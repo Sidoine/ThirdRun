@@ -40,7 +40,7 @@ namespace MonogameRPG
             map.GenerateRandomMap(GraphicsDevice);
             map.SpawnMonsters(Content);
             // Création d'un personnage de test au centre de la carte
-            var hero = new Character("Héros", CharacterClass.Guerrier, 30, 5, GraphicsDevice, Content)
+            var hero = new Character("Héros", CharacterClass.Guerrier, 30, 1, GraphicsDevice, Content)
             {
                 Position = new Vector2(
                     map.GridWidth / 2 * map.TileWidth + map.TileWidth / 2,
