@@ -18,7 +18,8 @@ namespace MonogameRPG.Monsters
         public Monster(MonsterType type, ContentManager contentManager)
         {
             Type = type;
-            Health = type.BaseHealth;
+            CurrentHealth = type.BaseHealth;
+            MaxHealth = type.BaseHealth;
             AttackPower = type.BaseAttack;
             texture = contentManager.Load<Texture2D>(type.TexturePath);
             Position = new Vector2(0, 0); // Initial position
@@ -26,8 +27,8 @@ namespace MonogameRPG.Monsters
 
         public void Attack(Character target)
         {
-            target.Health -= AttackPower;
-            if (target.Health < 0) target.Health = 0;
+            target.CurrentHealth -= AttackPower;
+            if (target.CurrentHealth < 0) target.CurrentHealth = 0;
         }
 
         public Item DropLoot()
@@ -44,7 +45,9 @@ namespace MonogameRPG.Monsters
 
         public void Render(SpriteBatch spriteBatch, DynamicSpriteFont dynamicFont)
         {
-            if (texture == null) return;
+            // N'affiche rien si le monstre est mort
+            if (IsDead || texture == null) return;
+
             spriteBatch.Draw(texture, new Rectangle((int)Position.X, (int)Position.Y, DefaultSize, DefaultSize), Color.White);
             DrawHealthBar(spriteBatch, DefaultSize, 6);
             spriteBatch.DrawString(dynamicFont, Type.Name, new Vector2(Position.X, Position.Y - 24), Color.White);
