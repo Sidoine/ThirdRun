@@ -48,9 +48,11 @@ namespace MonogameRPG.Monsters
             // N'affiche rien si le monstre est mort
             if (IsDead || texture == null) return;
 
-            spriteBatch.Draw(texture, new Rectangle((int)Position.X, (int)Position.Y, DefaultSize, DefaultSize), Color.White);
+            //spriteBatch.Draw(texture, new Rectangle((int)Position.X, (int)Position.Y, DefaultSize, DefaultSize), Color.White);
+            spriteBatch.Draw(texture, new Rectangle((int)(Position.X - DefaultSize / 2), (int)(Position.Y - DefaultSize / 2), DefaultSize, DefaultSize), Color.White);
             DrawHealthBar(spriteBatch, DefaultSize, 6);
-            spriteBatch.DrawString(dynamicFont, Type.Name, new Vector2(Position.X, Position.Y - 24), Color.White);
+            // Uncommented to display the monster's name above its position
+            spriteBatch.DrawString(dynamicFont, Type.Name, new Vector2(Position.X - DefaultSize / 2, Position.Y - DefaultSize), Color.White); 
         }
     }
 }

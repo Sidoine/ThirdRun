@@ -12,10 +12,12 @@ namespace MonogameRPG
         public int AttackPower { get; set; }
         public bool IsDead => CurrentHealth <= 0;
 
+        private const int HealthBarOffset = 25;
+
         public void DrawHealthBar(SpriteBatch spriteBatch, int width = 40, int height = 6)
         {
             // Position de la barre de vie juste au-dessus de l'unité
-            Vector2 barPos = new Vector2(Position.X, Position.Y - 12);
+            var barPos = new Vector2(Position.X, Position.Y - HealthBarOffset);
             Rectangle bgRect = new Rectangle((int)barPos.X - width / 2, (int)barPos.Y, width, height);
             Rectangle fgRect = bgRect;
             float percent = MathHelper.Clamp(CurrentHealth / (float)MaxHealth, 0f, 1f);
