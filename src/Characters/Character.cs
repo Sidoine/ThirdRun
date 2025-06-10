@@ -97,6 +97,9 @@ public class Character : Unit
         if (monster.Health <= 0)
         {
             GainExperience(monster);
+            // Ramasser automatiquement le loot du monstre vaincu
+            var loot = monster.DropLoot();
+            Inventory.AddItem(loot);
         }
     }
 
