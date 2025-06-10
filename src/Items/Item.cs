@@ -60,6 +60,6 @@ public class Potion : Item
     }
     public void Use(Character character)
     {
-        character.Health += HealAmount;
+        character.CurrentHealth += HealAmount;
     }
 }

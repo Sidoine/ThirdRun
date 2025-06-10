@@ -45,7 +45,8 @@ public class Character : Unit
     {
         Name = name;
         Class = characterClass;
-        Health = health;
+        CurrentHealth = health;
+        MaxHealth = health;
         AttackPower = attackPower;
         Experience = 0;
         Inventory = new Inventory() { Owner = this };
@@ -93,8 +94,8 @@ public class Character : Unit
 
     public void Attack(Monster monster)
     {
-        monster.Health -= AttackPower;
-        if (monster.Health <= 0)
+        monster.CurrentHealth -= AttackPower;
+        if (monster.CurrentHealth <= 0)
         {
             GainExperience(monster);
             // Ramasser automatiquement le loot du monstre vaincu
