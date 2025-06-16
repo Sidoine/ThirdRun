@@ -4,6 +4,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using FontStashSharp;
 using System.IO;
+using ThirdRun.Characters;
+using System.Linq;
 
 namespace MonogameRPG
 {
@@ -15,6 +17,9 @@ namespace MonogameRPG
         private List<Character> characters = new List<Character>();
         private FontSystem? _fontSystem;
         private DynamicSpriteFont _dynamicFont;
+        private InventoryPanel? _inventoryPanel;
+        private Dictionary<string, Texture2D> _itemIcons = new();
+        private MouseState _previousMouseState;
 
         public Game1()
         {
@@ -59,6 +64,9 @@ namespace MonogameRPG
                 }
             }
             _dynamicFont = _fontSystem.GetFont(24); // Taille 24px
+            _inventoryPanel = new InventoryPanel(_graphics.PreferredBackBufferHeight, _graphics.PreferredBackBufferWidth);
+            // Chargement des icônes d'objets (exemple, à adapter selon vos assets)
+            // _itemIcons["Potion de soin"] = Content.Load<Texture2D>("Items/potion");
         }
 
         protected override void Update(GameTime gameTime)
@@ -71,7 +79,15 @@ namespace MonogameRPG
             {
                 character.Move(map.GetMonsters(), map);
             }
-
+            KeyboardState keyboard = Keyboard.GetState();
+            if (_inventoryPanel != null && keyboard.IsKeyDown(Keys.I))
+            {
+                _inventoryPanel.Toggle();
+            }
+            MouseState mouse = Mouse.GetState();
+            if (_inventoryPanel != null)
+                _inventoryPanel.Update(gameTime, _graphics.PreferredBackBufferHeight, _graphics.PreferredBackBufferWidth, characters.First().Inventory, mouse, _previousMouseState);
+            _previousMouseState = mouse;
             base.Update(gameTime);
         }
 
@@ -94,7 +110,11 @@ namespace MonogameRPG
             _spriteBatch.Begin(transformMatrix: camera);
             map.Render(_spriteBatch, _dynamicFont); // On passe la police dynamique
             _spriteBatch.End();
-
+            // Affichage du panneau d'inventaire (hors caméra)
+            _spriteBatch.Begin();
+            if (_inventoryPanel != null)
+                _inventoryPanel.Draw(_spriteBatch, _dynamicFont, characters.First().Inventory, _itemIcons, _graphics.PreferredBackBufferHeight);
+            _spriteBatch.End();
             base.Draw(gameTime);
         }
     }
