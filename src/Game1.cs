@@ -2,16 +2,8 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using MonogameRPG.Map;
-using ThirdRun.Characters;
 using FontStashSharp;
 using System.IO;
-using MonoGameGum;
-using System;
-using System.Linq;
-using GumRuntime;
-using MonoGameGum.Forms.Controls;
-using Gum.Wireframe;
 
 namespace MonogameRPG
 {
@@ -23,8 +15,6 @@ namespace MonogameRPG
         private List<Character> characters = new List<Character>();
         private FontSystem? _fontSystem;
         private DynamicSpriteFont _dynamicFont;
-
-        private GumService Gum => GumService.Default;
 
         public Game1()
         {
@@ -39,16 +29,7 @@ namespace MonogameRPG
         protected override void Initialize()
         {
             map = new();
-            Gum.Initialize(this);
-
-            var mainMenuPanel = new Panel();
-            mainMenuPanel.Dock(Dock.Fill);
-            mainMenuPanel.AddToRoot();
-            var charactersButton = new Button();
-            charactersButton.Anchor(Anchor.TopLeft);
-            charactersButton.Text = "Characters";
-            mainMenuPanel.AddChild(charactersButton);
-
+            
             base.Initialize();
         }
 
@@ -82,8 +63,6 @@ namespace MonogameRPG
 
         protected override void Update(GameTime gameTime)
         {
-            Gum.Update(gameTime);
-
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
@@ -116,7 +95,6 @@ namespace MonogameRPG
             map.Render(_spriteBatch, _dynamicFont); // On passe la police dynamique
             _spriteBatch.End();
 
-            Gum.Draw();
             base.Draw(gameTime);
         }
     }
