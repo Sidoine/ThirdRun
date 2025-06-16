@@ -41,7 +41,7 @@ public class Character : Unit
         };
     }
 
-    public Character(string name, CharacterClass characterClass, int health, int attackPower, GraphicsDevice graphicsDevice, ContentManager content)
+    public Character(string name, CharacterClass characterClass, int health, int attackPower, ContentManager content)
     {
         Name = name;
         Class = characterClass;

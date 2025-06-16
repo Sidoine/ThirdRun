@@ -4,8 +4,9 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using FontStashSharp;
 using System.IO;
-using ThirdRun.Characters;
-using System.Linq;
+using ThirdRun.UI;
+using ThirdRun.UI.Panels;
+using ThirdRun.Data;
 
 namespace MonogameRPG
 {
@@ -14,10 +15,12 @@ namespace MonogameRPG
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private Map.Map map;
-        private List<Character> characters = new List<Character>();
         private FontSystem? _fontSystem;
         private DynamicSpriteFont _dynamicFont;
-        private InventoryPanel? _inventoryPanel;
+        private UiManager _uiManager;
+        private Root _rootPanel;
+        private GameState _gameState;
+
         private Dictionary<string, Texture2D> _itemIcons = new();
         private MouseState _previousMouseState;
 
@@ -29,6 +32,9 @@ namespace MonogameRPG
             _spriteBatch = null!;
             _dynamicFont = null!;
             IsMouseVisible = true; // Affiche le curseur de la souris
+            _uiManager = null!;
+            _gameState = null!;
+            _rootPanel = null!;
         }
 
         protected override void Initialize()
@@ -43,16 +49,12 @@ namespace MonogameRPG
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             map.GenerateRandomMap(GraphicsDevice);
             map.SpawnMonsters(Content);
-            // Création d'un personnage de test au centre de la carte
-            var hero = new Character("Héros", CharacterClass.Guerrier, 30, 1, GraphicsDevice, Content)
+            _gameState = new GameState
             {
-                Position = new Vector2(
-                    map.GridWidth / 2 * map.TileWidth + map.TileWidth / 2,
-                    map.GridHeight / 2 * map.TileHeight + map.TileHeight / 2)
+                Player = new Player(map, Content),
+                Map = map,
             };
-            characters.Clear();
-            characters.Add(hero);
-            map.SetCharacters(characters);
+            map.SetCharacters(_gameState.Player.Characters);
             // Chargement de la police Arial avec FontStashSharp
             _fontSystem = new FontSystem();
             using (var stream = File.OpenRead("Content/Arial.ttf"))
@@ -64,7 +66,8 @@ namespace MonogameRPG
                 }
             }
             _dynamicFont = _fontSystem.GetFont(24); // Taille 24px
-            _inventoryPanel = new InventoryPanel(_graphics.PreferredBackBufferHeight, _graphics.PreferredBackBufferWidth);
+            _uiManager = new UiManager(GraphicsDevice, _spriteBatch, _fontSystem, Content, _gameState);
+            _rootPanel = new Root(_uiManager, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight));
             // Chargement des icônes d'objets (exemple, à adapter selon vos assets)
             // _itemIcons["Potion de soin"] = Content.Load<Texture2D>("Items/potion");
         }
@@ -75,18 +78,30 @@ namespace MonogameRPG
                 Exit();
 
             // Déplacement automatique des personnages vers le monstre le plus proche
-            foreach (var character in characters)
+            foreach (var character in _gameState.Player.Characters)
             {
                 character.Move(map.GetMonsters(), map);
             }
             KeyboardState keyboard = Keyboard.GetState();
-            if (_inventoryPanel != null && keyboard.IsKeyDown(Keys.I))
+            if (keyboard.IsKeyDown(Keys.I))
             {
-                _inventoryPanel.Toggle();
+                _uiManager.CurrentState.IsInventoryVisible = !_uiManager.CurrentState.IsInventoryVisible;
             }
             MouseState mouse = Mouse.GetState();
-            if (_inventoryPanel != null)
-                _inventoryPanel.Update(gameTime, _graphics.PreferredBackBufferHeight, _graphics.PreferredBackBufferWidth, characters.First().Inventory, mouse, _previousMouseState);
+            _rootPanel.Update(gameTime);
+            _rootPanel.UpdateHover(mouse.Position);
+            if (mouse.LeftButton != _previousMouseState.LeftButton)
+            {
+                if (mouse.LeftButton == ButtonState.Released)
+                {
+                    _rootPanel.HandleMouseClick(mouse.Position);
+                }
+
+                if (mouse.LeftButton == ButtonState.Pressed)
+                {
+                    _rootPanel.HandleMouseDown(mouse.Position);
+                }
+            }
             _previousMouseState = mouse;
             base.Update(gameTime);
         }
@@ -96,11 +111,11 @@ namespace MonogameRPG
             GraphicsDevice.Clear(Color.CornflowerBlue);
             // Calcul de la position moyenne des personnages
             Vector2 avg = Vector2.Zero;
-            if (characters.Count > 0)
+            if (_gameState.Player.Characters.Count > 0)
             {
-                foreach (var c in characters)
+                foreach (var c in _gameState.Player.Characters)
                     avg += c.Position;
-                avg /= characters.Count;
+                avg /= _gameState.Player.Characters.Count;
             }
             // Calcul du décalage caméra (centrer sur la moyenne)
             var viewport = GraphicsDevice.Viewport;
@@ -112,8 +127,7 @@ namespace MonogameRPG
             _spriteBatch.End();
             // Affichage du panneau d'inventaire (hors caméra)
             _spriteBatch.Begin();
-            if (_inventoryPanel != null)
-                _inventoryPanel.Draw(_spriteBatch, _dynamicFont, characters.First().Inventory, _itemIcons, _graphics.PreferredBackBufferHeight);
+            _rootPanel.Draw();
             _spriteBatch.End();
             base.Draw(gameTime);
         }
