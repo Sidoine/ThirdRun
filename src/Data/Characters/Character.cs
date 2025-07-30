@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using ThirdRun.Characters;
+using ThirdRun.Items;
 using MonogameRPG.Monsters;
 using MonogameRPG.Map;
 using Microsoft.Xna.Framework;

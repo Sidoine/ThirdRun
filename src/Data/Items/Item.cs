@@ -1,6 +1,8 @@
 using System;
 
-public class Item
+namespace ThirdRun.Items
+{
+    public class Item
 {
     public string Name { get; set; }
     public string Description { get; set; }
@@ -62,4 +64,5 @@ public class Potion : Item
     {
         character.CurrentHealth += HealAmount;
     }
+}
 }
