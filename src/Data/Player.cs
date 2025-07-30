@@ -34,6 +34,23 @@ namespace ThirdRun.Data
             hero.Inventory.AddItem(new Item("Clé mystérieuse", "An old mysterious key", 200));
             hero.Inventory.AddItem(new Item("Parchemin", "An ancient scroll", 150));
             hero.Inventory.AddItem(new Armor("Bouclier", "A wooden shield", 90, 4, 12));
+            hero.Inventory.AddItem(new Item("Bottes de vitesse", "Increases movement speed", 70));
+            hero.Inventory.AddItem(new Item("Anneau de protection", "Increases defense", 110));
+            hero.Inventory.AddItem(new Item("Cape d'invisibilité", "Grants temporary invisibility", 300));
+            hero.Inventory.AddItem(new Item("Potion de mana", "Restores 30 mana", 80));
+            hero.Inventory.AddItem(new Item("Pierre de téléportation", "Teleports you to a safe location", 250));
+            hero.Inventory.AddItem(new Item("Fragment de cristal", "A piece of a magical crystal", 180));
+            hero.Inventory.AddItem(new Item("Livre de sorts", "Contains powerful spells", 400));
+            hero.Inventory.AddItem(new Item("Bâton magique", "A staff imbued with magic", 350));
+            hero.Inventory.AddItem(new Item("Gemme de feu", "A gem that radiates heat", 220));
+            hero.Inventory.AddItem(new Item("Gemme de glace", "A gem that radiates cold", 220));
+            hero.Inventory.AddItem(new Item("Gemme de foudre", "A gem that crackles with electricity", 220));
+            hero.Inventory.AddItem(new Item("Gemme de terre", "A gem that feels heavy and solid", 220));
+            hero.Inventory.AddItem(new Item("Potion de force", "Increases attack power temporarily", 90));
+            hero.Inventory.AddItem(new Item("Potion de défense", "Increases defense temporarily", 90));
+            hero.Inventory.AddItem(new Item("Potion de vitesse", "Increases movement speed temporarily", 90));
+            hero.Inventory.AddItem(new Item("Potion de chance", "Increases luck temporarily", 90));
+            hero.Inventory.AddItem(new Item("Potion de sagesse", "Increases intelligence temporarily", 90));
             
             Characters.Add(hero);
         }

@@ -16,22 +16,6 @@ namespace ThirdRun.Items
     }
 }
 
-public class Equipment : Item
-{
-    public int BonusStats { get; set; }
-    public Equipment(string name, string description, int value, int bonusStats)
-        : base(name, description, value)
-    {
-        BonusStats = bonusStats;
-    }
-
-    internal void Equip(Character character)
-    {
-        throw new NotImplementedException();
-    }
-
-}
-
 public class Weapon : Equipment
 {
     public int Damage { get; set; }
