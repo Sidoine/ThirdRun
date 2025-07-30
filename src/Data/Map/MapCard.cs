@@ -108,10 +108,7 @@ namespace MonogameRPG.Map
                 if (!monster.IsDead && monster.Position != Vector2.Zero)
                 {
                     Vector2 renderPos = monster.Position + renderOffset;
-                    // Create a temporary rectangle for rendering
-                    Rectangle destRect = new Rectangle((int)(renderPos.X - 20), (int)(renderPos.Y - 20), 40, 40);
-                    // We'll need to add a method to Monster to render at a specific position
-                    RenderMonsterAtPosition(spriteBatch, monster, renderPos, dynamicFont);
+                    monster.RenderAtPosition(spriteBatch, dynamicFont, renderPos);
                 }
             }
             // Affichage des personnages
@@ -120,58 +117,9 @@ namespace MonogameRPG.Map
                 if (character.Position != Vector2.Zero)
                 {
                     Vector2 renderPos = character.Position + renderOffset;
-                    RenderCharacterAtPosition(spriteBatch, character, renderPos);
+                    character.RenderAtPosition(spriteBatch, renderPos);
                 }
             }
-        }
-        
-        private void RenderMonsterAtPosition(SpriteBatch spriteBatch, Monster monster, Vector2 position, DynamicSpriteFont dynamicFont)
-        {
-            // This is a simplified version - we should add a method to Monster class for this
-            // For now, we'll just draw a colored rectangle as placeholder
-            var texture = CreateColorTexture(spriteBatch.GraphicsDevice, Color.Red, 40, 40);
-            spriteBatch.Draw(texture, new Rectangle((int)(position.X - 20), (int)(position.Y - 20), 40, 40), Color.White);
-            
-            // Draw health bar
-            int healthBarWidth = 40;
-            int healthBarHeight = 6;
-            float healthPercent = (float)monster.CurrentHealth / monster.MaxHealth;
-            
-            var bgTexture = CreateColorTexture(spriteBatch.GraphicsDevice, Color.Black, healthBarWidth, healthBarHeight);
-            var fgTexture = CreateColorTexture(spriteBatch.GraphicsDevice, Color.Red, (int)(healthBarWidth * healthPercent), healthBarHeight);
-            
-            Vector2 healthBarPos = position + new Vector2(-healthBarWidth / 2, -30);
-            spriteBatch.Draw(bgTexture, new Rectangle((int)healthBarPos.X, (int)healthBarPos.Y, healthBarWidth, healthBarHeight), Color.White);
-            spriteBatch.Draw(fgTexture, new Rectangle((int)healthBarPos.X, (int)healthBarPos.Y, (int)(healthBarWidth * healthPercent), healthBarHeight), Color.White);
-        }
-        
-        private void RenderCharacterAtPosition(SpriteBatch spriteBatch, Character character, Vector2 position)
-        {
-            // This is a simplified version - we should add a method to Character class for this
-            // For now, we'll just draw a colored rectangle as placeholder
-            var texture = CreateColorTexture(spriteBatch.GraphicsDevice, Color.CornflowerBlue, 40, 40);
-            spriteBatch.Draw(texture, new Rectangle((int)(position.X - 20), (int)(position.Y - 20), 40, 40), Color.White);
-            
-            // Draw health bar
-            int healthBarWidth = 40;
-            int healthBarHeight = 6;
-            float healthPercent = (float)character.CurrentHealth / character.MaxHealth;
-            
-            var bgTexture = CreateColorTexture(spriteBatch.GraphicsDevice, Color.Black, healthBarWidth, healthBarHeight);
-            var fgTexture = CreateColorTexture(spriteBatch.GraphicsDevice, Color.Green, (int)(healthBarWidth * healthPercent), healthBarHeight);
-            
-            Vector2 healthBarPos = position + new Vector2(-healthBarWidth / 2, -30);
-            spriteBatch.Draw(bgTexture, new Rectangle((int)healthBarPos.X, (int)healthBarPos.Y, healthBarWidth, healthBarHeight), Color.White);
-            spriteBatch.Draw(fgTexture, new Rectangle((int)healthBarPos.X, (int)healthBarPos.Y, (int)(healthBarWidth * healthPercent), healthBarHeight), Color.White);
-        }
-        
-        private Texture2D CreateColorTexture(GraphicsDevice graphicsDevice, Color color, int width, int height)
-        {
-            Texture2D texture = new Texture2D(graphicsDevice, width, height);
-            Color[] data = new Color[width * height];
-            for (int i = 0; i < data.Length; i++) data[i] = color;
-            texture.SetData(data);
-            return texture;
         }
 
         public List<Vector2> GetMonsterSpawnPoints()

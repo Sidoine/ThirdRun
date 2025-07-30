@@ -45,14 +45,24 @@ namespace MonogameRPG.Monsters
 
         public void Render(SpriteBatch spriteBatch, DynamicSpriteFont dynamicFont)
         {
+            RenderAtPosition(spriteBatch, dynamicFont, Position);
+        }
+
+        public void RenderAtPosition(SpriteBatch spriteBatch, DynamicSpriteFont dynamicFont, Vector2 renderPosition)
+        {
             // N'affiche rien si le monstre est mort
             if (IsDead || texture == null) return;
 
-            //spriteBatch.Draw(texture, new Rectangle((int)Position.X, (int)Position.Y, DefaultSize, DefaultSize), Color.White);
-            spriteBatch.Draw(texture, new Rectangle((int)(Position.X - DefaultSize / 2), (int)(Position.Y - DefaultSize / 2), DefaultSize, DefaultSize), Color.White);
+            spriteBatch.Draw(texture, new Rectangle((int)(renderPosition.X - DefaultSize / 2), (int)(renderPosition.Y - DefaultSize / 2), DefaultSize, DefaultSize), Color.White);
+            
+            // Temporarily set position for health bar drawing
+            Vector2 originalPos = Position;
+            Position = renderPosition;
             DrawHealthBar(spriteBatch, DefaultSize, 6);
-            // Uncommented to display the monster's name above its position
-            spriteBatch.DrawString(dynamicFont, Type.Name, new Vector2(Position.X - DefaultSize / 2, Position.Y - DefaultSize), Color.White); 
+            Position = originalPos;
+            
+            // Display the monster's name above its position
+            spriteBatch.DrawString(dynamicFont, Type.Name, new Vector2(renderPosition.X - DefaultSize / 2, renderPosition.Y - DefaultSize), Color.White); 
         }
     }
 }

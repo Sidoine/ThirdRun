@@ -156,10 +156,19 @@ public class Character : Unit
 
     public void Render(SpriteBatch spriteBatch)
     {
+        RenderAtPosition(spriteBatch, Position);
+    }
+    
+    public void RenderAtPosition(SpriteBatch spriteBatch, Vector2 renderPosition)
+    {
         if (texture == null) return;
-        Vector2 pos = Position;
         int size = DefaultSize;
-        spriteBatch.Draw(texture, new Rectangle((int)(pos.X - size / 2), (int)(pos.Y - size / 2), size, size), Color.White);
+        spriteBatch.Draw(texture, new Rectangle((int)(renderPosition.X - size / 2), (int)(renderPosition.Y - size / 2), size, size), Color.White);
+        
+        // Temporarily set position for health bar drawing
+        Vector2 originalPos = Position;
+        Position = renderPosition;
         DrawHealthBar(spriteBatch, size, 6);
+        Position = originalPos;
     }
 }
