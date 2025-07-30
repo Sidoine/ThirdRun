@@ -34,20 +34,35 @@ namespace ThirdRun.UI.Panels
 
         private void LoadItemIcons()
         {
+            // Try to load common item icons, if they exist
+            // This is optional - if icons don't exist, we'll show names instead
+            
+            // Try to load each icon individually, catching exceptions for each one
             try
             {
-                // Try to load common item icons, if they exist
-                // This is optional - if icons don't exist, we'll show names instead
-                if (System.IO.File.Exists("Content/Items/potion.png"))
-                    itemIcons["Potion"] = UiManager.ContentManager.Load<Texture2D>("Items/potion");
-                if (System.IO.File.Exists("Content/Items/sword.png"))
-                    itemIcons["Sword"] = UiManager.ContentManager.Load<Texture2D>("Items/sword");
-                if (System.IO.File.Exists("Content/Items/armor.png"))
-                    itemIcons["Armor"] = UiManager.ContentManager.Load<Texture2D>("Items/armor");
+                itemIcons["Potion"] = UiManager.ContentManager.Load<Texture2D>("Items/potion");
             }
             catch
             {
-                // Icons are optional, so we can safely ignore loading errors
+                // Potion icon not available, will use text fallback
+            }
+            
+            try
+            {
+                itemIcons["Sword"] = UiManager.ContentManager.Load<Texture2D>("Items/sword");
+            }
+            catch
+            {
+                // Sword icon not available, will use text fallback
+            }
+            
+            try
+            {
+                itemIcons["Armor"] = UiManager.ContentManager.Load<Texture2D>("Items/armor");
+            }
+            catch
+            {
+                // Armor icon not available, will use text fallback
             }
         }
 
