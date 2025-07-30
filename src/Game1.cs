@@ -23,6 +23,7 @@ namespace MonogameRPG
 
         private Dictionary<string, Texture2D> _itemIcons = new();
         private MouseState _previousMouseState;
+        private KeyboardState _previousKeyboardState;
 
         public Game1()
         {
@@ -83,13 +84,21 @@ namespace MonogameRPG
                 character.Move(map.GetMonsters(), map);
             }
             KeyboardState keyboard = Keyboard.GetState();
-            if (keyboard.IsKeyDown(Keys.I))
+            if (keyboard.IsKeyDown(Keys.I) && !_previousKeyboardState.IsKeyDown(Keys.I))
             {
                 _uiManager.CurrentState.IsInventoryVisible = !_uiManager.CurrentState.IsInventoryVisible;
             }
             MouseState mouse = Mouse.GetState();
             _rootPanel.Update(gameTime);
             _rootPanel.UpdateHover(mouse.Position);
+            
+            // Handle mouse wheel scrolling
+            if (mouse.ScrollWheelValue != _previousMouseState.ScrollWheelValue)
+            {
+                int scrollDelta = mouse.ScrollWheelValue - _previousMouseState.ScrollWheelValue;
+                _rootPanel.HandleScroll(mouse.Position, scrollDelta);
+            }
+            
             if (mouse.LeftButton != _previousMouseState.LeftButton)
             {
                 if (mouse.LeftButton == ButtonState.Released)
@@ -103,6 +112,7 @@ namespace MonogameRPG
                 }
             }
             _previousMouseState = mouse;
+            _previousKeyboardState = keyboard;
             base.Update(gameTime);
         }
 
@@ -126,7 +136,8 @@ namespace MonogameRPG
             map.Render(_spriteBatch, _dynamicFont); // On passe la police dynamique
             _spriteBatch.End();
             // Affichage du panneau d'inventaire (hors caméra)
-            _spriteBatch.Begin();
+            var rasterizerState = new RasterizerState() { ScissorTestEnable = true };
+            _spriteBatch.Begin(rasterizerState: rasterizerState);
             _rootPanel.Draw();
             _spriteBatch.End();
             base.Draw(gameTime);

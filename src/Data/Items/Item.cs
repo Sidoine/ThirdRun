@@ -1,6 +1,8 @@
 using System;
 
-public class Item
+namespace ThirdRun.Items
+{
+    public class Item
 {
     public string Name { get; set; }
     public string Description { get; set; }
@@ -12,22 +14,6 @@ public class Item
         Description = description;
         Value = value;
     }
-}
-
-public class Equipment : Item
-{
-    public int BonusStats { get; set; }
-    public Equipment(string name, string description, int value, int bonusStats)
-        : base(name, description, value)
-    {
-        BonusStats = bonusStats;
-    }
-
-    internal void Equip(Character character)
-    {
-        throw new NotImplementedException();
-    }
-
 }
 
 public class Weapon : Equipment
@@ -62,4 +48,5 @@ public class Potion : Item
     {
         character.CurrentHealth += HealAmount;
     }
+}
 }
