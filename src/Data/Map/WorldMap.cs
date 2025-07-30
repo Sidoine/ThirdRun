@@ -62,6 +62,16 @@ namespace MonogameRPG.Map
                     var direction = availableDirections[rand.Next(availableDirections.Count)];
                     GenerateAdjacentCard(direction);
                 }
+                
+                // If there are no available directions, generate one anyway by choosing a random direction
+                // This ensures the game always continues
+                if (availableDirections.Count == 0)
+                {
+                    var rand = new Random();
+                    var directions = new Direction[] { Direction.North, Direction.South, Direction.East, Direction.West };
+                    var direction = directions[rand.Next(directions.Length)];
+                    GenerateAdjacentCard(direction);
+                }
             }
 
             // Check for character transitions between cards
@@ -181,7 +191,7 @@ namespace MonogameRPG.Map
 
         private void MoveCharacterTowardsNewCard(Character character)
         {
-            // Find the nearest adjacent card that has monsters or is newly generated
+            // Find the nearest adjacent card that exists
             MapCard? targetCard = null;
             Direction targetDirection = Direction.North;
             float minDistance = float.MaxValue;
@@ -209,11 +219,50 @@ namespace MonogameRPG.Map
                 // Move character towards the edge of current card in the direction of target card
                 var edgePosition = CurrentCard.GetEdgePosition(targetDirection);
                 var direction = edgePosition - character.Position;
-                if (direction.Length() > 1f)
+                if (direction.Length() > 5f) // Increased threshold to avoid jittering
                 {
                     direction.Normalize();
                     character.Position += direction * 2f; // Same movement speed as normal movement
                 }
+                else
+                {
+                    // Character has reached the edge, transition to new card
+                    TransitionCharacterToNewCard(character, targetCard, targetDirection);
+                }
+            }
+        }
+        
+        private void TransitionCharacterToNewCard(Character character, MapCard newCard, Direction direction)
+        {
+            // Calculate the entry position on the new card (opposite edge)
+            Vector2 entryPos;
+            switch (direction)
+            {
+                case Direction.North:
+                    entryPos = new Vector2(newCard.GridWidth * newCard.TileWidth / 2, newCard.GridHeight * newCard.TileHeight - 50);
+                    break;
+                case Direction.South:
+                    entryPos = new Vector2(newCard.GridWidth * newCard.TileWidth / 2, 50);
+                    break;
+                case Direction.East:
+                    entryPos = new Vector2(50, newCard.GridHeight * newCard.TileHeight / 2);
+                    break;
+                case Direction.West:
+                    entryPos = new Vector2(newCard.GridWidth * newCard.TileWidth - 50, newCard.GridHeight * newCard.TileHeight / 2);
+                    break;
+                default:
+                    entryPos = new Vector2(newCard.GridWidth * newCard.TileWidth / 2, newCard.GridHeight * newCard.TileHeight / 2);
+                    break;
+            }
+            
+            // Set character position to the entry point of the new card
+            character.Position = entryPos;
+            
+            // Switch to the new card if this is the first character to transition
+            if (newCard.WorldPosition != currentCardPosition)
+            {
+                currentCardPosition = newCard.WorldPosition;
+                CurrentCard.SetCharacters(characters);
             }
         }
 
@@ -228,6 +277,9 @@ namespace MonogameRPG.Map
                 
                 // Don't remove current card
                 if (cardPos == currentCardPosition) continue;
+                
+                // Don't remove adjacent cards (keep them for potential re-entry)
+                if (IsAdjacentToCurrentCard(cardPos)) continue;
                 
                 // Check if any characters are on this card
                 bool hasCharacters = false;
@@ -252,6 +304,13 @@ namespace MonogameRPG.Map
             {
                 cards.Remove(cardPos);
             }
+        }
+        
+        private bool IsAdjacentToCurrentCard(Vector2 cardPos)
+        {
+            var diff = cardPos - currentCardPosition;
+            var distance = Math.Abs(diff.X) + Math.Abs(diff.Y);
+            return distance <= 1; // Adjacent cards have distance 1
         }
 
         public void Render(SpriteBatch spriteBatch, DynamicSpriteFont dynamicFont)
