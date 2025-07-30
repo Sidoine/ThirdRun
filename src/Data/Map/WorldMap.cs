@@ -1,0 +1,278 @@
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Content;
+using System.Collections.Generic;
+using System.Linq;
+using MonogameRPG.Monsters;
+using FontStashSharp;
+using System;
+
+namespace MonogameRPG.Map
+{
+    public class WorldMap
+    {
+        private Dictionary<Vector2, MapCard> cards = new Dictionary<Vector2, MapCard>();
+        private Vector2 currentCardPosition = Vector2.Zero;
+        private List<Character> characters = new List<Character>();
+        private ContentManager contentManager;
+        private GraphicsDevice graphicsDevice;
+
+        public MapCard CurrentCard => cards.ContainsKey(currentCardPosition) ? cards[currentCardPosition] : null!;
+        public Vector2 CurrentCardPosition => currentCardPosition;
+
+        public WorldMap(ContentManager content, GraphicsDevice graphics)
+        {
+            contentManager = content;
+            graphicsDevice = graphics;
+        }
+
+        public void Initialize()
+        {
+            // Create the initial card at (0,0)
+            var initialCard = new MapCard(Vector2.Zero);
+            initialCard.GenerateRandomMap(graphicsDevice);
+            initialCard.SpawnMonsters(contentManager);
+            cards[Vector2.Zero] = initialCard;
+            currentCardPosition = Vector2.Zero;
+        }
+
+        public void SetCharacters(List<Character> chars)
+        {
+            characters = chars;
+            // Set characters on the current card
+            if (CurrentCard != null)
+            {
+                CurrentCard.SetCharacters(chars);
+            }
+        }
+
+        public void Update()
+        {
+            if (CurrentCard == null) return;
+
+            // Check if current card is cleared of monsters
+            if (!CurrentCard.HasLivingMonsters())
+            {
+                // Check if we need to generate a new adjacent card
+                var availableDirections = GetAvailableDirections();
+                if (availableDirections.Count > 0)
+                {
+                    // Generate a new card in a random available direction
+                    var rand = new Random();
+                    var direction = availableDirections[rand.Next(availableDirections.Count)];
+                    GenerateAdjacentCard(direction);
+                }
+            }
+
+            // Check for character transitions between cards
+            HandleCharacterTransitions();
+
+            // Clean up empty cards (except current card)
+            CleanupEmptyCards();
+        }
+
+        private List<Direction> GetAvailableDirections()
+        {
+            var available = new List<Direction>();
+            var directions = new Direction[] { Direction.North, Direction.South, Direction.East, Direction.West };
+
+            foreach (var dir in directions)
+            {
+                var adjacentPos = GetAdjacentPosition(currentCardPosition, dir);
+                if (!cards.ContainsKey(adjacentPos))
+                {
+                    available.Add(dir);
+                }
+            }
+
+            return available;
+        }
+
+        private Vector2 GetAdjacentPosition(Vector2 cardPos, Direction direction)
+        {
+            switch (direction)
+            {
+                case Direction.North:
+                    return cardPos + new Vector2(0, -1);
+                case Direction.South:
+                    return cardPos + new Vector2(0, 1);
+                case Direction.East:
+                    return cardPos + new Vector2(1, 0);
+                case Direction.West:
+                    return cardPos + new Vector2(-1, 0);
+                default:
+                    return cardPos;
+            }
+        }
+
+        private void GenerateAdjacentCard(Direction direction)
+        {
+            var newCardPos = GetAdjacentPosition(currentCardPosition, direction);
+            
+            if (!cards.ContainsKey(newCardPos))
+            {
+                var newCard = new MapCard(newCardPos);
+                newCard.GenerateRandomMap(graphicsDevice);
+                newCard.SpawnMonsters(contentManager);
+                cards[newCardPos] = newCard;
+            }
+        }
+
+        private void HandleCharacterTransitions()
+        {
+            // Check if characters should move towards new cards when current card is cleared
+            if (CurrentCard != null && !CurrentCard.HasLivingMonsters())
+            {
+                foreach (var character in characters)
+                {
+                    MoveCharacterTowardsNewCard(character);
+                }
+            }
+        }
+
+        private MapCard? GetCardAtPosition(Vector2 worldPosition)
+        {
+            // Convert world position to card coordinates
+            foreach (var kvp in cards)
+            {
+                var card = kvp.Value;
+                var cardWorldPos = card.WorldPosition;
+                
+                // Calculate the bounds of this card in world coordinates
+                float cardLeft = cardWorldPos.X * card.GridWidth * card.TileWidth;
+                float cardTop = cardWorldPos.Y * card.GridHeight * card.TileHeight;
+                float cardRight = cardLeft + card.GridWidth * card.TileWidth;
+                float cardBottom = cardTop + card.GridHeight * card.TileHeight;
+                
+                if (worldPosition.X >= cardLeft && worldPosition.X < cardRight &&
+                    worldPosition.Y >= cardTop && worldPosition.Y < cardBottom)
+                {
+                    return card;
+                }
+            }
+            return null;
+        }
+
+        private void TransitionCharacterToCard(Character character, MapCard newCard)
+        {
+            // This method is called when a character moves to a different card
+            // We might want to update the current card if most characters have moved
+            if (newCard.WorldPosition != currentCardPosition && ShouldSwitchToCard(newCard))
+            {
+                currentCardPosition = newCard.WorldPosition;
+                CurrentCard.SetCharacters(characters);
+            }
+        }
+
+        private bool ShouldSwitchToCard(MapCard card)
+        {
+            // Switch to new card if majority of characters are on it
+            int charactersOnNewCard = 0;
+            foreach (var character in characters)
+            {
+                var charCard = GetCardAtPosition(character.Position);
+                if (charCard == card)
+                {
+                    charactersOnNewCard++;
+                }
+            }
+            return charactersOnNewCard > characters.Count / 2;
+        }
+
+        private void MoveCharacterTowardsNewCard(Character character)
+        {
+            // Find the nearest adjacent card that has monsters or is newly generated
+            MapCard? targetCard = null;
+            Direction targetDirection = Direction.North;
+            float minDistance = float.MaxValue;
+
+            var directions = new Direction[] { Direction.North, Direction.South, Direction.East, Direction.West };
+            foreach (var dir in directions)
+            {
+                var adjacentPos = GetAdjacentPosition(currentCardPosition, dir);
+                if (cards.ContainsKey(adjacentPos))
+                {
+                    var card = cards[adjacentPos];
+                    var edgePos = CurrentCard.GetEdgePosition(dir);
+                    var distance = Vector2.Distance(character.Position, edgePos);
+                    if (distance < minDistance)
+                    {
+                        minDistance = distance;
+                        targetCard = card;
+                        targetDirection = dir;
+                    }
+                }
+            }
+
+            if (targetCard != null)
+            {
+                // Move character towards the edge of current card in the direction of target card
+                var edgePosition = CurrentCard.GetEdgePosition(targetDirection);
+                var direction = edgePosition - character.Position;
+                if (direction.Length() > 1f)
+                {
+                    direction.Normalize();
+                    character.Position += direction * 2f; // Same movement speed as normal movement
+                }
+            }
+        }
+
+        private void CleanupEmptyCards()
+        {
+            var cardsToRemove = new List<Vector2>();
+            
+            foreach (var kvp in cards)
+            {
+                var cardPos = kvp.Key;
+                var card = kvp.Value;
+                
+                // Don't remove current card
+                if (cardPos == currentCardPosition) continue;
+                
+                // Check if any characters are on this card
+                bool hasCharacters = false;
+                foreach (var character in characters)
+                {
+                    var charCard = GetCardAtPosition(character.Position);
+                    if (charCard == card)
+                    {
+                        hasCharacters = true;
+                        break;
+                    }
+                }
+                
+                // Remove card if it has no characters and no living monsters
+                if (!hasCharacters && !card.HasLivingMonsters())
+                {
+                    cardsToRemove.Add(cardPos);
+                }
+            }
+            
+            foreach (var cardPos in cardsToRemove)
+            {
+                cards.Remove(cardPos);
+            }
+        }
+
+        public void Render(SpriteBatch spriteBatch, DynamicSpriteFont dynamicFont)
+        {
+            // Render all cards relative to their world positions
+            foreach (var card in cards.Values)
+            {
+                card.Render(spriteBatch, dynamicFont);
+            }
+        }
+
+        public List<Monster> GetMonstersOnCurrentCard()
+        {
+            return CurrentCard?.GetMonsters() ?? new List<Monster>();
+        }
+
+        public MapCard FindPathAStar(Vector2 start, Vector2 end)
+        {
+            // For now, just use the current card's pathfinding
+            // In the future, this could be extended to pathfind across multiple cards
+            return CurrentCard;
+        }
+    }
+}

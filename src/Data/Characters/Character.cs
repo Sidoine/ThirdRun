@@ -57,9 +57,14 @@ public class Character : Unit
         texture = content.Load<Texture2D>(path);
     }
 
-    public void Move(List<Monster> monsters, Map map)
+    public void Move(List<Monster> monsters, WorldMap worldMap)
     {
-        if (monsters == null || monsters.Count == 0) return;
+        if (monsters == null || monsters.Count == 0)
+        {
+            // No monsters on current card, character should move towards new card edge if available
+            return;
+        }
+        
         // Trouver le monstre vivant le plus proche
         Monster? closest = null;
         float minDist = float.MaxValue;
@@ -74,8 +79,9 @@ public class Character : Unit
             }
         }
         if (closest == null) return;
-        // Utiliser A* pour trouver le chemin
-        var path = map.FindPathAStar(Position, closest.Position);
+        
+        // Utiliser A* pour trouver le chemin sur la carte actuelle
+        var path = worldMap.CurrentCard.FindPathAStar(Position, closest.Position);
         if (path.Count > 1)
         {
             Vector2 next = path[1]; // [0] = position actuelle

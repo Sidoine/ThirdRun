@@ -7,6 +7,7 @@ using System.IO;
 using ThirdRun.UI;
 using ThirdRun.UI.Panels;
 using ThirdRun.Data;
+using MonogameRPG.Map;
 
 namespace MonogameRPG
 {
@@ -14,7 +15,7 @@ namespace MonogameRPG
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-        private Map.Map map;
+        private WorldMap worldMap;
         private FontSystem? _fontSystem;
         private DynamicSpriteFont _dynamicFont;
         private UiManager _uiManager;
@@ -29,7 +30,7 @@ namespace MonogameRPG
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            map = null!;
+            worldMap = null!;
             _spriteBatch = null!;
             _dynamicFont = null!;
             IsMouseVisible = true; // Affiche le curseur de la souris
@@ -40,7 +41,7 @@ namespace MonogameRPG
 
         protected override void Initialize()
         {
-            map = new();
+            worldMap = new Map.WorldMap(Content, GraphicsDevice);
             
             base.Initialize();
         }
@@ -48,14 +49,13 @@ namespace MonogameRPG
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            map.GenerateRandomMap(GraphicsDevice);
-            map.SpawnMonsters(Content);
+            worldMap.Initialize();
             _gameState = new GameState
             {
-                Player = new Player(map, Content),
-                Map = map,
+                Player = new Player(worldMap, Content),
+                WorldMap = worldMap,
             };
-            map.SetCharacters(_gameState.Player.Characters);
+            worldMap.SetCharacters(_gameState.Player.Characters);
             // Chargement de la police Arial avec FontStashSharp
             _fontSystem = new FontSystem();
             using (var stream = File.OpenRead("Content/Arial.ttf"))
@@ -78,10 +78,13 @@ namespace MonogameRPG
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            // Update world map logic (card transitions, cleanup, etc.)
+            worldMap.Update();
+            
             // Déplacement automatique des personnages vers le monstre le plus proche
             foreach (var character in _gameState.Player.Characters)
             {
-                character.Move(map.GetMonsters(), map);
+                character.Move(worldMap.GetMonstersOnCurrentCard(), worldMap);
             }
             KeyboardState keyboard = Keyboard.GetState();
             if (keyboard.IsKeyDown(Keys.I) && !_previousKeyboardState.IsKeyDown(Keys.I))
@@ -133,7 +136,7 @@ namespace MonogameRPG
             Vector2 offset = screenCenter - avg;
             Matrix camera = Matrix.CreateTranslation(new Vector3(offset, 0f));
             _spriteBatch.Begin(transformMatrix: camera);
-            map.Render(_spriteBatch, _dynamicFont); // On passe la police dynamique
+            worldMap.Render(_spriteBatch, _dynamicFont); // On passe la police dynamique
             _spriteBatch.End();
             // Affichage du panneau d'inventaire (hors caméra)
             var rasterizerState = new RasterizerState() { ScissorTestEnable = true };
