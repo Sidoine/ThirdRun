@@ -136,7 +136,8 @@ namespace MonogameRPG
             map.Render(_spriteBatch, _dynamicFont); // On passe la police dynamique
             _spriteBatch.End();
             // Affichage du panneau d'inventaire (hors caméra)
-            _spriteBatch.Begin();
+            var rasterizerState = new RasterizerState() { ScissorTestEnable = true };
+            _spriteBatch.Begin(rasterizerState: rasterizerState);
             _rootPanel.Draw();
             _spriteBatch.End();
             base.Draw(gameTime);
