@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using MonogameRPG.Monsters;
 using System;
+using System.Linq;
 using Microsoft.Xna.Framework.Content;
 using FontStashSharp;
 
@@ -30,7 +31,11 @@ namespace MonogameRPG.Map
 
         private static readonly MonsterType[] MonsterTypes = new MonsterType[]
         {
-            new MonsterType("Orc", 15, 3, "Monsters/orc"),
+            new MonsterType("Orc Faible", 15, 3, "Monsters/orc", 1),
+            new MonsterType("Orc", 20, 4, "Monsters/orc", 2),
+            new MonsterType("Orc Guerrier", 25, 6, "Monsters/orc", 3),
+            new MonsterType("Orc Chef", 35, 8, "Monsters/orc", 4),
+            new MonsterType("Orc Élite", 50, 12, "Monsters/orc", 5),
         };
 
         public Map(Point worldPosition)
@@ -74,9 +79,18 @@ namespace MonogameRPG.Map
         {
             monsters.Clear();
             var rand = new System.Random();
+            
+            // Calculate area difficulty based on distance from origin (0,0)
+            int distanceFromOrigin = Math.Abs(WorldPosition.X) + Math.Abs(WorldPosition.Y);
+            int areaLevel = Math.Min(distanceFromOrigin + 1, 5); // Level 1-5 based on distance
+            
             foreach (var spawn in monsterSpawnPoints)
             {
-                var type = MonsterTypes[rand.Next(MonsterTypes.Length)];
+                // Choose monster type appropriate for area level
+                var availableTypes = MonsterTypes.Where(mt => mt.Level <= areaLevel + 1).ToArray();
+                if (availableTypes.Length == 0) availableTypes = MonsterTypes; // Fallback
+                
+                var type = availableTypes[rand.Next(availableTypes.Length)];
                 var monster = new Monster(type, contentManager);
                 monster.Position = new Vector2(
                     spawn.X * TileWidth + TileWidth / 2 - monsterSize / 2,
