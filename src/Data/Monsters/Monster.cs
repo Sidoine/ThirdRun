@@ -12,16 +12,19 @@ namespace MonogameRPG.Monsters
     {
         public MonsterType Type { get; set; }
 
-        private readonly Texture2D texture;
+        private Texture2D? texture;
         private static readonly int DefaultSize = 40;
+        private readonly ContentManager contentManager;
+
 
         public Monster(MonsterType type, ContentManager contentManager)
         {
             Type = type;
+            this.contentManager = contentManager;
+
             CurrentHealth = type.BaseHealth;
             MaxHealth = type.BaseHealth;
             AttackPower = type.BaseAttack;
-            texture = contentManager.Load<Texture2D>(type.TexturePath);
             Position = new Vector2(0, 0); // Initial position
         }
 
@@ -45,14 +48,25 @@ namespace MonogameRPG.Monsters
 
         public void Render(SpriteBatch spriteBatch, DynamicSpriteFont dynamicFont)
         {
+            texture ??= contentManager.Load<Texture2D>(Type.TexturePath);
+            RenderAtPosition(spriteBatch, dynamicFont, Position);
+        }
+
+        public void RenderAtPosition(SpriteBatch spriteBatch, DynamicSpriteFont dynamicFont, Vector2 renderPosition)
+        {
             // N'affiche rien si le monstre est mort
             if (IsDead || texture == null) return;
 
-            //spriteBatch.Draw(texture, new Rectangle((int)Position.X, (int)Position.Y, DefaultSize, DefaultSize), Color.White);
-            spriteBatch.Draw(texture, new Rectangle((int)(Position.X - DefaultSize / 2), (int)(Position.Y - DefaultSize / 2), DefaultSize, DefaultSize), Color.White);
+            spriteBatch.Draw(texture, new Rectangle((int)(renderPosition.X - DefaultSize / 2), (int)(renderPosition.Y - DefaultSize / 2), DefaultSize, DefaultSize), Color.White);
+            
+            // Temporarily set position for health bar drawing
+            Vector2 originalPos = Position;
+            Position = renderPosition;
             DrawHealthBar(spriteBatch, DefaultSize, 6);
-            // Uncommented to display the monster's name above its position
-            spriteBatch.DrawString(dynamicFont, Type.Name, new Vector2(Position.X - DefaultSize / 2, Position.Y - DefaultSize), Color.White); 
+            Position = originalPos;
+            
+            // Display the monster's name above its position
+            spriteBatch.DrawString(dynamicFont, Type.Name, new Vector2(renderPosition.X - DefaultSize / 2, renderPosition.Y - DefaultSize), Color.White); 
         }
     }
 }

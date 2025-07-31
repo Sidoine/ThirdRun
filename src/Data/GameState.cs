@@ -10,6 +10,6 @@ namespace ThirdRun.Data
     public class GameState
     {
         required public Player Player { get; set; }
-        required public Map Map { get; set; }
+        required public WorldMap WorldMap { get; set; }
     }
 }
