@@ -1,8 +1,10 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThirdRun", "ThirdRun.csproj", "{14107365-1304-7FC2-F4AD-E9E35D3A3286}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThirdRun.Tests", "ThirdRun.Tests\ThirdRun.Tests.csproj", "{EF64743F-17EF-4C78-90E8-29D992645F54}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,6 +16,10 @@ Global
 		{14107365-1304-7FC2-F4AD-E9E35D3A3286}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14107365-1304-7FC2-F4AD-E9E35D3A3286}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{14107365-1304-7FC2-F4AD-E9E35D3A3286}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF64743F-17EF-4C78-90E8-29D992645F54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF64743F-17EF-4C78-90E8-29D992645F54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF64743F-17EF-4C78-90E8-29D992645F54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF64743F-17EF-4C78-90E8-29D992645F54}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
