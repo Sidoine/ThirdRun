@@ -221,30 +221,34 @@ namespace MonogameRPG.Map
         {
             return CurrentMap.GetMonsters();
         }
-       
-
-        private static int ModuloWithNegative(int value, int mod)
-        {
-            return (value % mod + mod) % mod;
-        }
 
         // Retourne la liste des cases accessibles (Herbe) autour d'une case
-        public List<Point> GetNeighbors(Point cell)
+        public List<(Point point, int cost)> GetNeighbors(Point cell)
         {
-            var neighbors = new List<Point>();
+            var neighbors = new List<(Point point, int cost)>();
             int[,] directions = new int[,] { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 } };
             for (int i = 0; i < 4; i++)
             {
                 int nx = cell.X + directions[i, 0];
                 int ny = cell.Y + directions[i, 1];
                 int mapX = nx / Map.GridWidth;
-                int mapY = ny / Map.GridHeight;
-                if (maps.TryGetValue(new Point(mapX, mapY), out Map? map) && map != null)
+                if (nx < 0)
                 {
-                    var rx = ModuloWithNegative(nx, Map.GridWidth);
-                    var ry = ModuloWithNegative(ny, Map.GridHeight);
+                    mapX--;
+                }
+                int mapY = ny / Map.GridHeight;
+                if (ny < 0)
+                {
+                    mapY--;
+                }
+                if (maps.TryGetValue(new Point(mapX, mapY), out Map? map))
+                {
+                    var rx = nx - mapX * Map.GridWidth;
+                    var ry = ny - mapY * Map.GridHeight;
                     if (map.Tiles[rx, ry].IsWalkable)
-                        neighbors.Add(new Point(nx, ny));
+                        neighbors.Add((new Point(nx, ny), 1));
+                    else if (map != CurrentMap)
+                        neighbors.Add((new Point(nx, ny), 10));
                 }
             }
             return neighbors;
@@ -253,8 +257,8 @@ namespace MonogameRPG.Map
         public List<Vector2> FindPathAStar(Vector2 start, Vector2 end)
         {
             // Conversion en coordonnées de grille
-            Point startCell = new Point((int)(start.X / Map.TileWidth), (int)(start.Y / Map.TileHeight));
-            Point endCell = new Point((int)(end.X / Map.TileWidth), (int)(end.Y / Map.TileHeight));
+            Point startCell = new Point((int)Math.Floor(start.X / Map.TileWidth), (int)Math.Floor(start.Y / Map.TileHeight));
+            Point endCell = new Point((int)Math.Floor(end.X / Map.TileWidth), (int)Math.Floor(end.Y / Map.TileHeight));
             var openSet = new SortedSet<(float, Point)>(Comparer<(float, Point)>.Create((a, b) => a.Item1 != b.Item1 ? a.Item1.CompareTo(b.Item1) : a.Item2.GetHashCode().CompareTo(b.Item2.GetHashCode())));
             var cameFrom = new Dictionary<Point, Point>();
             var gScore = new Dictionary<Point, float>();
@@ -268,9 +272,9 @@ namespace MonogameRPG.Map
                 if (current == endCell)
                     return ReconstructPath(cameFrom, current);
                 openSet.Remove(openSet.Min);
-                foreach (var neighbor in GetNeighbors(current))
+                foreach (var (neighbor, cost) in GetNeighbors(current))
                 {
-                    float tentativeG = gScore[current] + 1;
+                    float tentativeG = gScore[current] + cost;
                     if (!gScore.ContainsKey(neighbor) || tentativeG < gScore[neighbor])
                     {
                         cameFrom[neighbor] = current;
