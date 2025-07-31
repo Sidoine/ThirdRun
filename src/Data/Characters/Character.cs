@@ -25,10 +25,13 @@ public class Character : Unit
     public Equipment? Weapon { get; private set; }
     public Equipment? Armor { get; private set; }
     public List<string> Techniques { get; private set; }
+    public Map Map { get; set; }
 
     private readonly Texture2D texture;
     private static readonly int DefaultSize = 40;
     private static readonly Color DefaultColor = Color.CornflowerBlue;
+    private readonly WorldMap worldMap;
+
 
     private static string GetTexturePathForClass(CharacterClass characterClass)
     {
@@ -42,10 +45,12 @@ public class Character : Unit
         };
     }
 
-    public Character(string name, CharacterClass characterClass, int health, int attackPower, ContentManager content)
+    public Character(string name, CharacterClass characterClass, int health, int attackPower, ContentManager content, WorldMap worldMap)
     {
         Name = name;
         Class = characterClass;
+        this.worldMap = worldMap;
+
         CurrentHealth = health;
         MaxHealth = health;
         AttackPower = attackPower;
@@ -55,17 +60,19 @@ public class Character : Unit
         Position = new Vector2(0, 0); // Position initiale
         string path = GetTexturePathForClass(characterClass);
         texture = content.Load<Texture2D>(path);
+        Map = worldMap.CurrentMap;
     }
 
-    public void Move(List<Monster> monsters, WorldMap worldMap)
+    public void Move(List<Monster> monsters)
     {
         if (monsters == null || monsters.Count == 0)
         {
             // No monsters on current card, character should move towards new card edge if available
             return;
         }
-        
+
         // Trouver le monstre vivant le plus proche
+
         Monster? closest = null;
         float minDist = float.MaxValue;
         foreach (var monster in monsters)
@@ -78,10 +85,26 @@ public class Character : Unit
                 closest = monster;
             }
         }
-        if (closest == null) return;
-        
+        if (closest == null)
+        {
+            var nextMap = worldMap.GetAdjacentCardWithMonsters();
+            MoveTo(nextMap.Position);
+            return;
+        }
+
+        MoveTo(closest.Position);
+
+        // Si le personnage est assez proche, attaque
+        if (Vector2.Distance(Position, closest.Position) < DefaultSize)
+        {
+            Attack(closest);
+        }
+    }
+
+    private void MoveTo(Vector2 position)
+    {
         // Utiliser A* pour trouver le chemin sur la carte actuelle
-        var path = worldMap.CurrentMap.FindPathAStar(Position, closest.Position);
+        var path = worldMap.FindPathAStar(Position, position);
         if (path.Count > 1)
         {
             Vector2 next = path[1]; // [0] = position actuelle
@@ -91,13 +114,18 @@ public class Character : Unit
                 direction.Normalize();
                 Position += direction * 2f; // Vitesse de déplacement (pixels par frame)
             }
-        }
-        // Si le personnage est assez proche, attaque
-        if (Vector2.Distance(Position, closest.Position) < DefaultSize)
-        {
-            Attack(closest);
+            
+            var mapAtPosition = worldMap.GetMapAtPosition(Position);
+            if (mapAtPosition != null && mapAtPosition != Map)
+            {
+                Map.Characters.Remove(this);
+                mapAtPosition.Characters.Add(this);
+                Map = mapAtPosition;
+                worldMap.UpdateCurrentMap();
+            }
         }
     }
+
 
     public void Attack(Monster monster)
     {

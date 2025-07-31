@@ -18,11 +18,11 @@ namespace ThirdRun.Data
         {
             Characters = new List<Character>();
              // Création d'un personnage de test au centre de la carte
-            var hero = new Character("Héros", CharacterClass.Guerrier, 30, 1, content)
+            var hero = new Character("Héros", CharacterClass.Guerrier, 30, 1, content, worldMap)
             {
                 Position = new Vector2(
-                    worldMap.CurrentMap.GridWidth / 2 * worldMap.CurrentMap.TileWidth + worldMap.CurrentMap.TileWidth / 2,
-                    worldMap.CurrentMap.GridHeight / 2 * worldMap.CurrentMap.TileHeight + worldMap.CurrentMap.TileHeight / 2)
+                    Map.GridWidth / 2 * Map.TileWidth + Map.TileWidth / 2,
+                    Map.GridHeight / 2 * Map.TileHeight + Map.TileHeight / 2)
             };
             
             // Ajout d'objets de test dans l'inventaire

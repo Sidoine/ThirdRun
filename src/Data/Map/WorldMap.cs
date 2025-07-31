@@ -9,31 +9,25 @@ using System;
 
 namespace MonogameRPG.Map
 {
-    public class WorldMap
+    public class WorldMap(ContentManager content, GraphicsDevice graphics)
     {
-        private Dictionary<Vector2, Map> cards = new Dictionary<Vector2, Map>();
-        private Vector2 currentCardPosition = Vector2.Zero;
-        private List<Character> characters = new List<Character>();
-        private ContentManager contentManager;
-        private GraphicsDevice graphicsDevice;
+        private readonly Dictionary<Point, Map> maps = new Dictionary<Point, Map>();
+        private Point currentMapPosition = Point.Zero;
+        private List<Character> characters = [];
+        private readonly ContentManager contentManager = content;
+        private readonly GraphicsDevice graphicsDevice = graphics;
 
-        public Map CurrentMap => cards.ContainsKey(currentCardPosition) ? cards[currentCardPosition] : null!;
-        public Vector2 CurrentMapPosition => currentCardPosition;
-
-        public WorldMap(ContentManager content, GraphicsDevice graphics)
-        {
-            contentManager = content;
-            graphicsDevice = graphics;
-        }
+        public Map CurrentMap => maps.TryGetValue(currentMapPosition, out Map? value) ? value : throw new Exception("Current map not found at position: " + currentMapPosition);
+        public Point CurrentMapPosition => currentMapPosition;
 
         public void Initialize()
         {
             // Create the initial card at (0,0)
-            var initialCard = new Map(Vector2.Zero);
-            initialCard.GenerateRandomMap(graphicsDevice);
-            initialCard.SpawnMonsters(contentManager);
-            cards[Vector2.Zero] = initialCard;
-            currentCardPosition = Vector2.Zero;
+            var initialMap = new Map(Point.Zero);
+            initialMap.GenerateRandomMap(graphicsDevice);
+            initialMap.SpawnMonsters(contentManager);
+            maps[Point.Zero] = initialMap;
+            currentMapPosition = Point.Zero;
         }
 
         public void SetCharacters(List<Character> chars)
@@ -48,38 +42,30 @@ namespace MonogameRPG.Map
 
         public void Update()
         {
-            if (CurrentMap == null) return;
+        }
 
-            // Check if current card is cleared of monsters
-            if (!CurrentMap.HasLivingMonsters())
+        private Map GenerateNewAdjacentMap()
+        {
+            // Check if we need to generate a new adjacent card
+            var availableDirections = GetAvailableDirections();
+            Direction direction;
+            if (availableDirections.Count > 0)
             {
-                // Check if we need to generate a new adjacent card
-                var availableDirections = GetAvailableDirections();
-                if (availableDirections.Count > 0)
-                {
-                    // Generate a new card in a random available direction
-                    var rand = new Random();
-                    var direction = availableDirections[rand.Next(availableDirections.Count)];
-                    GenerateAdjacentCard(direction);
-                }
-                
+                // Generate a new card in a random available direction
+                var rand = new Random();
+                direction = availableDirections[rand.Next(availableDirections.Count)];
+            }
+            else
+            {
                 // If there are no available directions, generate one anyway by choosing a random direction
                 // This ensures the game always continues
-                if (availableDirections.Count == 0)
-                {
-                    var rand = new Random();
-                    var directions = new Direction[] { Direction.North, Direction.South, Direction.East, Direction.West };
-                    var direction = directions[rand.Next(directions.Length)];
-                    GenerateAdjacentCard(direction);
-                }
+                var rand = new Random();
+                var directions = new Direction[] { Direction.North, Direction.South, Direction.East, Direction.West };
+                direction = directions[rand.Next(directions.Length)];
             }
-
-            // Check for character transitions between cards
-            HandleCharacterTransitions();
-
-            // Clean up empty cards (except current card)
-            CleanupEmptyCards();
+            return GenerateAdjacentMap(direction);
         }
+
 
         private List<Direction> GetAvailableDirections()
         {
@@ -88,8 +74,8 @@ namespace MonogameRPG.Map
 
             foreach (var dir in directions)
             {
-                var adjacentPos = GetAdjacentPosition(currentCardPosition, dir);
-                if (!cards.ContainsKey(adjacentPos))
+                var adjacentPos = GetAdjacentPosition(currentMapPosition, dir);
+                if (!maps.ContainsKey(adjacentPos))
                 {
                     available.Add(dir);
                 }
@@ -98,62 +84,63 @@ namespace MonogameRPG.Map
             return available;
         }
 
-        private Vector2 GetAdjacentPosition(Vector2 cardPos, Direction direction)
+        private Point GetAdjacentPosition(Point cardPos, Direction direction)
         {
             switch (direction)
             {
                 case Direction.North:
-                    return cardPos + new Vector2(0, -1);
+                    return new Point(cardPos.X, cardPos.Y - 1);
                 case Direction.South:
-                    return cardPos + new Vector2(0, 1);
+                    return new Point(cardPos.X, cardPos.Y + 1);
                 case Direction.East:
-                    return cardPos + new Vector2(1, 0);
+                    return new Point(cardPos.X + 1, cardPos.Y);
                 case Direction.West:
-                    return cardPos + new Vector2(-1, 0);
+                    return new Point(cardPos.X - 1, cardPos.Y);
                 default:
                     return cardPos;
             }
         }
 
-        private void GenerateAdjacentCard(Direction direction)
+        private Map GenerateAdjacentMap(Direction direction)
         {
-            var newCardPos = GetAdjacentPosition(currentCardPosition, direction);
-            
-            if (!cards.ContainsKey(newCardPos))
+            var newCardPos = GetAdjacentPosition(currentMapPosition, direction);
+
+            if (!maps.ContainsKey(newCardPos))
             {
                 var newCard = new Map(newCardPos);
                 newCard.GenerateRandomMap(graphicsDevice);
                 newCard.SpawnMonsters(contentManager);
-                cards[newCardPos] = newCard;
+                maps[newCardPos] = newCard;
             }
+            return maps[newCardPos];
         }
 
-        private void HandleCharacterTransitions()
+        public Map GetAdjacentCardWithMonsters()
         {
-            // Check if characters should move towards new cards when current card is cleared
-            if (CurrentMap != null && !CurrentMap.HasLivingMonsters())
+            foreach (var map in GetAdjacentMaps())
             {
-                foreach (var character in characters)
+                if (map.HasLivingMonsters())
                 {
-                    MoveCharacterTowardsNewCard(character);
+                    return map;
                 }
             }
+            return GenerateNewAdjacentMap();
         }
 
-        private Map? GetCardAtPosition(Vector2 worldPosition)
+        public Map? GetMapAtPosition(Vector2 worldPosition)
         {
             // Convert world position to card coordinates
-            foreach (var kvp in cards)
+            foreach (var kvp in maps)
             {
                 var card = kvp.Value;
                 var cardWorldPos = card.WorldPosition;
-                
+
                 // Calculate the bounds of this card in world coordinates
-                float cardLeft = cardWorldPos.X * card.GridWidth * card.TileWidth;
-                float cardTop = cardWorldPos.Y * card.GridHeight * card.TileHeight;
-                float cardRight = cardLeft + card.GridWidth * card.TileWidth;
-                float cardBottom = cardTop + card.GridHeight * card.TileHeight;
-                
+                float cardLeft = cardWorldPos.X * Map.GridWidth * Map.TileWidth;
+                float cardTop = cardWorldPos.Y * Map.GridHeight * Map.TileHeight;
+                float cardRight = cardLeft + Map.GridWidth * Map.TileWidth;
+                float cardBottom = cardTop + Map.GridHeight * Map.TileHeight;
+
                 if (worldPosition.X >= cardLeft && worldPosition.X < cardRight &&
                     worldPosition.Y >= cardTop && worldPosition.Y < cardBottom)
                 {
@@ -163,152 +150,60 @@ namespace MonogameRPG.Map
             return null;
         }
 
-        private void TransitionCharacterToCard(Character character, Map newCard)
+        public void UpdateCurrentMap()
         {
-            // This method is called when a character moves to a different card
-            // We might want to update the current card if most characters have moved
-            if (newCard.WorldPosition != currentCardPosition && ShouldSwitchToCard(newCard))
+            if (characters.All(x => x.Map != CurrentMap))
             {
-                currentCardPosition = newCard.WorldPosition;
-                CurrentMap.SetCharacters(characters);
+                currentMapPosition = characters.First().Map.WorldPosition;
+                CleanupEmptyCards();
             }
         }
 
-        private bool ShouldSwitchToCard(Map card)
+        private IEnumerable<Map> GetAdjacentMaps()
         {
-            // Switch to new card if majority of characters are on it
-            int charactersOnNewCard = 0;
-            foreach (var character in characters)
-            {
-                var charCard = GetCardAtPosition(character.Position);
-                if (charCard == card)
-                {
-                    charactersOnNewCard++;
-                }
-            }
-            return charactersOnNewCard > characters.Count / 2;
-        }
-
-        private void MoveCharacterTowardsNewCard(Character character)
-        {
-            // Find the nearest adjacent card that exists
-            Map? targetCard = null;
-            Direction targetDirection = Direction.North;
-            float minDistance = float.MaxValue;
-
+            // Get all maps that are adjacent to the current map
             var directions = new Direction[] { Direction.North, Direction.South, Direction.East, Direction.West };
             foreach (var dir in directions)
             {
-                var adjacentPos = GetAdjacentPosition(currentCardPosition, dir);
-                if (cards.ContainsKey(adjacentPos))
+                var adjacentPos = GetAdjacentPosition(currentMapPosition, dir);
+                if (maps.TryGetValue(adjacentPos, out Map? map))
                 {
-                    var card = cards[adjacentPos];
-                    var edgePos = CurrentMap.GetEdgePosition(dir);
-                    var distance = Vector2.Distance(character.Position, edgePos);
-                    if (distance < minDistance)
-                    {
-                        minDistance = distance;
-                        targetCard = card;
-                        targetDirection = dir;
-                    }
+                    yield return map;
                 }
-            }
-
-            if (targetCard != null)
-            {
-                // Move character towards the edge of current card in the direction of target card
-                var edgePosition = CurrentMap.GetEdgePosition(targetDirection);
-                var direction = edgePosition - character.Position;
-                if (direction.Length() > 5f) // Increased threshold to avoid jittering
-                {
-                    direction.Normalize();
-                    character.Position += direction * 2f; // Same movement speed as normal movement
-                }
-                else
-                {
-                    // Character has reached the edge, transition to new card
-                    TransitionCharacterToNewCard(character, targetCard, targetDirection);
-                }
-            }
-        }
-        
-        private void TransitionCharacterToNewCard(Character character, Map newCard, Direction direction)
-        {
-            // Calculate the entry position on the new card (opposite edge)
-            Vector2 entryPos;
-            switch (direction)
-            {
-                case Direction.North:
-                    entryPos = new Vector2(newCard.GridWidth * newCard.TileWidth / 2, newCard.GridHeight * newCard.TileHeight - 50);
-                    break;
-                case Direction.South:
-                    entryPos = new Vector2(newCard.GridWidth * newCard.TileWidth / 2, 50);
-                    break;
-                case Direction.East:
-                    entryPos = new Vector2(50, newCard.GridHeight * newCard.TileHeight / 2);
-                    break;
-                case Direction.West:
-                    entryPos = new Vector2(newCard.GridWidth * newCard.TileWidth - 50, newCard.GridHeight * newCard.TileHeight / 2);
-                    break;
-                default:
-                    entryPos = new Vector2(newCard.GridWidth * newCard.TileWidth / 2, newCard.GridHeight * newCard.TileHeight / 2);
-                    break;
-            }
-            
-            // Set character position to the entry point of the new card
-            character.Position = entryPos;
-            
-            // Switch to the new card if this is the first character to transition
-            if (newCard.WorldPosition != currentCardPosition)
-            {
-                currentCardPosition = newCard.WorldPosition;
-                CurrentMap.SetCharacters(characters);
             }
         }
 
         private void CleanupEmptyCards()
         {
-            var cardsToRemove = new List<Vector2>();
-            
-            foreach (var kvp in cards)
+            var cardsToRemove = new List<Point>();
+
+            foreach (var kvp in maps)
             {
-                var cardPos = kvp.Key;
+                var mapPosition = kvp.Key;
                 var card = kvp.Value;
-                
+
                 // Don't remove current card
-                if (cardPos == currentCardPosition) continue;
-                
+                if (mapPosition == currentMapPosition) continue;
+
                 // Don't remove adjacent cards (keep them for potential re-entry)
-                if (IsAdjacentToCurrentMap(cardPos)) continue;
-                
-                // Check if any characters are on this card
-                bool hasCharacters = false;
-                foreach (var character in characters)
-                {
-                    var charCard = GetCardAtPosition(character.Position);
-                    if (charCard == card)
-                    {
-                        hasCharacters = true;
-                        break;
-                    }
-                }
-                
+                if (IsAdjacentToCurrentMap(mapPosition)) continue;
+
                 // Remove card if it has no characters and no living monsters
-                if (!hasCharacters && !card.HasLivingMonsters())
+                if (!card.Characters.Any() && !card.HasLivingMonsters())
                 {
-                    cardsToRemove.Add(cardPos);
+                    cardsToRemove.Add(mapPosition);
                 }
             }
-            
+
             foreach (var cardPos in cardsToRemove)
             {
-                cards.Remove(cardPos);
+                maps.Remove(cardPos);
             }
         }
-        
-        private bool IsAdjacentToCurrentMap(Vector2 cardPos)
+
+        private bool IsAdjacentToCurrentMap(Point cardPos)
         {
-            var diff = cardPos - currentCardPosition;
+            var diff = cardPos - currentMapPosition;
             var distance = Math.Abs(diff.X) + Math.Abs(diff.Y);
             return distance <= 1; // Adjacent cards have distance 1
         }
@@ -316,7 +211,7 @@ namespace MonogameRPG.Map
         public void Render(SpriteBatch spriteBatch, DynamicSpriteFont dynamicFont)
         {
             // Render all cards relative to their world positions
-            foreach (var card in cards.Values)
+            foreach (var card in maps.Values)
             {
                 card.Render(spriteBatch, dynamicFont);
             }
@@ -324,14 +219,85 @@ namespace MonogameRPG.Map
 
         public List<Monster> GetMonstersOnCurrentMap()
         {
-            return CurrentMap?.GetMonsters() ?? new List<Monster>();
+            return CurrentMap.GetMonsters();
+        }
+       
+
+        private static int ModuloWithNegative(int value, int mod)
+        {
+            return (value % mod + mod) % mod;
         }
 
-        public Map FindPathAStar(Vector2 start, Vector2 end)
+        // Retourne la liste des cases accessibles (Herbe) autour d'une case
+        public List<Point> GetNeighbors(Point cell)
         {
-            // For now, just use the current card's pathfinding
-            // In the future, this could be extended to pathfind across multiple cards
-            return CurrentMap;
+            var neighbors = new List<Point>();
+            int[,] directions = new int[,] { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 } };
+            for (int i = 0; i < 4; i++)
+            {
+                int nx = cell.X + directions[i, 0];
+                int ny = cell.Y + directions[i, 1];
+                int mapX = nx / Map.GridWidth;
+                int mapY = ny / Map.GridHeight;
+                if (maps.TryGetValue(new Point(mapX, mapY), out Map? map) && map != null)
+                {
+                    var rx = ModuloWithNegative(nx, Map.GridWidth);
+                    var ry = ModuloWithNegative(ny, Map.GridHeight);
+                    if (map.Tiles[rx, ry].IsWalkable)
+                        neighbors.Add(new Point(nx, ny));
+                }
+            }
+            return neighbors;
+        }
+
+        public List<Vector2> FindPathAStar(Vector2 start, Vector2 end)
+        {
+            // Conversion en coordonnées de grille
+            Point startCell = new Point((int)(start.X / Map.TileWidth), (int)(start.Y / Map.TileHeight));
+            Point endCell = new Point((int)(end.X / Map.TileWidth), (int)(end.Y / Map.TileHeight));
+            var openSet = new SortedSet<(float, Point)>(Comparer<(float, Point)>.Create((a, b) => a.Item1 != b.Item1 ? a.Item1.CompareTo(b.Item1) : a.Item2.GetHashCode().CompareTo(b.Item2.GetHashCode())));
+            var cameFrom = new Dictionary<Point, Point>();
+            var gScore = new Dictionary<Point, float>();
+            var fScore = new Dictionary<Point, float>();
+            openSet.Add((0, startCell));
+            gScore[startCell] = 0;
+            fScore[startCell] = Heuristic(startCell, endCell);
+            while (openSet.Count > 0)
+            {
+                var current = openSet.Min.Item2;
+                if (current == endCell)
+                    return ReconstructPath(cameFrom, current);
+                openSet.Remove(openSet.Min);
+                foreach (var neighbor in GetNeighbors(current))
+                {
+                    float tentativeG = gScore[current] + 1;
+                    if (!gScore.ContainsKey(neighbor) || tentativeG < gScore[neighbor])
+                    {
+                        cameFrom[neighbor] = current;
+                        gScore[neighbor] = tentativeG;
+                        fScore[neighbor] = tentativeG + Heuristic(neighbor, endCell);
+                        if (!openSet.Contains((fScore[neighbor], neighbor)))
+                            openSet.Add((fScore[neighbor], neighbor));
+                    }
+                }
+            }
+            return new List<Vector2>(); // Pas de chemin trouvé
+        }
+
+        private float Heuristic(Point a, Point b)
+        {
+            return Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
+        }
+
+        private List<Vector2> ReconstructPath(Dictionary<Point, Point> cameFrom, Point current)
+        {
+            var path = new List<Vector2> { new Vector2(current.X * Map.TileWidth + Map.TileWidth / 2, current.Y * Map.TileHeight + Map.TileHeight / 2) };
+            while (cameFrom.ContainsKey(current))
+            {
+                current = cameFrom[current];
+                path.Insert(0, new Vector2(current.X * Map.TileWidth + Map.TileWidth / 2, current.Y * Map.TileHeight + Map.TileHeight / 2));
+            }
+            return path;
         }
     }
 }

@@ -12,12 +12,15 @@ namespace MonogameRPG.Map
         public int Height { get; }
         private Texture2D texture;
 
-        public TileType(string name, Color color, int width, int height, GraphicsDevice graphicsDevice)
+        public bool IsWalkable { get; private set; }
+
+        public TileType(string name, Color color, int width, int height, GraphicsDevice graphicsDevice, bool isWalkable)
         {
             Name = name;
             Color = color;
             Width = width;
             Height = height;
+            IsWalkable = isWalkable;
             texture = new Texture2D(graphicsDevice, width, height);
             Color[] data = new Color[width * height];
             for (int i = 0; i < data.Length; i++) data[i] = Color;
