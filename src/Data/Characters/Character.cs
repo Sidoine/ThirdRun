@@ -65,14 +65,7 @@ public class Character : Unit
 
     public void Move(List<Monster> monsters)
     {
-        if (monsters == null || monsters.Count == 0)
-        {
-            // No monsters on current card, character should move towards new card edge if available
-            return;
-        }
-
         // Trouver le monstre vivant le plus proche
-
         Monster? closest = null;
         float minDist = float.MaxValue;
         foreach (var monster in monsters)
@@ -95,7 +88,7 @@ public class Character : Unit
         MoveTo(closest.Position);
 
         // Si le personnage est assez proche, attaque
-        if (Vector2.Distance(Position, closest.Position) < DefaultSize)
+        if (Vector2.Distance(Position, closest.Position) < Map.TileHeight)
         {
             Attack(closest);
         }

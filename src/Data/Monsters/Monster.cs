@@ -46,16 +46,11 @@ namespace MonogameRPG.Monsters
             return 10;
         }
 
-        public void Render(SpriteBatch spriteBatch, DynamicSpriteFont dynamicFont)
-        {
-            texture ??= contentManager.Load<Texture2D>(Type.TexturePath);
-            RenderAtPosition(spriteBatch, dynamicFont, Position);
-        }
-
         public void RenderAtPosition(SpriteBatch spriteBatch, DynamicSpriteFont dynamicFont, Vector2 renderPosition)
         {
+            texture ??= contentManager.Load<Texture2D>(Type.TexturePath);
             // N'affiche rien si le monstre est mort
-            if (IsDead || texture == null) return;
+            if (IsDead) return;
 
             spriteBatch.Draw(texture, new Rectangle((int)(renderPosition.X - DefaultSize / 2), (int)(renderPosition.Y - DefaultSize / 2), DefaultSize, DefaultSize), Color.White);
             
