@@ -21,8 +21,8 @@ namespace ThirdRun.Data
             var hero = new Character("Héros", CharacterClass.Guerrier, 30, 1, content)
             {
                 Position = new Vector2(
-                    worldMap.CurrentCard.GridWidth / 2 * worldMap.CurrentCard.TileWidth + worldMap.CurrentCard.TileWidth / 2,
-                    worldMap.CurrentCard.GridHeight / 2 * worldMap.CurrentCard.TileHeight + worldMap.CurrentCard.TileHeight / 2)
+                    worldMap.CurrentMap.GridWidth / 2 * worldMap.CurrentMap.TileWidth + worldMap.CurrentMap.TileWidth / 2,
+                    worldMap.CurrentMap.GridHeight / 2 * worldMap.CurrentMap.TileHeight + worldMap.CurrentMap.TileHeight / 2)
             };
             
             // Ajout d'objets de test dans l'inventaire

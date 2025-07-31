@@ -8,7 +8,7 @@ using FontStashSharp;
 
 namespace MonogameRPG.Map
 {
-    public class MapCard
+    public class Map
     {
         private TileType[,] tiles;
         public int TileWidth { get; private set; } = 48;
@@ -31,7 +31,7 @@ namespace MonogameRPG.Map
             new MonsterType("Orc", 15, 3, "Monsters/orc"),
         };
 
-        public MapCard(Vector2 worldPosition)
+        public Map(Vector2 worldPosition)
         {
             WorldPosition = worldPosition;
             monsterSpawnPoints = new List<Vector2>();

@@ -81,7 +81,7 @@ public class Character : Unit
         if (closest == null) return;
         
         // Utiliser A* pour trouver le chemin sur la carte actuelle
-        var path = worldMap.CurrentCard.FindPathAStar(Position, closest.Position);
+        var path = worldMap.CurrentMap.FindPathAStar(Position, closest.Position);
         if (path.Count > 1)
         {
             Vector2 next = path[1]; // [0] = position actuelle
