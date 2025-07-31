@@ -38,5 +38,7 @@ public class UiManager
     public class State
     {
         public bool IsInventoryVisible { get; set; } = false;
+        public bool IsCharacterDetailsVisible { get; set; } = false;
+        public Character? SelectedCharacter { get; set; } = null;
     }
 }
