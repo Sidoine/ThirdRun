@@ -12,16 +12,19 @@ namespace MonogameRPG.Monsters
     {
         public MonsterType Type { get; set; }
 
-        private readonly Texture2D texture;
+        private Texture2D? texture;
         private static readonly int DefaultSize = 40;
+        private readonly ContentManager contentManager;
+
 
         public Monster(MonsterType type, ContentManager contentManager)
         {
             Type = type;
+            this.contentManager = contentManager;
+
             CurrentHealth = type.BaseHealth;
             MaxHealth = type.BaseHealth;
             AttackPower = type.BaseAttack;
-            texture = contentManager.Load<Texture2D>(type.TexturePath);
             Position = new Vector2(0, 0); // Initial position
         }
 
@@ -45,6 +48,7 @@ namespace MonogameRPG.Monsters
 
         public void Render(SpriteBatch spriteBatch, DynamicSpriteFont dynamicFont)
         {
+            texture ??= contentManager.Load<Texture2D>(Type.TexturePath);
             RenderAtPosition(spriteBatch, dynamicFont, Position);
         }
 

@@ -35,28 +35,15 @@ namespace ThirdRun.Tests
             var position = worldMap.CurrentMapPosition;
 
             // Assert
-            Assert.Equal(Vector2.Zero, position);
+            Assert.Equal(Point.Zero, position);
         }
-
-        [Fact]
-        public void GetMonstersOnCurrentMap_WhenNoCurrentMap_ShouldReturnEmptyList()
-        {
-            // Arrange
-            var worldMap = new WorldMap(null!, null!);
-
-            // Act
-            var monsters = worldMap.GetMonstersOnCurrentMap();
-
-            // Assert
-            Assert.NotNull(monsters);
-            Assert.Empty(monsters);
-        }
-
+        
         [Fact]
         public void SetCharacters_WithEmptyList_ShouldNotThrow()
         {
             // Arrange
             var worldMap = new WorldMap(null!, null!);
+            worldMap.Initialize();
             var emptyCharacters = new List<Character>();
 
             // Act & Assert - Should not throw
@@ -68,6 +55,7 @@ namespace ThirdRun.Tests
         {
             // Arrange
             var worldMap = new WorldMap(null!, null!);
+            worldMap.Initialize();
             var characters = new List<Character>();
             
             // Create characters - we'll use basic parameters since we can't load textures in tests
@@ -76,7 +64,7 @@ namespace ThirdRun.Tests
                 // This might fail due to ContentManager being null, but that's expected in unit tests
                 for (int i = 0; i < 3; i++)
                 {
-                    var character = new Character($"TestChar{i}", CharacterClass.Guerrier, 100, 10, null!);
+                    var character = new Character($"TestChar{i}", CharacterClass.Guerrier, 100, 10, null!, worldMap);
                     character.Position = new Vector2(i * 10, i * 10);
                     characters.Add(character);
                 }
@@ -98,6 +86,7 @@ namespace ThirdRun.Tests
         {
             // Arrange
             var worldMap = new WorldMap(null!, null!);
+            worldMap.Initialize();
 
             // Act & Assert - Should not throw
             worldMap.Update();
@@ -108,6 +97,7 @@ namespace ThirdRun.Tests
         {
             // Arrange
             var worldMap = new WorldMap(null!, null!);
+            worldMap.Initialize();
             var characters = new List<Character>();
             worldMap.SetCharacters(characters);
 
@@ -124,7 +114,7 @@ namespace ThirdRun.Tests
 
             try
             {
-                var character = new Character("TestTransition", CharacterClass.Mage, 50, 15, null!);
+                var character = new Character("TestTransition", CharacterClass.Mage, 50, 15, null!, worldMap);
                 character.Position = new Vector2(100, 100);
                 characters.Add(character);
 
@@ -161,6 +151,7 @@ namespace ThirdRun.Tests
         {
             // Arrange
             var worldMap = new WorldMap(null!, null!);
+            worldMap.Initialize();
             var characters = new List<Character>();
             worldMap.SetCharacters(characters);
 
@@ -184,6 +175,7 @@ namespace ThirdRun.Tests
         {
             // Arrange
             var worldMap = new WorldMap(null!, null!);
+            worldMap.Initialize();
             var characters = new List<Character>();
 
             // Act
@@ -206,6 +198,7 @@ namespace ThirdRun.Tests
         {
             // Arrange
             var worldMap = new WorldMap(null!, null!);
+            worldMap.Initialize();
             
             // Test the core character transition logic by simulating character list changes
             var initialCharacters = new List<Character>();

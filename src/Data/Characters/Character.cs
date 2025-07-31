@@ -88,7 +88,7 @@ public class Character : Unit
         if (closest == null)
         {
             var nextMap = worldMap.GetAdjacentCardWithMonsters();
-            MoveTo(nextMap.Position);
+            MoveTo(nextMap.Position + new Vector2(Map.GridWidth / 2 * Map.TileWidth, Map.GridHeight / 2 * Map.TileHeight));
             return;
         }
 
