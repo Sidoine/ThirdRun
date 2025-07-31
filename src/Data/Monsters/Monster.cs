@@ -11,6 +11,7 @@ namespace MonogameRPG.Monsters
     public class Monster : Unit
     {
         public MonsterType Type { get; set; }
+        public int Level => Type.Level;
 
         private Texture2D? texture;
         private static readonly int DefaultSize = 40;
@@ -36,8 +37,8 @@ namespace MonogameRPG.Monsters
 
         public Item DropLoot()
         {
-            // Logic to drop loot, returning a new Item for simplicity
-            return new Item($"Loot from {Type.Name}", "A valuable item dropped by the monster.", 10);
+            // Generate a random item based on monster level
+            return RandomItemGenerator.GenerateRandomItem(Level);
         }
 
         public int GetExperienceValue()
