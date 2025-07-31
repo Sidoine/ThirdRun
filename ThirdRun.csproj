@@ -17,6 +17,10 @@
      <PackageReference Include="StbTrueTypeSharp" Version="1.26.12" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Remove="ThirdRun.Tests/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="Content\Arial.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
