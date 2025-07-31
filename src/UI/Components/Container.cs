@@ -173,6 +173,19 @@ namespace ThirdRun.UI.Components
             }
         }
 
+        /// <summary>
+        /// Met à jour le container et tous ses éléments enfants
+        /// </summary>
+        public override void Update(GameTime gameTime)
+        {
+            if (!Visible) return;
+
+            foreach (var child in Children)
+            {
+                child.Update(gameTime);
+            }
+        }
+
         public override void Scroll(int scrollValue)
         {
             base.Scroll(scrollValue);
