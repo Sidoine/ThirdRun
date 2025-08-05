@@ -1,11 +1,9 @@
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using MonogameRPG.Monsters;
 using System;
 using System.Linq;
 using Microsoft.Xna.Framework.Content;
-using FontStashSharp;
+using Microsoft.Xna.Framework;
 
 namespace MonogameRPG.Map
 {
@@ -45,11 +43,11 @@ namespace MonogameRPG.Map
             tiles = new TileType[0, 0];
         }
 
-        public void GenerateRandomMap(GraphicsDevice graphicsDevice, int spawnCount = 2)
+        public void GenerateRandomMap(int spawnCount = 2)
         {
-            herbeTile = new TileType("Herbe", Color.ForestGreen, TileWidth, TileHeight, graphicsDevice, true);
-            eauTile = new TileType("Eau", Color.Blue, TileWidth, TileHeight, graphicsDevice, false);
-            rocheTile = new TileType("Roche", Color.Gray, TileWidth, TileHeight, graphicsDevice, false);
+            herbeTile = new TileType("Herbe", Color.ForestGreen, TileWidth, TileHeight, true);
+            eauTile = new TileType("Eau", Color.Blue, TileWidth, TileHeight, false);
+            rocheTile = new TileType("Roche", Color.Gray, TileWidth, TileHeight, false);
             tiles = new TileType[GridWidth, GridHeight];
             var rand = new System.Random();
             for (int x = 0; x < GridWidth; x++)
@@ -75,7 +73,7 @@ namespace MonogameRPG.Map
             }
         }
 
-        public void SpawnMonsters(ContentManager contentManager)
+        public void SpawnMonsters()
         {
             monsters.Clear();
             var rand = new System.Random();
@@ -91,7 +89,7 @@ namespace MonogameRPG.Map
                 if (availableTypes.Length == 0) availableTypes = MonsterTypes; // Fallback
                 
                 var type = availableTypes[rand.Next(availableTypes.Length)];
-                var monster = new Monster(type, contentManager);
+                var monster = new Monster(type);
                 monster.Position = new Vector2(
                     spawn.X * TileWidth + TileWidth / 2 - monsterSize / 2,
                     spawn.Y * TileHeight + TileHeight / 2 - monsterSize / 2) + Position;
@@ -105,37 +103,7 @@ namespace MonogameRPG.Map
             characters.AddRange(chars);
         }
 
-        public void Render(SpriteBatch spriteBatch, DynamicSpriteFont dynamicFont, Vector2 offset = default)
-        {
-            if (tiles == null) return;
-            
-            Vector2 renderOffset = offset + Position;
-            
-            for (int x = 0; x < GridWidth; x++)
-                for (int y = 0; y < GridHeight; y++)
-                {
-                    Vector2 tilePos = renderOffset + new Vector2(x * TileWidth, y * TileHeight);
-                    tiles[x, y].Render(spriteBatch, (int)tilePos.X, (int)tilePos.Y);
-                }
-            // Affichage des monstres
-            foreach (var monster in monsters)
-            {
-                if (!monster.IsDead && monster.Position != Vector2.Zero)
-                {
-                    Vector2 renderPos = monster.Position;
-                    monster.RenderAtPosition(spriteBatch, dynamicFont, renderPos);
-                }
-            }
-            // Affichage des personnages
-            foreach (var character in characters)
-            {
-                if (character.Position != Vector2.Zero)
-                {
-                    Vector2 renderPos = character.Position;
-                    character.RenderAtPosition(spriteBatch, renderPos);
-                }
-            }
-        }
+
 
         public List<Vector2> GetMonsterSpawnPoints()
         {

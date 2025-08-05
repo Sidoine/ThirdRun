@@ -2,7 +2,6 @@ namespace ThirdRun.Data
 {
     using System.Collections.Generic;
     using Microsoft.Xna.Framework;
-    using Microsoft.Xna.Framework.Content;
     using MonogameRPG.Map;
     using ThirdRun.Characters;
     using ThirdRun.Items;
@@ -14,11 +13,11 @@ namespace ThirdRun.Data
     {
         public List<Character> Characters { get; set; }
 
-        public Player(WorldMap worldMap, ContentManager content)
+        public Player(WorldMap worldMap)
         {
             Characters = new List<Character>();
              // Création d'un personnage de test au centre de la carte
-            var hero = new Character("Héros", CharacterClass.Guerrier, 30, 1, content, worldMap)
+            var hero = new Character("Héros", CharacterClass.Guerrier, 30, 1, worldMap)
             {
                 Position = new Vector2(
                     Map.GridWidth / 2 * Map.TileWidth + Map.TileWidth / 2,

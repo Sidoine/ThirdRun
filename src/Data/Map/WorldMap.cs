@@ -1,21 +1,16 @@
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Content;
 using System.Collections.Generic;
 using System.Linq;
 using MonogameRPG.Monsters;
-using FontStashSharp;
 using System;
+using Microsoft.Xna.Framework;
 
 namespace MonogameRPG.Map
 {
-    public class WorldMap(ContentManager content, GraphicsDevice graphics)
+    public class WorldMap()
     {
         private readonly Dictionary<Point, Map> maps = new Dictionary<Point, Map>();
         private Point currentMapPosition = Point.Zero;
         private List<Character> characters = [];
-        private readonly ContentManager contentManager = content;
-        private readonly GraphicsDevice graphicsDevice = graphics;
 
         public Map CurrentMap => maps.TryGetValue(currentMapPosition, out Map? value) ? value : throw new Exception("Current map not found at position: " + currentMapPosition);
         public Point CurrentMapPosition => currentMapPosition;
@@ -24,8 +19,8 @@ namespace MonogameRPG.Map
         {
             // Create the initial card at (0,0)
             var initialMap = new Map(Point.Zero);
-            initialMap.GenerateRandomMap(graphicsDevice);
-            initialMap.SpawnMonsters(contentManager);
+            initialMap.GenerateRandomMap();
+            initialMap.SpawnMonsters();
             maps[Point.Zero] = initialMap;
             currentMapPosition = Point.Zero;
         }
@@ -108,8 +103,8 @@ namespace MonogameRPG.Map
             if (!maps.ContainsKey(newCardPos))
             {
                 var newCard = new Map(newCardPos);
-                newCard.GenerateRandomMap(graphicsDevice);
-                newCard.SpawnMonsters(contentManager);
+                newCard.GenerateRandomMap();
+                newCard.SpawnMonsters();
                 maps[newCardPos] = newCard;
             }
             return maps[newCardPos];
@@ -208,18 +203,16 @@ namespace MonogameRPG.Map
             return distance <= 1; // Adjacent cards have distance 1
         }
 
-        public void Render(SpriteBatch spriteBatch, DynamicSpriteFont dynamicFont)
-        {
-            // Render all cards relative to their world positions
-            foreach (var card in maps.Values)
-            {
-                card.Render(spriteBatch, dynamicFont);
-            }
-        }
+
 
         public List<Monster> GetMonstersOnCurrentMap()
         {
             return CurrentMap.GetMonsters();
+        }
+
+        public IEnumerable<Map> GetAllMaps()
+        {
+            return maps.Values;
         }
 
         // Retourne la liste des cases accessibles (Herbe) autour d'une case

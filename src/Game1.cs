@@ -8,6 +8,7 @@ using ThirdRun.UI;
 using ThirdRun.UI.Panels;
 using ThirdRun.Data;
 using MonogameRPG.Map;
+using ThirdRun.Graphics.Map;
 
 namespace MonogameRPG
 {
@@ -21,6 +22,7 @@ namespace MonogameRPG
         private UiManager _uiManager;
         private Root _rootPanel;
         private GameState _gameState;
+        private WorldMapView _worldMapView;
 
         private Dictionary<string, Texture2D> _itemIcons = new();
         private MouseState _previousMouseState;
@@ -37,11 +39,12 @@ namespace MonogameRPG
             _uiManager = null!;
             _gameState = null!;
             _rootPanel = null!;
+            _worldMapView = null!;
         }
 
         protected override void Initialize()
         {
-            worldMap = new Map.WorldMap(Content, GraphicsDevice);
+            worldMap = new Map.WorldMap();
             
             base.Initialize();
         }
@@ -50,9 +53,10 @@ namespace MonogameRPG
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             worldMap.Initialize();
+            _worldMapView = new WorldMapView(Content);
             _gameState = new GameState
             {
-                Player = new Player(worldMap, Content),
+                Player = new Player(worldMap),
                 WorldMap = worldMap,
             };
             worldMap.SetCharacters(_gameState.Player.Characters);
@@ -136,7 +140,7 @@ namespace MonogameRPG
             Vector2 offset = screenCenter - avg;
             Matrix camera = Matrix.CreateTranslation(new Vector3(offset, 0f));
             _spriteBatch.Begin(transformMatrix: camera);
-            worldMap.Render(_spriteBatch, _dynamicFont); // On passe la police dynamique
+            _worldMapView.Render(_spriteBatch, worldMap, _dynamicFont); // On passe la police dynamique
             _spriteBatch.End();
             // Affichage du panneau d'inventaire (hors caméra)
             var rasterizerState = new RasterizerState() { ScissorTestEnable = true };

@@ -19,7 +19,7 @@ namespace ThirdRun.Tests
             GraphicsDevice? graphicsDevice = null;
 
             // Act
-            var worldMap = new WorldMap(contentManager!, graphicsDevice!);
+            var worldMap = new WorldMap();
 
             // Assert
             Assert.NotNull(worldMap);
@@ -29,7 +29,7 @@ namespace ThirdRun.Tests
         public void CurrentMapPosition_ShouldInitiallyBeZero_WhenNotInitialized()
         {
             // Arrange
-            var worldMap = new WorldMap(null!, null!);
+            var worldMap = new WorldMap();
 
             // Act
             var position = worldMap.CurrentMapPosition;
@@ -42,7 +42,7 @@ namespace ThirdRun.Tests
         public void SetCharacters_WithEmptyList_ShouldNotThrow()
         {
             // Arrange
-            var worldMap = new WorldMap(null!, null!);
+            var worldMap = new WorldMap();
             worldMap.Initialize();
             var emptyCharacters = new List<Character>();
 
@@ -54,7 +54,7 @@ namespace ThirdRun.Tests
         public void SetCharacters_WithMultipleCharacters_ShouldNotThrow()
         {
             // Arrange
-            var worldMap = new WorldMap(null!, null!);
+            var worldMap = new WorldMap();
             worldMap.Initialize();
             var characters = new List<Character>();
             
@@ -64,7 +64,7 @@ namespace ThirdRun.Tests
                 // This might fail due to ContentManager being null, but that's expected in unit tests
                 for (int i = 0; i < 3; i++)
                 {
-                    var character = new Character($"TestChar{i}", CharacterClass.Guerrier, 100, 10, null!, worldMap);
+                    var character = new Character($"TestChar{i}", CharacterClass.Guerrier, 100, 10, worldMap);
                     character.Position = new Vector2(i * 10, i * 10);
                     characters.Add(character);
                 }
@@ -85,7 +85,7 @@ namespace ThirdRun.Tests
         public void Update_WithoutInitialization_ShouldNotThrow()
         {
             // Arrange
-            var worldMap = new WorldMap(null!, null!);
+            var worldMap = new WorldMap();
             worldMap.Initialize();
 
             // Act & Assert - Should not throw
@@ -96,7 +96,7 @@ namespace ThirdRun.Tests
         public void Update_WithEmptyCharacterList_ShouldNotThrow()
         {
             // Arrange
-            var worldMap = new WorldMap(null!, null!);
+            var worldMap = new WorldMap();
             worldMap.Initialize();
             var characters = new List<Character>();
             worldMap.SetCharacters(characters);
@@ -109,12 +109,12 @@ namespace ThirdRun.Tests
         public void CharacterTransition_ShouldMaintainCharacterProperties()
         {
             // Arrange
-            var worldMap = new WorldMap(null!, null!);
+            var worldMap = new WorldMap();
             var characters = new List<Character>();
 
             try
             {
-                var character = new Character("TestTransition", CharacterClass.Mage, 50, 15, null!, worldMap);
+                var character = new Character("TestTransition", CharacterClass.Mage, 50, 15, worldMap);
                 character.Position = new Vector2(100, 100);
                 characters.Add(character);
 
@@ -150,7 +150,7 @@ namespace ThirdRun.Tests
         public void WorldMap_ShouldHandleMultipleUpdates()
         {
             // Arrange
-            var worldMap = new WorldMap(null!, null!);
+            var worldMap = new WorldMap();
             worldMap.Initialize();
             var characters = new List<Character>();
             worldMap.SetCharacters(characters);
@@ -174,7 +174,7 @@ namespace ThirdRun.Tests
         public void WorldMap_ShouldHandleCharacterListModification()
         {
             // Arrange
-            var worldMap = new WorldMap(null!, null!);
+            var worldMap = new WorldMap();
             worldMap.Initialize();
             var characters = new List<Character>();
 
@@ -197,7 +197,7 @@ namespace ThirdRun.Tests
         public void WorldMap_CharacterTransitionBehavior_ShouldBeStable()
         {
             // Arrange
-            var worldMap = new WorldMap(null!, null!);
+            var worldMap = new WorldMap();
             worldMap.Initialize();
             
             // Test the core character transition logic by simulating character list changes
