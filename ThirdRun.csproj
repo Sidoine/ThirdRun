@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>ThirdRun</RootNamespace>
     <AssemblyName>ThirdRun</AssemblyName>
@@ -18,6 +18,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="ThirdRun.Tests/**/*.cs" />
+    <Compile Remove="ThirdRun.Android/**/*.cs" />
+    <Compile Remove="ThirdRun.DesktopGL/**/*.cs" />
   </ItemGroup>
 
   <ItemGroup>

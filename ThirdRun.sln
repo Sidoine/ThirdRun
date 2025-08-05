@@ -6,6 +6,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThirdRun", "ThirdRun.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThirdRun.Tests", "ThirdRun.Tests\ThirdRun.Tests.csproj", "{EF64743F-17EF-4C78-90E8-29D992645F54}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThirdRun.DesktopGL", "ThirdRun.DesktopGL\ThirdRun.DesktopGL.csproj", "{D8F4C5A3-2F8E-4B5C-9A1D-3C7E8F9B2A4E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThirdRun.Android", "ThirdRun.Android\ThirdRun.Android.csproj", "{B5E2F1A7-8C3D-4E9F-A2B6-7D4F3E5A8B9C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +24,14 @@ Global
 		{EF64743F-17EF-4C78-90E8-29D992645F54}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF64743F-17EF-4C78-90E8-29D992645F54}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF64743F-17EF-4C78-90E8-29D992645F54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8F4C5A3-2F8E-4B5C-9A1D-3C7E8F9B2A4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8F4C5A3-2F8E-4B5C-9A1D-3C7E8F9B2A4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8F4C5A3-2F8E-4B5C-9A1D-3C7E8F9B2A4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8F4C5A3-2F8E-4B5C-9A1D-3C7E8F9B2A4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5E2F1A7-8C3D-4E9F-A2B6-7D4F3E5A8B9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5E2F1A7-8C3D-4E9F-A2B6-7D4F3E5A8B9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5E2F1A7-8C3D-4E9F-A2B6-7D4F3E5A8B9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5E2F1A7-8C3D-4E9F-A2B6-7D4F3E5A8B9C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
