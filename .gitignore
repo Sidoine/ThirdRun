@@ -3,3 +3,5 @@ obj/
 Content/bin/
 Content/obj/
 .vs
+TestResults/
+*.trx
