@@ -50,11 +50,7 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
       
-    - name: Install .NET MAUI workload (includes Android)
-      run: dotnet workload install maui || echo "MAUI workload not available, trying alternatives..."
-      continue-on-error: true
-      
-    - name: Install Android workload (alternative)
+    - name: Install Android workload
       run: dotnet workload install android || echo "Android workload not available, skipping..."
       continue-on-error: true
       

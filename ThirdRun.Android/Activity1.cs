@@ -1,8 +1,6 @@
 using Android.App;
 using Android.Content.PM;
 using Android.OS;
-using Android.Views;
-using Microsoft.Xna.Framework;
 
 namespace ThirdRun.Android
 {
@@ -23,13 +21,27 @@ namespace ThirdRun.Android
         {
             base.OnCreate(bundle);
 
+            // Create and run the game
             _game = new MonogameRPG.Game1();
-            var gameView = _game.Services.GetService(typeof(View)) as View;
-            if (gameView != null)
-            {
-                SetContentView(gameView);
-            }
             _game.Run();
+        }
+
+        protected override void OnResume()
+        {
+            base.OnResume();
+            // Game lifecycle handled by MonoGame
+        }
+
+        protected override void OnPause()
+        {
+            base.OnPause();
+            // Game lifecycle handled by MonoGame
+        }
+
+        protected override void OnDestroy()
+        {
+            _game?.Exit();
+            base.OnDestroy();
         }
     }
 }
