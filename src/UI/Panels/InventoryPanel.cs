@@ -25,6 +25,7 @@ namespace ThirdRun.UI.Panels
         private int maxScroll = 0;
 
         private Dictionary<string, Texture2D> itemIcons = new();
+        private List<(Rectangle rect, Item item)> itemRectangles = new();
 
         public InventoryPanel(UiManager uiManager,  Rectangle bounds)
             : base(uiManager, bounds)
@@ -80,6 +81,34 @@ namespace ThirdRun.UI.Panels
             return base.HandleMouseClick(mousePosition);
         }
 
+        public override bool HandleMouseRightClick(Point mousePosition)
+        {
+            if (!Visible || !Bounds.Contains(mousePosition)) return false;
+
+            // Check if right-click hit any item
+            foreach (var (rect, item) in itemRectangles)
+            {
+                if (rect.Contains(mousePosition))
+                {
+                    // Try to equip the item if it's equipment
+                    if (item is Equipment equipment)
+                    {
+                        var character = UiManager.GameState.Player.Characters.First();
+                        bool equipped = character.Inventory.EquipItem(equipment);
+                        if (equipped)
+                        {
+                            // Remove the item from inventory since it's now equipped
+                            // The Character.Equip method handles swapping any existing equipment back to inventory
+                            character.Inventory.GetItems().Remove(equipment);
+                        }
+                        return true;
+                    }
+                }
+            }
+
+            return base.HandleMouseRightClick(mousePosition);
+        }
+
         public override bool Visible { get => UiManager.CurrentState.IsInventoryVisible ; set => UiManager.CurrentState.IsInventoryVisible = value; }
 
         public override void Draw()
@@ -117,6 +146,9 @@ namespace ThirdRun.UI.Panels
                 int y0 = Bounds.Y + PanelPadding + 30 - scrollOffset; // +30 pour l'espace du titre
                 int col = 0, row = 0;
                 
+                // Clear item rectangles for this frame
+                itemRectangles.Clear();
+                
                 // Zone de clipping pour ne pas dessiner en dehors du panneau
                 var originalScissorRect = UiManager.GraphicsDevice.ScissorRectangle;
                 UiManager.GraphicsDevice.ScissorRectangle = new Rectangle(
@@ -135,6 +167,9 @@ namespace ThirdRun.UI.Panels
                     if (itemRect.Bottom >= Bounds.Y + 30 && itemRect.Top < Bounds.Bottom)
                     {
                         var item = items[i];
+                        
+                        // Store item rectangle for click detection
+                        itemRectangles.Add((itemRect, item));
                         
                         // Fond de l'item
                         UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
