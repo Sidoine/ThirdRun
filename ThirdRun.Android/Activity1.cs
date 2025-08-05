@@ -3,7 +3,6 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Views;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Android;
 
 namespace ThirdRun.Android
 {
@@ -16,7 +15,7 @@ namespace ThirdRun.Android
         ScreenOrientation = ScreenOrientation.FullUser,
         ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.Keyboard | ConfigChanges.KeyboardHidden | ConfigChanges.ScreenSize
     )]
-    public class Activity1 : AndroidGameActivity
+    public class Activity1 : Activity
     {
         private MonogameRPG.Game1? _game;
 
@@ -25,7 +24,11 @@ namespace ThirdRun.Android
             base.OnCreate(bundle);
 
             _game = new MonogameRPG.Game1();
-            SetContentView((View)_game.Services.GetService(typeof(View))!);
+            var gameView = _game.Services.GetService(typeof(View)) as View;
+            if (gameView != null)
+            {
+                SetContentView(gameView);
+            }
             _game.Run();
         }
     }
