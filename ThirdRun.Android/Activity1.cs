@@ -3,6 +3,7 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Views;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Android;
 
 namespace ThirdRun.Android
 {
@@ -18,16 +19,13 @@ namespace ThirdRun.Android
     public class Activity1 : AndroidGameActivity
     {
         private MonogameRPG.Game1? _game;
-        private View? _view;
 
         protected override void OnCreate(Bundle? bundle)
         {
             base.OnCreate(bundle);
 
             _game = new MonogameRPG.Game1();
-            _view = _game.Services.GetService(typeof(View)) as View;
-
-            SetContentView(_view);
+            SetContentView((View)_game.Services.GetService(typeof(View))!);
             _game.Run();
         }
     }

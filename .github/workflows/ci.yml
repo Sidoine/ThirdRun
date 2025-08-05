@@ -41,11 +41,26 @@ jobs:
       with:
         dotnet-version: 8.0.x
         
-    - name: Install Android workload
-      run: dotnet workload install android
+    - name: Setup Java JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'microsoft'
+        java-version: 11
+        
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      
+    - name: Install .NET MAUI workload (includes Android)
+      run: dotnet workload install maui || echo "MAUI workload not available, trying alternatives..."
+      continue-on-error: true
+      
+    - name: Install Android workload (alternative)
+      run: dotnet workload install android || echo "Android workload not available, skipping..."
+      continue-on-error: true
       
     - name: Restore workloads
-      run: dotnet workload restore ThirdRun.Android/ThirdRun.Android.csproj
+      run: dotnet workload restore ThirdRun.Android/ThirdRun.Android.csproj || echo "Workload restore failed, continuing..."
+      continue-on-error: true
       
     - name: Restore dependencies
       run: dotnet restore ThirdRun.Android/ThirdRun.Android.csproj
