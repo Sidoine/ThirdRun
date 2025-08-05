@@ -6,7 +6,7 @@ namespace ThirdRun.Items
     {
         public int BonusStats { get; set; }
 
-        public Equipment(string name, string description, int value, int bonusStats) : base(name, description, value)
+        public Equipment(string name, string description, int value, int bonusStats, int itemLevel = 1) : base(name, description, value, itemLevel)
         {
             BonusStats = bonusStats;
         }

@@ -7,20 +7,22 @@ namespace ThirdRun.Items
     public string Name { get; set; }
     public string Description { get; set; }
     public int Value { get; set; }
+    public int ItemLevel { get; set; }
 
-    public Item(string name, string description, int value)
+    public Item(string name, string description, int value, int itemLevel = 1)
     {
         Name = name;
         Description = description;
         Value = value;
+        ItemLevel = itemLevel;
     }
 }
 
 public class Weapon : Equipment
 {
     public int Damage { get; set; }
-    public Weapon(string name, string description, int value, int bonusStats, int damage)
-        : base(name, description, value, bonusStats)
+    public Weapon(string name, string description, int value, int bonusStats, int damage, int itemLevel = 1)
+        : base(name, description, value, bonusStats, itemLevel)
     {
         Damage = damage;
     }
@@ -29,8 +31,8 @@ public class Weapon : Equipment
 public class Armor : Equipment
 {
     public int Defense { get; set; }
-    public Armor(string name, string description, int value, int bonusStats, int defense)
-        : base(name, description, value, bonusStats)
+    public Armor(string name, string description, int value, int bonusStats, int defense, int itemLevel = 1)
+        : base(name, description, value, bonusStats, itemLevel)
     {
         Defense = defense;
     }
@@ -39,8 +41,8 @@ public class Armor : Equipment
 public class Potion : Item
 {
     public int HealAmount { get; set; }
-    public Potion(string name, string description, int value, int healAmount)
-        : base(name, description, value)
+    public Potion(string name, string description, int value, int healAmount, int itemLevel = 1)
+        : base(name, description, value, itemLevel)
     {
         HealAmount = healAmount;
     }
