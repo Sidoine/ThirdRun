@@ -24,6 +24,9 @@ jobs:
     - name: Build Desktop
       run: dotnet build ThirdRun.DesktopGL/ThirdRun.DesktopGL.csproj --no-restore --configuration Release
       
+    - name: Build Tests
+      run: dotnet build ThirdRun.Tests/ThirdRun.Tests.csproj --no-restore --configuration Debug
+      
     - name: Test
       run: dotnet test ThirdRun.Tests/ThirdRun.Tests.csproj --no-build --verbosity normal
 
@@ -38,21 +41,20 @@ jobs:
       with:
         dotnet-version: 8.0.x
         
-    - name: Install MAUI workload
-      run: dotnet workload install android maui
-      continue-on-error: true
+    - name: Install Android workload
+      run: dotnet workload install android
+      
+    - name: Restore workloads
+      run: dotnet workload restore ThirdRun.Android/ThirdRun.Android.csproj
       
     - name: Restore dependencies
       run: dotnet restore ThirdRun.Android/ThirdRun.Android.csproj
-      continue-on-error: true
       
     - name: Build Android
       run: dotnet build ThirdRun.Android/ThirdRun.Android.csproj --no-restore --configuration Release
-      continue-on-error: true
       
     - name: Publish Android APK
       run: dotnet publish ThirdRun.Android/ThirdRun.Android.csproj -c Release -f net8.0-android
-      continue-on-error: true
       
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
