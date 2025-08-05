@@ -4,8 +4,6 @@ using ThirdRun.Items;
 using MonogameRPG.Monsters;
 using MonogameRPG.Map;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Content;
 using MonogameRPG;
 
 public enum CharacterClass
@@ -27,25 +25,9 @@ public class Character : Unit
     public List<string> Techniques { get; private set; }
     public Map Map { get; set; }
 
-    private readonly Texture2D texture;
-    private static readonly int DefaultSize = 40;
-    private static readonly Color DefaultColor = Color.CornflowerBlue;
     private readonly WorldMap worldMap;
 
-
-    private static string GetTexturePathForClass(CharacterClass characterClass)
-    {
-        return characterClass switch
-        {
-            CharacterClass.Guerrier => "Characters/warrior",
-            CharacterClass.Mage => "Characters/mage",
-            CharacterClass.Prêtre => "Characters/priest",
-            CharacterClass.Chasseur => "Characters/hunter",
-            _ => "Characters/warrior"
-        };
-    }
-
-    public Character(string name, CharacterClass characterClass, int health, int attackPower, ContentManager content, WorldMap worldMap)
+    public Character(string name, CharacterClass characterClass, int health, int attackPower, WorldMap worldMap)
     {
         Name = name;
         Class = characterClass;
@@ -58,8 +40,6 @@ public class Character : Unit
         Inventory = new Inventory() { Owner = this };
         Techniques = new List<string>();
         Position = new Vector2(0, 0); // Position initiale
-        string path = GetTexturePathForClass(characterClass);
-        texture = content.Load<Texture2D>(path);
         Map = worldMap.CurrentMap;
     }
 
@@ -173,23 +153,5 @@ public class Character : Unit
             Techniques.Add("Coup spécial");
         }
         // Ajouter d'autres techniques selon la classe
-    }
-
-    public void Render(SpriteBatch spriteBatch)
-    {
-        RenderAtPosition(spriteBatch, Position);
-    }
-    
-    public void RenderAtPosition(SpriteBatch spriteBatch, Vector2 renderPosition)
-    {
-        if (texture == null) return;
-        int size = DefaultSize;
-        spriteBatch.Draw(texture, new Rectangle((int)(renderPosition.X - size / 2), (int)(renderPosition.Y - size / 2), size, size), Color.White);
-        
-        // Temporarily set position for health bar drawing
-        Vector2 originalPos = Position;
-        Position = renderPosition;
-        DrawHealthBar(spriteBatch, size, 6);
-        Position = originalPos;
     }
 }
