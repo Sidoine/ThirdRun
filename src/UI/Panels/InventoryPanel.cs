@@ -27,6 +27,13 @@ namespace ThirdRun.UI.Panels
         private Dictionary<string, Texture2D> itemIcons = new();
         private List<(Rectangle rect, Item item, Point coordinates)> itemRectangles = new();
 
+        // Drag and drop state
+        private bool isDragging = false;
+        private Item? draggedItem = null;
+        private Point draggedItemOriginalCoords;
+        private Point dragOffset;
+        private Point currentMousePosition;
+
         public InventoryPanel(UiManager uiManager,  Rectangle bounds)
             : base(uiManager, bounds)
         {
@@ -76,9 +83,146 @@ namespace ThirdRun.UI.Panels
             return true;
         }
 
-        public override bool HandleMouseClick(Point mousePosition)
+        public override bool HandleMouseDown(Point mousePosition)
         {
-            return base.HandleMouseClick(mousePosition);
+            if (!Visible || !Bounds.Contains(mousePosition)) return false;
+
+            // Check if mouse down hit any item
+            foreach (var (rect, item, coordinates) in itemRectangles)
+            {
+                if (rect.Contains(mousePosition))
+                {
+                    // Start dragging
+                    isDragging = true;
+                    draggedItem = item;
+                    draggedItemOriginalCoords = coordinates;
+                    dragOffset = new Point(mousePosition.X - rect.X, mousePosition.Y - rect.Y);
+                    currentMousePosition = mousePosition;
+                    return true;
+                }
+            }
+
+            return base.HandleMouseDown(mousePosition);
+        }
+
+        public override bool HandleMouseUp(Point mousePosition)
+        {
+            if (!Visible) return false;
+
+            if (isDragging && draggedItem != null)
+            {
+                bool handled = false;
+
+                // Check if dropping on a valid inventory slot first
+                Point? targetSlot = GetSlotFromPosition(mousePosition);
+                if (targetSlot.HasValue)
+                {
+                    var character = UiManager.GameState.Player.Characters.First();
+                    if (character.Inventory.IsSlotEmpty(targetSlot.Value))
+                    {
+                        // Move item to new slot
+                        character.Inventory.MoveItem(draggedItemOriginalCoords, targetSlot.Value);
+                        handled = true;
+                    }
+                    else
+                    {
+                        // Slot occupied - could implement item swapping here later
+                        // For now, just return item to original position (no action needed)
+                        handled = true;
+                    }
+                }
+                else
+                {
+                    // Check if dropping on character portrait for equipping
+                    Character? targetCharacter = GetCharacterAtPosition(mousePosition);
+                    if (targetCharacter != null && draggedItem is Equipment equipment)
+                    {
+                        bool equipped = targetCharacter.Inventory.EquipItem(equipment);
+                        if (equipped)
+                        {
+                            // Remove item from inventory since it's now equipped
+                            var sourceCharacter = UiManager.GameState.Player.Characters.First();
+                            sourceCharacter.Inventory.RemoveItemAt(draggedItemOriginalCoords);
+                            handled = true;
+                        }
+                    }
+                }
+
+                // End dragging
+                isDragging = false;
+                draggedItem = null;
+                return handled;
+            }
+
+            return base.HandleMouseUp(mousePosition);
+        }
+
+        private Character? GetCharacterAtPosition(Point position)
+        {
+            // Check if the position is in the character portraits area
+            // Character portraits panel bounds are: x=0, width=92
+            if (position.X >= 0 && position.X < 92)
+            {
+                var characters = UiManager.GameState.Player.Characters;
+                const int PortraitSize = 60;
+                const int PortraitSpacing = 8;
+                const int PanelPadding = 16;
+                
+                for (int i = 0; i < characters.Count; i++)
+                {
+                    var portraitBounds = new Rectangle(
+                        PanelPadding,
+                        PanelPadding + i * (PortraitSize + PortraitSpacing),
+                        PortraitSize,
+                        PortraitSize
+                    );
+
+                    if (portraitBounds.Contains(position))
+                    {
+                        return characters[i];
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public override void UpdateHover(Point mousePosition)
+        {
+            currentMousePosition = mousePosition;
+            base.UpdateHover(mousePosition);
+        }
+
+        private Point? GetSlotFromPosition(Point position)
+        {
+            if (!Bounds.Contains(position)) return null;
+
+            int x0 = Bounds.X + PanelPadding;
+            int y0 = Bounds.Y + PanelPadding + 30 - scrollOffset; // +30 pour l'espace du titre
+
+            int relativeX = position.X - x0;
+            int relativeY = position.Y - y0;
+
+            if (relativeX < 0 || relativeY < 0) return null;
+
+            int slotX = relativeX / (ItemSize + ItemSpacing);
+            int slotY = relativeY / (ItemSize + ItemSpacing);
+
+            // Check if click is within the actual item area, not just the spacing
+            int itemOffsetX = relativeX % (ItemSize + ItemSpacing);
+            int itemOffsetY = relativeY % (ItemSize + ItemSpacing);
+
+            if (itemOffsetX > ItemSize || itemOffsetY > ItemSize) return null;
+
+            var character = UiManager.GameState.Player.Characters.First();
+            Point slot = new Point(slotX, slotY);
+            
+            if (character.Inventory.IsSlotEmpty(slot) && slotX >= 0 && slotX < ItemsPerRow)
+            {
+                return slot;
+            }
+
+            return null;
         }
 
         public override bool HandleMouseRightClick(Point mousePosition)
@@ -160,6 +304,9 @@ namespace ThirdRun.UI.Panels
                     Point coords = kvp.Key;
                     Item item = kvp.Value;
                     
+                    // Skip rendering the dragged item in its original position
+                    if (isDragging && item == draggedItem) continue;
+                    
                     int x = x0 + coords.X * (ItemSize + ItemSpacing);
                     int y = y0 + coords.Y * (ItemSize + ItemSpacing);
                     Rectangle itemRect = new Rectangle(x, y, ItemSize, ItemSize);
@@ -170,54 +317,25 @@ namespace ThirdRun.UI.Panels
                         // Store item rectangle for click detection
                         itemRectangles.Add((itemRect, item, coords));
                         
-                        // Fond de l'item
-                        UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
-                            itemRect, Color.DarkGray * 0.7f);
-                        
-                        // Bordure de l'item
-                        var itemBorderColor = Color.LightGray;
-                        // Top
-                        UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
-                            new Rectangle(itemRect.X, itemRect.Y, itemRect.Width, 1), itemBorderColor);
-                        // Bottom
-                        UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
-                            new Rectangle(itemRect.X, itemRect.Bottom - 1, itemRect.Width, 1), itemBorderColor);
-                        // Left
-                        UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
-                            new Rectangle(itemRect.X, itemRect.Y, 1, itemRect.Height), itemBorderColor);
-                        // Right
-                        UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
-                            new Rectangle(itemRect.Right - 1, itemRect.Y, 1, itemRect.Height), itemBorderColor);
-
-                        // Essayer d'afficher l'icône de l'item
-                        bool iconDrawn = false;
-                        if (itemIcons.ContainsKey(item.Name))
-                        {
-                            var iconTexture = itemIcons[item.Name];
-                            var iconRect = new Rectangle(x + 4, y + 4, ItemSize - 8, ItemSize - 8);
-                            UiManager.SpriteBatch.Draw(iconTexture, iconRect, Color.White);
-                            iconDrawn = true;
-                        }
-                        
-                        // Si pas d'icône, afficher le nom de l'item
-                        if (!iconDrawn)
-                        {
-                            var itemFont = UiManager.FontSystem.GetFont(10);
-                            var textSize = itemFont.MeasureString(item.Name);
-                            var textRect = new Rectangle(x + 2, y + 2, ItemSize - 4, ItemSize - 4);
-                            
-                            // Dessiner le texte centré dans le rectangle
-                            var textPos = new Vector2(
-                                textRect.X + (textRect.Width - textSize.X) / 2,
-                                textRect.Y + (textRect.Height - textSize.Y) / 2);
-                            
-                            UiManager.SpriteBatch.DrawString(itemFont, item.Name, textPos, Color.White);
-                        }
+                        DrawItemAt(item, itemRect);
                     }
                 }
                 
                 // Restaurer le rectangle de clipping
                 UiManager.GraphicsDevice.ScissorRectangle = originalScissorRect;
+                
+                // Draw dragged item following mouse cursor (outside clipping area)
+                if (isDragging && draggedItem != null)
+                {
+                    Rectangle dragRect = new Rectangle(
+                        currentMousePosition.X - dragOffset.X,
+                        currentMousePosition.Y - dragOffset.Y,
+                        ItemSize,
+                        ItemSize);
+                    
+                    // Draw with semi-transparency to indicate dragging
+                    DrawItemAt(draggedItem, dragRect, 0.7f);
+                }
                 
                 // Calcul du scroll max based on coordinate-based items
                 int maxY = itemsWithCoords.Keys.Count > 0 ? itemsWithCoords.Keys.Max(coord => coord.Y) : 0;
@@ -255,6 +373,53 @@ namespace ThirdRun.UI.Panels
                 Rectangle scrollbarThumb = new Rectangle(scrollbarX, thumbY, scrollbarWidth, thumbHeight);
                 UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
                     scrollbarThumb, Color.LightGray * 0.8f);
+            }
+        }
+
+        private void DrawItemAt(Item item, Rectangle itemRect, float alpha = 1.0f)
+        {
+            // Fond de l'item
+            UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
+                itemRect, Color.DarkGray * (0.7f * alpha));
+            
+            // Bordure de l'item
+            var itemBorderColor = Color.LightGray * alpha;
+            // Top
+            UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
+                new Rectangle(itemRect.X, itemRect.Y, itemRect.Width, 1), itemBorderColor);
+            // Bottom
+            UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
+                new Rectangle(itemRect.X, itemRect.Bottom - 1, itemRect.Width, 1), itemBorderColor);
+            // Left
+            UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
+                new Rectangle(itemRect.X, itemRect.Y, 1, itemRect.Height), itemBorderColor);
+            // Right
+            UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
+                new Rectangle(itemRect.Right - 1, itemRect.Y, 1, itemRect.Height), itemBorderColor);
+
+            // Essayer d'afficher l'icône de l'item
+            bool iconDrawn = false;
+            if (itemIcons.ContainsKey(item.Name))
+            {
+                var iconTexture = itemIcons[item.Name];
+                var iconRect = new Rectangle(itemRect.X + 4, itemRect.Y + 4, ItemSize - 8, ItemSize - 8);
+                UiManager.SpriteBatch.Draw(iconTexture, iconRect, Color.White * alpha);
+                iconDrawn = true;
+            }
+            
+            // Si pas d'icône, afficher le nom de l'item
+            if (!iconDrawn)
+            {
+                var itemFont = UiManager.FontSystem.GetFont(10);
+                var textSize = itemFont.MeasureString(item.Name);
+                var textRect = new Rectangle(itemRect.X + 2, itemRect.Y + 2, ItemSize - 4, ItemSize - 4);
+                
+                // Dessiner le texte centré dans le rectangle
+                var textPos = new Vector2(
+                    textRect.X + (textRect.Width - textSize.X) / 2,
+                    textRect.Y + (textRect.Height - textSize.Y) / 2);
+                
+                UiManager.SpriteBatch.DrawString(itemFont, item.Name, textPos, Color.White * alpha);
             }
         }
     }

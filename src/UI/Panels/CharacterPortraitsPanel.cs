@@ -71,6 +71,30 @@ namespace ThirdRun.UI.Panels
             };
         }
 
+        public Character? GetCharacterAtPosition(Point position)
+        {
+            if (!Visible || !Bounds.Contains(position)) return null;
+
+            var characters = UiManager.GameState.Player.Characters;
+            
+            for (int i = 0; i < characters.Count; i++)
+            {
+                var portraitBounds = new Rectangle(
+                    Bounds.X + PanelPadding,
+                    Bounds.Y + PanelPadding + i * (PortraitSize + PortraitSpacing),
+                    PortraitSize,
+                    PortraitSize
+                );
+
+                if (portraitBounds.Contains(position))
+                {
+                    return characters[i];
+                }
+            }
+
+            return null;
+        }
+
         private void ShowCharacterDetails(Character character)
         {
             UiManager.CurrentState.SelectedCharacter = character;
