@@ -124,10 +124,35 @@ public class Character : Unit
         // Restriction selon la classe et le type d'équipement
         if (equipment is Weapon && !CanEquipWeapon(equipment)) return false;
         if (equipment is Armor && !CanEquipArmor(equipment)) return false;
-        if (equipment is Weapon) Weapon = equipment;
-        else if (equipment is Armor) Armor = equipment;
+        
+        // Handle unequipping current item and putting it back in inventory
+        if (equipment is Weapon)
+        {
+            if (Weapon != null)
+            {
+                Unequip(Weapon);
+                Inventory.AddItem(Weapon);
+            }
+            Weapon = equipment;
+        }
+        else if (equipment is Armor)
+        {
+            if (Armor != null)
+            {
+                Unequip(Armor);
+                Inventory.AddItem(Armor);
+            }
+            Armor = equipment;
+        }
+        
         equipment.Equip(this);
         return true;
+    }
+
+    private void Unequip(Equipment equipment)
+    {
+        // Remove the bonus stats when unequipping
+        AttackPower -= equipment.BonusStats;
     }
 
     private bool CanEquipWeapon(Equipment equipment)

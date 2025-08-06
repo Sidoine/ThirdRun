@@ -118,6 +118,15 @@ namespace MonogameRPG
                     _rootPanel.HandleMouseDown(mouse.Position);
                 }
             }
+            
+            // Handle right-click for item equipping
+            if (mouse.RightButton != _previousMouseState.RightButton)
+            {
+                if (mouse.RightButton == ButtonState.Released)
+                {
+                    _rootPanel.HandleMouseRightClick(mouse.Position);
+                }
+            }
             _previousMouseState = mouse;
             _previousKeyboardState = keyboard;
             base.Update(gameTime);
