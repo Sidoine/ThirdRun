@@ -25,7 +25,7 @@ namespace ThirdRun.UI.Panels
         private int maxScroll = 0;
 
         private Dictionary<string, Texture2D> itemIcons = new();
-        private List<(Rectangle rect, Item item)> itemRectangles = new();
+        private List<(Rectangle rect, Item item, Point coordinates)> itemRectangles = new();
 
         public InventoryPanel(UiManager uiManager,  Rectangle bounds)
             : base(uiManager, bounds)
@@ -86,7 +86,7 @@ namespace ThirdRun.UI.Panels
             if (!Visible || !Bounds.Contains(mousePosition)) return false;
 
             // Check if right-click hit any item
-            foreach (var (rect, item) in itemRectangles)
+            foreach (var (rect, item, coordinates) in itemRectangles)
             {
                 if (rect.Contains(mousePosition))
                 {
@@ -98,8 +98,7 @@ namespace ThirdRun.UI.Panels
                         if (equipped)
                         {
                             // Remove the item from inventory since it's now equipped
-                            // The Character.Equip method handles swapping any existing equipment back to inventory
-                            character.Inventory.GetItems().Remove(equipment);
+                            character.Inventory.RemoveItem(equipment);
                         }
                         return true;
                     }
@@ -141,10 +140,9 @@ namespace ThirdRun.UI.Panels
                     new Vector2(Bounds.X + PanelPadding, Bounds.Y + 8), Color.White);
 
                 // Affichage des objets
-                var items = UiManager.GameState.Player.Characters.First().Inventory.GetItems();
+                var itemsWithCoords = UiManager.GameState.Player.Characters.First().Inventory.GetItemsWithCoordinates();
                 int x0 = Bounds.X + PanelPadding;
                 int y0 = Bounds.Y + PanelPadding + 30 - scrollOffset; // +30 pour l'espace du titre
-                int col = 0, row = 0;
                 
                 // Clear item rectangles for this frame
                 itemRectangles.Clear();
@@ -157,19 +155,20 @@ namespace ThirdRun.UI.Panels
                     Bounds.Width - 2 * borderThickness, 
                     Bounds.Height - 30 - 2 * borderThickness);
 
-                for (int i = 0; i < items.Count; i++)
+                foreach (var kvp in itemsWithCoords)
                 {
-                    int x = x0 + col * (ItemSize + ItemSpacing);
-                    int y = y0 + row * (ItemSize + ItemSpacing);
+                    Point coords = kvp.Key;
+                    Item item = kvp.Value;
+                    
+                    int x = x0 + coords.X * (ItemSize + ItemSpacing);
+                    int y = y0 + coords.Y * (ItemSize + ItemSpacing);
                     Rectangle itemRect = new Rectangle(x, y, ItemSize, ItemSize);
                     
                     // Ne dessiner que si visible dans la zone du panneau
                     if (itemRect.Bottom >= Bounds.Y + 30 && itemRect.Top < Bounds.Bottom)
                     {
-                        var item = items[i];
-                        
                         // Store item rectangle for click detection
-                        itemRectangles.Add((itemRect, item));
+                        itemRectangles.Add((itemRect, item, coords));
                         
                         // Fond de l'item
                         UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
@@ -215,21 +214,14 @@ namespace ThirdRun.UI.Panels
                             UiManager.SpriteBatch.DrawString(itemFont, item.Name, textPos, Color.White);
                         }
                     }
-                    
-                    col++;
-                    if (col >= ItemsPerRow)
-                    {
-                        col = 0;
-                        row++;
-                    }
                 }
                 
                 // Restaurer le rectangle de clipping
                 UiManager.GraphicsDevice.ScissorRectangle = originalScissorRect;
                 
-                // Calcul du scroll max
-                int totalRows = (int)Math.Ceiling(items.Count / (float)ItemsPerRow);
-                int contentHeight = totalRows * (ItemSize + ItemSpacing);
+                // Calcul du scroll max based on coordinate-based items
+                int maxY = itemsWithCoords.Keys.Count > 0 ? itemsWithCoords.Keys.Max(coord => coord.Y) : 0;
+                int contentHeight = (maxY + 1) * (ItemSize + ItemSpacing);
                 int availableHeight = Bounds.Height - 30 - 2 * PanelPadding; // -30 pour le titre
                 maxScroll = Math.Max(0, contentHeight - availableHeight);
                 
