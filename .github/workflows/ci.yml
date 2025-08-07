@@ -34,3 +34,45 @@ jobs:
         name: ThirdRun-Game-${{ github.sha }}
         path: bin/Debug/net8.0/
         retention-days: 7
+        
+    - name: Comment PR with artifact link
+      uses: actions/github-script@v7
+      if: success() && github.event_name == 'pull_request'
+      with:
+        script: |
+          const artifactName = `ThirdRun-Game-${context.sha}`;
+          const workflowRunUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+          
+          const comment = `🎮 **Game Build Ready!**
+          
+          The latest build of ThirdRun is now available for download:
+          
+          📦 **Artifact**: \`${artifactName}\`
+          🔗 **Download**: [Click here to download from the workflow run](${workflowRunUrl})
+          ⏰ **Retention**: Available for 7 days
+          
+          To download:
+          1. Click the link above to go to the workflow run
+          2. Scroll down to the "Artifacts" section
+          3. Click on \`${artifactName}\` to download the game build
+          
+          The build includes the complete game executable and all dependencies.`;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+          
+    - name: Add workflow summary
+      if: success()
+      run: |
+        echo "## 🎮 ThirdRun Game Build" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "✅ **Build Status**: Successful" >> $GITHUB_STEP_SUMMARY
+        echo "📦 **Artifact**: \`ThirdRun-Game-${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "🔗 **Download**: Available in the [Artifacts section](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) of this workflow run" >> $GITHUB_STEP_SUMMARY
+        echo "⏰ **Retention**: 7 days" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "The build includes the complete game executable and all dependencies." >> $GITHUB_STEP_SUMMARY
