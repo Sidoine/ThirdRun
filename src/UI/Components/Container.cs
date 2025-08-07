@@ -3,15 +3,13 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using FontStashSharp;
-using ThirdRun.Items;
-using System.Linq;
 
 namespace ThirdRun.UI.Components
 {
     /// <summary>
     /// Classe de base pour les containers d'interface utilisateur qui peuvent contenir des éléments interactifs
     /// </summary>
-    public class Container : UIElement, IDropTarget
+    public class Container : UIElement
     {
         protected List<UIElement> Children = new List<UIElement>();
 
@@ -205,58 +203,5 @@ namespace ThirdRun.UI.Components
         {
             Bounds = newBounds;
         }
-
-        #region IDropTarget Implementation
-
-        /// <summary>
-        /// Check if this container or any of its children can accept the dropped item
-        /// </summary>
-        public virtual bool CanAcceptDrop(Item item, Point position)
-        {
-            if (!Visible || !Bounds.Contains(position)) return false;
-
-            // Check children first (most specific targets)
-            foreach (var child in Children.OfType<IDropTarget>())
-            {
-                if (child.CanAcceptDrop(item, position))
-                    return true;
-            }
-
-            // Default container behavior - don't accept drops unless overridden
-            return false;
-        }
-
-        /// <summary>
-        /// Handle the drop by delegating to the most appropriate child drop target
-        /// </summary>
-        public virtual bool HandleDrop(Item item, Point position, Point sourceCoordinates)
-        {
-            if (!Visible || !Bounds.Contains(position)) return false;
-
-            // Delegate to children first (most specific targets)
-            // Sort by area to get most specific child first
-            var childDropTargets = Children.OfType<IDropTarget>()
-                .Where(dt => dt.CanAcceptDrop(item, position))
-                .OrderBy(dt => dt.GetDropBounds().Width * dt.GetDropBounds().Height);
-
-            foreach (var childTarget in childDropTargets)
-            {
-                if (childTarget.HandleDrop(item, position, sourceCoordinates))
-                    return true;
-            }
-
-            // If no child handled it, container doesn't handle drops by default
-            return false;
-        }
-
-        /// <summary>
-        /// Get the bounds for drop target hit testing
-        /// </summary>
-        public virtual Rectangle GetDropBounds()
-        {
-            return Bounds;
-        }
-
-        #endregion
     }
 }

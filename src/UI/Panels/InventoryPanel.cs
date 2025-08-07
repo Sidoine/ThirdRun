@@ -133,13 +133,6 @@ namespace ThirdRun.UI.Panels
         {
             if (!Visible) return false;
 
-            // Try to drop the item using the drag and drop manager
-            if (UiManager.DragAndDropManager.IsDragging)
-            {
-                bool handled = UiManager.DragAndDropManager.TryDrop(mousePosition);
-                if (handled) return true;
-            }
-
             return base.HandleMouseUp(mousePosition);
         }
 
