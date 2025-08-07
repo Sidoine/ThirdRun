@@ -43,13 +43,13 @@ public class DragDropIntegrationTest
         Assert.Equal(armor, character.Inventory.GetItemAt(new Point(1, 0))); // Other items unchanged
         Assert.Equal(potion, character.Inventory.GetItemAt(new Point(0, 1)));
         
-        // Act 2 - Try to move armor to occupied slot (should fail)
+        // Act 2 - Try to move armor to occupied slot (should swap items)
         bool armorMoveToOccupied = character.Inventory.MoveItem(new Point(1, 0), new Point(2, 0));
         
-        // Assert 2 - Verify move to occupied slot failed
-        Assert.False(armorMoveToOccupied);
-        Assert.Equal(armor, character.Inventory.GetItemAt(new Point(1, 0))); // Armor didn't move
-        Assert.Equal(sword, character.Inventory.GetItemAt(new Point(2, 0))); // Sword still there
+        // Assert 2 - Verify items were swapped
+        Assert.True(armorMoveToOccupied);
+        Assert.Equal(sword, character.Inventory.GetItemAt(new Point(1, 0))); // Sword swapped here
+        Assert.Equal(armor, character.Inventory.GetItemAt(new Point(2, 0))); // Armor moved here
         
         // Act 3 - Move potion to empty slot
         bool potionMoved = character.Inventory.MoveItem(new Point(0, 1), new Point(3, 1));

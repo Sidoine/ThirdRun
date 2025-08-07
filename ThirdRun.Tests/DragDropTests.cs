@@ -37,7 +37,7 @@ public class DragDropTests
     }
     
     [Fact]
-    public void Inventory_MoveToOccupiedSlot_ReturnsFalse()
+    public void Inventory_MoveToOccupiedSlot_SwapsItems()
     {
         // Arrange
         var worldMap = new WorldMap();
@@ -49,13 +49,13 @@ public class DragDropTests
         character.Inventory.AddItem(sword, new Point(0, 0));
         character.Inventory.AddItem(armor, new Point(1, 0));
         
-        // Act - Try to move sword to occupied slot
+        // Act - Try to move sword to occupied slot - should swap items
         bool moved = character.Inventory.MoveItem(new Point(0, 0), new Point(1, 0));
         
-        // Assert - Movement should fail, items unchanged
-        Assert.False(moved);
-        Assert.Equal(sword, character.Inventory.GetItemAt(new Point(0, 0)));
-        Assert.Equal(armor, character.Inventory.GetItemAt(new Point(1, 0)));
+        // Assert - Movement should succeed and items should be swapped
+        Assert.True(moved);
+        Assert.Equal(armor, character.Inventory.GetItemAt(new Point(0, 0))); // armor moved here
+        Assert.Equal(sword, character.Inventory.GetItemAt(new Point(1, 0))); // sword moved here
     }
     
     [Fact]

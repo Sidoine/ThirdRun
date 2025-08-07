@@ -11,6 +11,8 @@ namespace ThirdRun.Characters
         private const int GridWidth = 4;
         private const int GridHeight = 10; // Allow for larger inventory
 
+        public int MaxGridHeight => GridHeight;
+
         public Inventory()
         {
             items = new Dictionary<Point, Item>();
@@ -68,11 +70,22 @@ namespace ThirdRun.Characters
 
         public bool MoveItem(Point from, Point to)
         {
-            if (items.TryGetValue(from, out Item? item) && !items.ContainsKey(to))
+            if (items.TryGetValue(from, out Item? item))
             {
-                items.Remove(from);
-                items[to] = item;
-                return true;
+                if (!items.ContainsKey(to))
+                {
+                    // Move to empty slot
+                    items.Remove(from);
+                    items[to] = item;
+                    return true;
+                }
+                else if (items.TryGetValue(to, out Item? targetItem))
+                {
+                    // Swap items
+                    items[from] = targetItem;
+                    items[to] = item;
+                    return true;
+                }
             }
             return false;
         }

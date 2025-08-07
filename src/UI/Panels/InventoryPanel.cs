@@ -126,8 +126,8 @@ namespace ThirdRun.UI.Panels
                     }
                     else
                     {
-                        // Slot occupied - could implement item swapping here later
-                        // For now, just return item to original position (no action needed)
+                        // Slot occupied - swap items using the updated MoveItem method
+                        character.Inventory.MoveItem(draggedItemOriginalCoords, targetSlot.Value);
                         handled = true;
                     }
                 }
@@ -217,7 +217,8 @@ namespace ThirdRun.UI.Panels
             var character = UiManager.GameState.Player.Characters.First();
             Point slot = new Point(slotX, slotY);
             
-            if (character.Inventory.IsSlotEmpty(slot) && slotX >= 0 && slotX < ItemsPerRow)
+            // Allow dropping on any valid slot (empty or occupied for swapping)
+            if (slotX >= 0 && slotX < ItemsPerRow && slotY >= 0 && slotY < character.Inventory.MaxGridHeight)
             {
                 return slot;
             }
