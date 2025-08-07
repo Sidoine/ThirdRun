@@ -2,6 +2,7 @@ using FontStashSharp;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using ThirdRun.Data;
+using ThirdRun.UI.Components;
 
 namespace ThirdRun.UI;
 
@@ -14,9 +15,9 @@ public class UiManager
     public ContentManager ContentManager { get; }
     public GraphicsDevice GraphicsDevice { get; }
 
-
     public State CurrentState { get; } = new State();
     public GameState GameState { get; }
+    public DragAndDropManager DragAndDropManager { get; } = new DragAndDropManager();
 
     public UiManager(
         GraphicsDevice graphicsDevice,
