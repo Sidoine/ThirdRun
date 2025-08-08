@@ -88,7 +88,14 @@ namespace MonogameRPG
             // Déplacement automatique des personnages vers le monstre le plus proche
             foreach (var character in worldMap.CurrentMap.Characters.ToArray())
             {
+                character.UpdateGameTime((float)gameTime.TotalGameTime.TotalSeconds);
                 character.Move(worldMap.GetMonstersOnCurrentMap());
+            }
+            
+            // Update monsters with game time too
+            foreach (var monster in worldMap.GetMonstersOnCurrentMap())
+            {
+                monster.UpdateGameTime((float)gameTime.TotalGameTime.TotalSeconds);
             }
             KeyboardState keyboard = Keyboard.GetState();
             if (keyboard.IsKeyDown(Keys.I) && !_previousKeyboardState.IsKeyDown(Keys.I))

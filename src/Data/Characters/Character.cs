@@ -5,6 +5,7 @@ using MonogameRPG.Monsters;
 using MonogameRPG.Map;
 using Microsoft.Xna.Framework;
 using MonogameRPG;
+using ThirdRun.Data.Abilities;
 
 public enum CharacterClass
 {
@@ -41,6 +42,43 @@ public class Character : Unit
         Techniques = new List<string>();
         Position = new Vector2(0, 0); // Position initiale
         Map = worldMap.CurrentMap;
+        
+        // Add class-specific abilities
+        InitializeClassAbilities();
+    }
+
+    private void InitializeClassAbilities()
+    {
+        // All characters keep the default melee attack
+        // Add class-specific abilities based on character class
+        switch (Class)
+        {
+            case CharacterClass.Chasseur:
+                // Hunters get ranged attack
+                Abilities.Add(new RangedAttackAbility());
+                Characteristics.SetValue(ThirdRun.Data.Characteristic.RangedAttackPower, AttackPower);
+                break;
+                
+            case CharacterClass.Prêtre:
+                // Priests get healing abilities
+                Abilities.Add(new HealAbility());
+                Abilities.Add(new SelfHealAbility());
+                Characteristics.SetValue(ThirdRun.Data.Characteristic.HealingPower, AttackPower / 2);
+                break;
+                
+            case CharacterClass.Mage:
+                // Mages could get spell abilities (ranged magic attacks)
+                Abilities.Add(new RangedAttackAbility()); // Use as magic attack for now
+                Characteristics.SetValue(ThirdRun.Data.Characteristic.RangedAttackPower, AttackPower);
+                break;
+                
+            case CharacterClass.Guerrier:
+                // Warriors are melee focused, so just the default attack is fine
+                // Maybe they get a self-heal for survivability
+                Abilities.Add(new SelfHealAbility());
+                Characteristics.SetValue(ThirdRun.Data.Characteristic.HealingPower, AttackPower / 3);
+                break;
+        }
     }
 
     public void Move(List<Monster> monsters)
