@@ -31,11 +31,11 @@ public class RightClickEquipIntegrationTest
         
         // Act - Simulate right-clicking on the sword to equip it
         bool swordEquipped = character.Inventory.EquipItem(sword);
-        character.Inventory.GetItems().Remove(sword); // UI would handle this removal
+        character.Inventory.RemoveItem(sword); // UI would handle this removal
         
         // Act - Simulate right-clicking on the armor to equip it  
         bool armorEquipped = character.Inventory.EquipItem(armor);
-        character.Inventory.GetItems().Remove(armor); // UI would handle this removal
+        character.Inventory.RemoveItem(armor); // UI would handle this removal
         
         // Act - Try to right-click on potion (should fail)
         bool potionEquipped = character.Inventory.EquipItem(potion);
@@ -63,7 +63,7 @@ public class RightClickEquipIntegrationTest
         character.Inventory.AddItem(betterSword);
         
         bool swapEquipped = character.Inventory.EquipItem(betterSword);
-        character.Inventory.GetItems().Remove(betterSword); // UI would handle this removal
+        character.Inventory.RemoveItem(betterSword); // UI would handle this removal
         
         Assert.True(swapEquipped);
         Assert.Equal(betterSword, character.Weapon);

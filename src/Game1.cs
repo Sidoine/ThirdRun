@@ -110,7 +110,20 @@ namespace MonogameRPG
             {
                 if (mouse.LeftButton == ButtonState.Released)
                 {
-                    _rootPanel.HandleMouseClick(mouse.Position);
+                    // Handle drag and drop first
+                    if (_uiManager.DragAndDropManager.IsDragging)
+                    {
+                        bool dropHandled = _uiManager.DragAndDropManager.TryDrop(mouse.Position);
+                        if (!dropHandled)
+                        {
+                            _rootPanel.HandleMouseUp(mouse.Position);
+                        }
+                    }
+                    else
+                    {
+                        _rootPanel.HandleMouseClick(mouse.Position);
+                        _rootPanel.HandleMouseUp(mouse.Position);
+                    }
                 }
 
                 if (mouse.LeftButton == ButtonState.Pressed)

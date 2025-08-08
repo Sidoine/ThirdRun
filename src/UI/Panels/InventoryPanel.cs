@@ -25,12 +25,13 @@ namespace ThirdRun.UI.Panels
         private int maxScroll = 0;
 
         private Dictionary<string, Texture2D> itemIcons = new();
-        private List<(Rectangle rect, Item item)> itemRectangles = new();
+        private List<InventorySlot> inventorySlots = new();
 
         public InventoryPanel(UiManager uiManager,  Rectangle bounds)
             : base(uiManager, bounds)
         {
             LoadItemIcons();
+            CreateInventorySlots();
         }
 
         private void LoadItemIcons()
@@ -67,46 +68,72 @@ namespace ThirdRun.UI.Panels
             }
         }
 
+        private void CreateInventorySlots()
+        {
+            // Create inventory slots for a 4x10 grid
+            var character = UiManager.GameState.Player.Characters.First();
+            
+            for (int y = 0; y < character.Inventory.MaxGridHeight; y++)
+            {
+                for (int x = 0; x < ItemsPerRow; x++)
+                {
+                    var coordinates = new Point(x, y);
+                    var slotBounds = GetSlotBounds(coordinates);
+                    
+                    var slot = new InventorySlot(UiManager, slotBounds, character, coordinates, itemIcons);
+                    inventorySlots.Add(slot);
+                    AddChild(slot);
+                    
+                    // Register with the drag and drop manager
+                    UiManager.DragAndDropManager.RegisterDropTarget(slot);
+                }
+            }
+        }
+
+        private Rectangle GetSlotBounds(Point coordinates)
+        {
+            int x0 = Bounds.X + PanelPadding;
+            int y0 = Bounds.Y + PanelPadding + 30; // +30 for title space
+            
+            int x = x0 + coordinates.X * (ItemSize + ItemSpacing);
+            int y = y0 + coordinates.Y * (ItemSize + ItemSpacing) - scrollOffset;
+            
+            return new Rectangle(x, y, ItemSize, ItemSize);
+        }
+
+        private void UpdateSlotBounds()
+        {
+            foreach (var slot in inventorySlots)
+            {
+                var newBounds = GetSlotBounds(slot.SlotCoordinates);
+                slot.UpdateBounds(newBounds);
+            }
+        }
+
         public override bool HandleScroll(Point mousePosition, int scrollValue)
         {
             if (!Visible || !Bounds.Contains(mousePosition)) return false;
 
             scrollOffset -= scrollValue / 120 * (ItemSize + ItemSpacing);
             scrollOffset = Math.Clamp(scrollOffset, 0, maxScroll);
+            
+            // Update slot bounds after scrolling
+            UpdateSlotBounds();
             return true;
         }
 
-        public override bool HandleMouseClick(Point mousePosition)
+        public override void UpdateHover(Point mousePosition)
         {
-            return base.HandleMouseClick(mousePosition);
+            // Update the drag and drop manager with mouse position
+            UiManager.DragAndDropManager.UpdateMousePosition(mousePosition);
+            base.UpdateHover(mousePosition);
         }
 
-        public override bool HandleMouseRightClick(Point mousePosition)
+        public override bool HandleMouseUp(Point mousePosition)
         {
-            if (!Visible || !Bounds.Contains(mousePosition)) return false;
+            if (!Visible) return false;
 
-            // Check if right-click hit any item
-            foreach (var (rect, item) in itemRectangles)
-            {
-                if (rect.Contains(mousePosition))
-                {
-                    // Try to equip the item if it's equipment
-                    if (item is Equipment equipment)
-                    {
-                        var character = UiManager.GameState.Player.Characters.First();
-                        bool equipped = character.Inventory.EquipItem(equipment);
-                        if (equipped)
-                        {
-                            // Remove the item from inventory since it's now equipped
-                            // The Character.Equip method handles swapping any existing equipment back to inventory
-                            character.Inventory.GetItems().Remove(equipment);
-                        }
-                        return true;
-                    }
-                }
-            }
-
-            return base.HandleMouseRightClick(mousePosition);
+            return base.HandleMouseUp(mousePosition);
         }
 
         public override bool Visible { get => UiManager.CurrentState.IsInventoryVisible ; set => UiManager.CurrentState.IsInventoryVisible = value; }
@@ -116,129 +143,89 @@ namespace ThirdRun.UI.Panels
             // Affichage du panneau d'inventaire si visible
             if (Visible)
             {
+                // Update slot bounds in case of scrolling
+                UpdateSlotBounds();
+                
                 // Fond du panneau avec transparence
                 UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), Bounds, Color.Black * 0.8f);
                 
                 // Bordure du panneau
-                int borderThickness = 2;
-                var borderColor = Color.Gray;
-                // Top border
-                UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
-                    new Rectangle(Bounds.X, Bounds.Y, Bounds.Width, borderThickness), borderColor);
-                // Bottom border
-                UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
-                    new Rectangle(Bounds.X, Bounds.Bottom - borderThickness, Bounds.Width, borderThickness), borderColor);
-                // Left border
-                UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
-                    new Rectangle(Bounds.X, Bounds.Y, borderThickness, Bounds.Height), borderColor);
-                // Right border
-                UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
-                    new Rectangle(Bounds.Right - borderThickness, Bounds.Y, borderThickness, Bounds.Height), borderColor);
+                DrawPanelBorder();
 
                 // Titre du panneau
                 var font = UiManager.FontSystem.GetFont(18);
                 UiManager.SpriteBatch.DrawString(font, "Inventaire", 
                     new Vector2(Bounds.X + PanelPadding, Bounds.Y + 8), Color.White);
 
-                // Affichage des objets
-                var items = UiManager.GameState.Player.Characters.First().Inventory.GetItems();
-                int x0 = Bounds.X + PanelPadding;
-                int y0 = Bounds.Y + PanelPadding + 30 - scrollOffset; // +30 pour l'espace du titre
-                int col = 0, row = 0;
-                
-                // Clear item rectangles for this frame
-                itemRectangles.Clear();
-                
                 // Zone de clipping pour ne pas dessiner en dehors du panneau
                 var originalScissorRect = UiManager.GraphicsDevice.ScissorRectangle;
                 UiManager.GraphicsDevice.ScissorRectangle = new Rectangle(
-                    Bounds.X + borderThickness, 
-                    Bounds.Y + 30 + borderThickness, 
-                    Bounds.Width - 2 * borderThickness, 
-                    Bounds.Height - 30 - 2 * borderThickness);
+                    Bounds.X + 2, 
+                    Bounds.Y + 30 + 2, 
+                    Bounds.Width - 4, 
+                    Bounds.Height - 30 - 4);
 
-                for (int i = 0; i < items.Count; i++)
+                // Draw child components (inventory slots)
+                foreach (var child in Children)
                 {
-                    int x = x0 + col * (ItemSize + ItemSpacing);
-                    int y = y0 + row * (ItemSize + ItemSpacing);
-                    Rectangle itemRect = new Rectangle(x, y, ItemSize, ItemSize);
-                    
-                    // Ne dessiner que si visible dans la zone du panneau
-                    if (itemRect.Bottom >= Bounds.Y + 30 && itemRect.Top < Bounds.Bottom)
-                    {
-                        var item = items[i];
-                        
-                        // Store item rectangle for click detection
-                        itemRectangles.Add((itemRect, item));
-                        
-                        // Fond de l'item
-                        UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
-                            itemRect, Color.DarkGray * 0.7f);
-                        
-                        // Bordure de l'item
-                        var itemBorderColor = Color.LightGray;
-                        // Top
-                        UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
-                            new Rectangle(itemRect.X, itemRect.Y, itemRect.Width, 1), itemBorderColor);
-                        // Bottom
-                        UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
-                            new Rectangle(itemRect.X, itemRect.Bottom - 1, itemRect.Width, 1), itemBorderColor);
-                        // Left
-                        UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
-                            new Rectangle(itemRect.X, itemRect.Y, 1, itemRect.Height), itemBorderColor);
-                        // Right
-                        UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
-                            new Rectangle(itemRect.Right - 1, itemRect.Y, 1, itemRect.Height), itemBorderColor);
-
-                        // Essayer d'afficher l'icône de l'item
-                        bool iconDrawn = false;
-                        if (itemIcons.ContainsKey(item.Name))
-                        {
-                            var iconTexture = itemIcons[item.Name];
-                            var iconRect = new Rectangle(x + 4, y + 4, ItemSize - 8, ItemSize - 8);
-                            UiManager.SpriteBatch.Draw(iconTexture, iconRect, Color.White);
-                            iconDrawn = true;
-                        }
-                        
-                        // Si pas d'icône, afficher le nom de l'item
-                        if (!iconDrawn)
-                        {
-                            var itemFont = UiManager.FontSystem.GetFont(10);
-                            var textSize = itemFont.MeasureString(item.Name);
-                            var textRect = new Rectangle(x + 2, y + 2, ItemSize - 4, ItemSize - 4);
-                            
-                            // Dessiner le texte centré dans le rectangle
-                            var textPos = new Vector2(
-                                textRect.X + (textRect.Width - textSize.X) / 2,
-                                textRect.Y + (textRect.Height - textSize.Y) / 2);
-                            
-                            UiManager.SpriteBatch.DrawString(itemFont, item.Name, textPos, Color.White);
-                        }
-                    }
-                    
-                    col++;
-                    if (col >= ItemsPerRow)
-                    {
-                        col = 0;
-                        row++;
-                    }
+                    child.Draw();
                 }
                 
                 // Restaurer le rectangle de clipping
                 UiManager.GraphicsDevice.ScissorRectangle = originalScissorRect;
                 
-                // Calcul du scroll max
-                int totalRows = (int)Math.Ceiling(items.Count / (float)ItemsPerRow);
-                int contentHeight = totalRows * (ItemSize + ItemSpacing);
-                int availableHeight = Bounds.Height - 30 - 2 * PanelPadding; // -30 pour le titre
-                maxScroll = Math.Max(0, contentHeight - availableHeight);
+                // Draw dragged item following mouse cursor (outside clipping area)
+                var dragManager = UiManager.DragAndDropManager;
+                if (dragManager.IsDragging && dragManager.DraggedItem != null)
+                {
+                    Rectangle dragRect = new Rectangle(
+                        dragManager.CurrentMousePosition.X - dragManager.DragOffset.X,
+                        dragManager.CurrentMousePosition.Y - dragManager.DragOffset.Y,
+                        ItemSize,
+                        ItemSize);
+                    
+                    // Draw with semi-transparency to indicate dragging
+                    DrawItemAt(dragManager.DraggedItem, dragRect, 0.7f);
+                }
                 
-                // Afficher la barre de scroll si nécessaire
+                // Update scroll limits and draw scrollbar
+                UpdateScrollLimits();
                 if (maxScroll > 0)
                 {
                     DrawScrollbar();
                 }
             }
+        }
+
+        private void DrawPanelBorder()
+        {
+            int borderThickness = 2;
+            var borderColor = Color.Gray;
+            var pixel = ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice);
+            
+            // Top border
+            UiManager.SpriteBatch.Draw(pixel, 
+                new Rectangle(Bounds.X, Bounds.Y, Bounds.Width, borderThickness), borderColor);
+            // Bottom border
+            UiManager.SpriteBatch.Draw(pixel, 
+                new Rectangle(Bounds.X, Bounds.Bottom - borderThickness, Bounds.Width, borderThickness), borderColor);
+            // Left border
+            UiManager.SpriteBatch.Draw(pixel, 
+                new Rectangle(Bounds.X, Bounds.Y, borderThickness, Bounds.Height), borderColor);
+            // Right border
+            UiManager.SpriteBatch.Draw(pixel, 
+                new Rectangle(Bounds.Right - borderThickness, Bounds.Y, borderThickness, Bounds.Height), borderColor);
+        }
+
+        private void UpdateScrollLimits()
+        {
+            // Calculate scroll limits based on inventory content
+            var character = UiManager.GameState.Player.Characters.First();
+            var itemsWithCoords = character.Inventory.GetItemsWithCoordinates();
+            int maxY = itemsWithCoords.Keys.Count > 0 ? itemsWithCoords.Keys.Max(coord => coord.Y) : 0;
+            int contentHeight = (maxY + 1) * (ItemSize + ItemSpacing);
+            int availableHeight = Bounds.Height - 30 - 2 * PanelPadding; // -30 pour le titre
+            maxScroll = Math.Max(0, contentHeight - availableHeight);
         }
 
         private void DrawScrollbar()
@@ -263,6 +250,54 @@ namespace ThirdRun.UI.Panels
                 Rectangle scrollbarThumb = new Rectangle(scrollbarX, thumbY, scrollbarWidth, thumbHeight);
                 UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
                     scrollbarThumb, Color.LightGray * 0.8f);
+            }
+        }
+
+        private void DrawItemAt(Item item, Rectangle itemRect, float alpha = 1.0f)
+        {
+            // Fond de l'item
+            UiManager.SpriteBatch.Draw(ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice), 
+                itemRect, Color.DarkGray * (0.7f * alpha));
+            
+            // Bordure de l'item
+            var itemBorderColor = Color.LightGray * alpha;
+            var pixel = ThirdRun.Utils.Helpers.GetPixel(UiManager.GraphicsDevice);
+            // Top
+            UiManager.SpriteBatch.Draw(pixel, 
+                new Rectangle(itemRect.X, itemRect.Y, itemRect.Width, 1), itemBorderColor);
+            // Bottom
+            UiManager.SpriteBatch.Draw(pixel, 
+                new Rectangle(itemRect.X, itemRect.Bottom - 1, itemRect.Width, 1), itemBorderColor);
+            // Left
+            UiManager.SpriteBatch.Draw(pixel, 
+                new Rectangle(itemRect.X, itemRect.Y, 1, itemRect.Height), itemBorderColor);
+            // Right
+            UiManager.SpriteBatch.Draw(pixel, 
+                new Rectangle(itemRect.Right - 1, itemRect.Y, 1, itemRect.Height), itemBorderColor);
+
+            // Essayer d'afficher l'icône de l'item
+            bool iconDrawn = false;
+            if (itemIcons.ContainsKey(item.Name))
+            {
+                var iconTexture = itemIcons[item.Name];
+                var iconRect = new Rectangle(itemRect.X + 4, itemRect.Y + 4, ItemSize - 8, ItemSize - 8);
+                UiManager.SpriteBatch.Draw(iconTexture, iconRect, Color.White * alpha);
+                iconDrawn = true;
+            }
+            
+            // Si pas d'icône, afficher le nom de l'item
+            if (!iconDrawn)
+            {
+                var itemFont = UiManager.FontSystem.GetFont(10);
+                var textSize = itemFont.MeasureString(item.Name);
+                var textRect = new Rectangle(itemRect.X + 2, itemRect.Y + 2, ItemSize - 4, ItemSize - 4);
+                
+                // Dessiner le texte centré dans le rectangle
+                var textPos = new Vector2(
+                    textRect.X + (textRect.Width - textSize.X) / 2,
+                    textRect.Y + (textRect.Height - textSize.Y) / 2);
+                
+                UiManager.SpriteBatch.DrawString(itemFont, item.Name, textPos, Color.White * alpha);
             }
         }
     }

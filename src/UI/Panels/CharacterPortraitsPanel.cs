@@ -42,20 +42,18 @@ namespace ThirdRun.UI.Panels
                     // If texture fails to load, we'll show button without texture
                 }
 
-                var portraitButton = new SquareImageButton(
+                var portraitButton = new CharacterPortrait(
                     UiManager,
                     portraitBounds,
+                    character,
                     characterTexture,
                     () => ShowCharacterDetails(character)
                 );
 
-                // Set colors for better visibility
-                portraitButton.SetColors(
-                    new Color(40, 40, 40, 200), // Default: semi-transparent dark
-                    new Color(80, 120, 80, 220)  // Hover: semi-transparent green
-                );
-
                 AddChild(portraitButton);
+                
+                // Register with the drag and drop manager
+                UiManager.DragAndDropManager.RegisterDropTarget(portraitButton);
             }
         }
 
@@ -69,6 +67,30 @@ namespace ThirdRun.UI.Panels
                 CharacterClass.Chasseur => "Characters/hunter",
                 _ => "Characters/warrior"
             };
+        }
+
+        public Character? GetCharacterAtPosition(Point position)
+        {
+            if (!Visible || !Bounds.Contains(position)) return null;
+
+            var characters = UiManager.GameState.Player.Characters;
+            
+            for (int i = 0; i < characters.Count; i++)
+            {
+                var portraitBounds = new Rectangle(
+                    Bounds.X + PanelPadding,
+                    Bounds.Y + PanelPadding + i * (PortraitSize + PortraitSpacing),
+                    PortraitSize,
+                    PortraitSize
+                );
+
+                if (portraitBounds.Contains(position))
+                {
+                    return characters[i];
+                }
+            }
+
+            return null;
         }
 
         private void ShowCharacterDetails(Character character)
