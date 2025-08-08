@@ -6,3 +6,5 @@ Content/obj/
 TestResults/
 *.trx
 /tmp
+# Ignore generated image metadata files (AI-generated content placeholders)
+**/generated_*.txt
