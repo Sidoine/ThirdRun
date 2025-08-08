@@ -5,3 +5,4 @@ Content/obj/
 .vs
 TestResults/
 *.trx
+/tmp
