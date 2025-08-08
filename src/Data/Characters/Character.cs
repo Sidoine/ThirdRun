@@ -69,7 +69,6 @@ public class Character : Unit
             case CharacterClass.Mage:
                 // Mages could get spell abilities (ranged magic attacks)
                 Abilities.Add(new RangedAttackAbility()); // Use as magic attack for now
-                Characteristics.SetValue(ThirdRun.Data.Characteristic.SpellPower, AttackPower);
                 Characteristics.SetValue(ThirdRun.Data.Characteristic.RangedAttackPower, AttackPower);
                 break;
                 
