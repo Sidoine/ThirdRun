@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThirdRun", "ThirdRun.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThirdRun.Tests", "ThirdRun.Tests\ThirdRun.Tests.csproj", "{EF64743F-17EF-4C78-90E8-29D992645F54}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThirdRun.ImageGenerator", "ThirdRun.ImageGenerator\ThirdRun.ImageGenerator.csproj", "{11F35569-67B8-449F-BB0C-1A8F9D71FF79}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,10 @@ Global
 		{EF64743F-17EF-4C78-90E8-29D992645F54}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF64743F-17EF-4C78-90E8-29D992645F54}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF64743F-17EF-4C78-90E8-29D992645F54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11F35569-67B8-449F-BB0C-1A8F9D71FF79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11F35569-67B8-449F-BB0C-1A8F9D71FF79}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11F35569-67B8-449F-BB0C-1A8F9D71FF79}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11F35569-67B8-449F-BB0C-1A8F9D71FF79}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

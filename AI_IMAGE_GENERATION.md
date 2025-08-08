@@ -13,22 +13,23 @@ This project now includes AI-powered image generation capabilities using Google'
 
 ### Command Line Image Generation
 
-Generate images using the command line interface:
+Generate images using the dedicated image generator console application:
 
 ```bash
-dotnet run --generate-image "prompt description" "output/path/image.png"
+cd ThirdRun.ImageGenerator
+dotnet run "prompt description" "output/path/image.png"
 ```
 
 **Examples:**
 ```bash
 # Generate a warrior character
-dotnet run --generate-image "medieval warrior character sprite for 2D RPG" "Content/Characters/generated_warrior.png"
+dotnet run "medieval warrior character sprite for 2D RPG" "../Content/Characters/generated_warrior.png"
 
 # Generate a magic spell effect
-dotnet run --generate-image "blue fireball spell effect" "Content/Effects/blue_fireball.png"
+dotnet run "blue fireball spell effect" "../Content/Effects/blue_fireball.png"
 
 # Generate a dungeon background
-dotnet run --generate-image "dark stone dungeon corridor" "Content/Backgrounds/dungeon_corridor.png"
+dotnet run "dark stone dungeon corridor" "../Content/Backgrounds/dungeon_corridor.png"
 ```
 
 ### Programmatic Usage
@@ -71,8 +72,8 @@ The system works without Google Cloud credentials by creating placeholder files 
 
 ## Architecture
 
-- **GeminiImageGenerator**: Core service for image generation
-- **Program.cs**: CLI interface for image generation commands
+- **GeminiImageGenerator**: Core service for image generation (in main project)
+- **ThirdRun.ImageGenerator**: Dedicated console application for CLI image generation
 - **Automatic Authentication**: Detects available credentials and falls back gracefully
 - **Test Coverage**: Comprehensive unit tests with mocked dependencies
 
@@ -80,7 +81,7 @@ The system works without Google Cloud credentials by creating placeholder files 
 
 - `src/Utils/GeminiImageGenerator.cs` - Main image generation service
 - `ThirdRun.Tests/GeminiImageGeneratorTests.cs` - Unit tests
-- Updated `src/Program.cs` - CLI interface
+- `ThirdRun.ImageGenerator/` - Dedicated console application for image generation
 
 ## Environment Requirements
 
