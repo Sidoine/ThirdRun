@@ -14,17 +14,16 @@ namespace MonogameRPG.Monsters
         {
             Type = type;
 
-            CurrentHealth = type.BaseHealth;
-            MaxHealth = type.BaseHealth;
-            AttackPower = type.BaseAttack;
-            Position = new Vector2(0, 0); // Initial position
-
-            // Copy characteristics from monster type
+            // Copy all characteristics from monster type
             var typeCharacteristics = type.Characteristics.GetAllValues();
             foreach (var kvp in typeCharacteristics)
             {
                 Characteristics.SetValue(kvp.Key, kvp.Value);
             }
+
+            // Set current health to max health from characteristics
+            CurrentHealth = MaxHealth;
+            Position = new Vector2(0, 0); // Initial position
         }
 
         public void Attack(Character target)

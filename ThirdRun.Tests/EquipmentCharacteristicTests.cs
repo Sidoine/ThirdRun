@@ -91,7 +91,7 @@ namespace ThirdRun.Tests
             var worldMap = new WorldMap();
             worldMap.Initialize();
             var character = new Character("TestHero", CharacterClass.Mage, 80, 8, worldMap);
-            var equipment = new Equipment("Arcane Robes", "Robes of the arcane", 400, 4);
+            var equipment = new Equipment("Arcane Robes", "Robes of the arcane", 400, 0); // No legacy bonus stats
             
             // Set multiple characteristics
             equipment.Characteristics.SetValue(Characteristic.SpellPower, 25);
@@ -108,8 +108,8 @@ namespace ThirdRun.Tests
             Assert.Equal(10, character.Characteristics.GetValue(Characteristic.ShadowResistance));
             Assert.Equal(8, character.Characteristics.GetValue(Characteristic.CriticalChance));
             
-            // And unaffected characteristics remain zero
-            Assert.Equal(0, character.Characteristics.GetValue(Characteristic.MeleeAttackPower));
+            // And unaffected characteristics remain at their base values
+            Assert.Equal(8, character.Characteristics.GetValue(Characteristic.MeleeAttackPower)); // Character's base attack
             Assert.Equal(0, character.Characteristics.GetValue(Characteristic.FireResistance));
         }
 

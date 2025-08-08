@@ -6,20 +6,33 @@ namespace MonogameRPG.Monsters
     public class MonsterType
     {
         public string Name { get; set; }
-        public int BaseHealth { get; set; }
-        public int BaseAttack { get; set; }
         public string TexturePath { get; set; }
         public int Level { get; set; }
         public CharacteristicValues Characteristics { get; private set; }
 
+        // Properties that delegate to characteristics for backward compatibility
+        public int BaseHealth 
+        { 
+            get => Characteristics.GetValue(Characteristic.Health);
+            set => Characteristics.SetValue(Characteristic.Health, value);
+        }
+        
+        public int BaseAttack 
+        { 
+            get => Characteristics.GetValue(Characteristic.MeleeAttackPower);
+            set => Characteristics.SetValue(Characteristic.MeleeAttackPower, value);
+        }
+
         public MonsterType(string name, int baseHealth, int baseAttack, string texturePath, int level = 1)
         {
             Name = name;
-            BaseHealth = baseHealth;
-            BaseAttack = baseAttack;
             TexturePath = texturePath;
             Level = level;
             Characteristics = new CharacteristicValues();
+            
+            // Set the values using characteristics
+            BaseHealth = baseHealth;
+            BaseAttack = baseAttack;
         }
     }
 }

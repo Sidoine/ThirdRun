@@ -2,6 +2,7 @@ namespace ThirdRun.Data
 {
     public enum Characteristic
     {
+        Health,
         MeleeAttackPower,
         RangedAttackPower,
         SpellPower,

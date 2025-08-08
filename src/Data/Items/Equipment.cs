@@ -5,19 +5,27 @@ namespace ThirdRun.Items
 {
     public class Equipment : Item
     {
-        public int BonusStats { get; set; }
         public CharacteristicValues Characteristics { get; private set; }
+
+        // Backward compatibility property that delegates to MeleeAttackPower characteristic
+        public int BonusStats
+        {
+            get => Characteristics.GetValue(Characteristic.MeleeAttackPower);
+            set => Characteristics.SetValue(Characteristic.MeleeAttackPower, value);
+        }
 
         public Equipment(string name, string description, int value, int bonusStats, int itemLevel = 1) : base(name, description, value, itemLevel)
         {
-            BonusStats = bonusStats;
             Characteristics = new CharacteristicValues();
+            // Set the legacy bonusStats parameter as MeleeAttackPower characteristic for backward compatibility
+            if (bonusStats > 0)
+            {
+                BonusStats = bonusStats;
+            }
         }
 
         public void Equip(Character character)
         {
-            character.AttackPower += BonusStats; // Keep existing behavior
-            
             // Apply characteristic bonuses
             var characteristicValues = Characteristics.GetAllValues();
             foreach (var kvp in characteristicValues)
@@ -28,8 +36,6 @@ namespace ThirdRun.Items
 
         public void Unequip(Character character)
         {
-            character.AttackPower -= BonusStats; // Remove existing bonuses
-            
             // Remove characteristic bonuses
             var characteristicValues = Characteristics.GetAllValues();
             foreach (var kvp in characteristicValues)
