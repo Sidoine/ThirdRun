@@ -4,7 +4,7 @@ using System.IO;
 using Google.Cloud.AIPlatform.V1;
 using Google.Protobuf.WellKnownTypes;
 
-namespace ThirdRun.Utils
+namespace ThirdRun.ImageGenerator
 {
     /// <summary>
     /// Service for generating images using Google Gemini AI
