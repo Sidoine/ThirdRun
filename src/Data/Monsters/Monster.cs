@@ -28,8 +28,8 @@ namespace MonogameRPG.Monsters
 
         public void Attack(Character target)
         {
-            target.CurrentHealth -= AttackPower;
-            if (target.CurrentHealth < 0) target.CurrentHealth = 0;
+            // Use the inherited Attack method from Unit which uses the default ability
+            Attack((Unit)target);
         }
 
         public Item DropLoot()
