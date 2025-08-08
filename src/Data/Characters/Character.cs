@@ -130,7 +130,7 @@ public class Character : Unit
         {
             if (Weapon != null)
             {
-                Unequip(Weapon);
+                Weapon.Unequip(this);
                 Inventory.AddItem(Weapon);
             }
             Weapon = equipment;
@@ -139,7 +139,7 @@ public class Character : Unit
         {
             if (Armor != null)
             {
-                Unequip(Armor);
+                Armor.Unequip(this);
                 Inventory.AddItem(Armor);
             }
             Armor = equipment;
@@ -147,12 +147,6 @@ public class Character : Unit
         
         equipment.Equip(this);
         return true;
-    }
-
-    private void Unequip(Equipment equipment)
-    {
-        // Remove the bonus stats when unequipping
-        AttackPower -= equipment.BonusStats;
     }
 
     private bool CanEquipWeapon(Equipment equipment)
