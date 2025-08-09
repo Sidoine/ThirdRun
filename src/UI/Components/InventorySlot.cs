@@ -128,11 +128,11 @@ namespace ThirdRun.UI.Components
 
         private void DrawItemAt(Item item, Rectangle itemRect, float alpha = 1.0f)
         {
-            // Essayer d'afficher l'icône de l'item
+            // Try to display the item icon using the mapping system
             bool iconDrawn = false;
-            if (itemIcons.ContainsKey(item.Name))
+            string? imagePath = ThirdRun.Utils.ItemImageMapper.GetImagePath(item.Name);
+            if (imagePath != null && itemIcons.TryGetValue(imagePath, out Texture2D? iconTexture))
             {
-                var iconTexture = itemIcons[item.Name];
                 var iconRect = new Rectangle(itemRect.X + 4, itemRect.Y + 4, ItemSize - 8, ItemSize - 8);
                 UiManager.SpriteBatch.Draw(iconTexture, iconRect, Color.White * alpha);
                 iconDrawn = true;
