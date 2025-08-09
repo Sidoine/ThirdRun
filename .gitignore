@@ -6,3 +6,8 @@ Content/obj/
 TestResults/
 *.trx
 /tmp
+
+# Image generation scripts - temporary files
+generate_item_images.py
+create_placeholder_images.py
+generate_mgcb_entries.py
