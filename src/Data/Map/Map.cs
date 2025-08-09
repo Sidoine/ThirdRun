@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework;
+using ThirdRun.Data.Map;
 
 namespace MonogameRPG.Map
 {
@@ -23,9 +24,7 @@ namespace MonogameRPG.Map
         private List<Character> characters = new List<Character>();
         public List<Character> Characters => characters;
         private Color characterColor = Color.CornflowerBlue;
-        private TileType herbeTile = null!;
-        private TileType eauTile = null!;
-        private TileType rocheTile = null!;
+        private readonly AdvancedMapGenerator mapGenerator;
 
         private static readonly MonsterType[] MonsterTypes = new MonsterType[]
         {
@@ -41,31 +40,29 @@ namespace MonogameRPG.Map
             WorldPosition = worldPosition;
             monsterSpawnPoints = new List<Vector2>();
             tiles = new TileType[0, 0];
+            
+            // Create map generator with seed based on world position for consistency
+            int seed = worldPosition.X * 1000 + worldPosition.Y;
+            mapGenerator = new AdvancedMapGenerator(seed);
         }
 
         public void GenerateRandomMap(int spawnCount = 2)
         {
-            herbeTile = new TileType("Herbe", Color.ForestGreen, TileWidth, TileHeight, true);
-            eauTile = new TileType("Eau", Color.Blue, TileWidth, TileHeight, false);
-            rocheTile = new TileType("Roche", Color.Gray, TileWidth, TileHeight, false);
-            tiles = new TileType[GridWidth, GridHeight];
-            var rand = new System.Random();
-            for (int x = 0; x < GridWidth; x++)
-                for (int y = 0; y < GridHeight; y++)
-                {
-                    int r = rand.Next(100);
-                    if (r < 80) tiles[x, y] = herbeTile;
-                    else if (r < 90) tiles[x, y] = eauTile;
-                    else tiles[x, y] = rocheTile;
-                }
-            // Points d'apparition de monstres sur des cases herbe
+            // Use advanced map generator instead of simple random generation
+            tiles = mapGenerator.GenerateMap(GridWidth, GridHeight, WorldPosition);
+            
+            // Find suitable spawn points for monsters on walkable terrain
             monsterSpawnPoints.Clear();
             int placed = 0;
+            var rand = new System.Random(WorldPosition.X * 1000 + WorldPosition.Y + 100);
+            
             while (placed < spawnCount)
             {
                 int x = rand.Next(GridWidth);
                 int y = rand.Next(GridHeight);
-                if (tiles[x, y] == herbeTile)
+                
+                // Spawn on walkable tiles (grass, road, hill, door)
+                if (tiles[x, y].IsWalkable)
                 {
                     monsterSpawnPoints.Add(new Vector2(x, y));
                     placed++;
