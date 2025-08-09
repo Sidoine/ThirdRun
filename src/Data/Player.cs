@@ -19,8 +19,8 @@ namespace ThirdRun.Data
             
             // Position de départ au centre de la carte
             Vector2 startPosition = new Vector2(
-                Map.GridWidth / 2 * Map.TileWidth + Map.TileWidth / 2,
-                Map.GridHeight / 2 * Map.TileHeight + Map.TileHeight / 2);
+                MonogameRPG.Map.Map.GridWidth / 2 * MonogameRPG.Map.Map.TileWidth + MonogameRPG.Map.Map.TileWidth / 2,
+                MonogameRPG.Map.Map.GridHeight / 2 * MonogameRPG.Map.Map.TileHeight + MonogameRPG.Map.Map.TileHeight / 2);
             
             // Création des quatre personnages requis
             var warrior = new Character("Guerrier", CharacterClass.Guerrier, 35, 12, worldMap)
