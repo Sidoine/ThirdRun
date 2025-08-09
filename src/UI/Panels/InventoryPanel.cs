@@ -36,8 +36,8 @@ namespace ThirdRun.UI.Panels
 
         private void LoadItemIcons()
         {
-            // Load all available item images using the ItemImageMapper
-            foreach (string imagePath in ThirdRun.Utils.ItemImageMapper.GetAllImagePaths())
+            // Load all available item images using the ItemTemplateRepository
+            foreach (string imagePath in ItemTemplateRepository.GetAllImagePaths())
             {
                 try
                 {
@@ -259,9 +259,16 @@ namespace ThirdRun.UI.Panels
             UiManager.SpriteBatch.Draw(pixel, 
                 new Rectangle(itemRect.Right - 1, itemRect.Y, 1, itemRect.Height), itemBorderColor);
 
-            // Try to display the item icon using the mapping system
+            // Try to display the item icon using the item's ImagePath first
             bool iconDrawn = false;
-            string? imagePath = ThirdRun.Utils.ItemImageMapper.GetImagePath(item.Name);
+            string? imagePath = item.ImagePath;
+            
+            // If item doesn't have an ImagePath, fall back to the mapper (for backward compatibility)
+            if (imagePath == null)
+            {
+                imagePath = ThirdRun.Utils.ItemImageMapper.GetImagePath(item.Name);
+            }
+            
             if (imagePath != null && itemIcons.TryGetValue(imagePath, out Texture2D? iconTexture))
             {
                 var iconRect = new Rectangle(itemRect.X + 4, itemRect.Y + 4, ItemSize - 8, ItemSize - 8);

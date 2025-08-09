@@ -128,9 +128,16 @@ namespace ThirdRun.UI.Components
 
         private void DrawItemAt(Item item, Rectangle itemRect, float alpha = 1.0f)
         {
-            // Try to display the item icon using the mapping system
+            // Try to display the item icon using the item's ImagePath first
             bool iconDrawn = false;
-            string? imagePath = ThirdRun.Utils.ItemImageMapper.GetImagePath(item.Name);
+            string? imagePath = item.ImagePath;
+            
+            // If item doesn't have an ImagePath, fall back to the mapper (for backward compatibility)
+            if (imagePath == null)
+            {
+                imagePath = ThirdRun.Utils.ItemImageMapper.GetImagePath(item.Name);
+            }
+            
             if (imagePath != null && itemIcons.TryGetValue(imagePath, out Texture2D? iconTexture))
             {
                 var iconRect = new Rectangle(itemRect.X + 4, itemRect.Y + 4, ItemSize - 8, ItemSize - 8);
