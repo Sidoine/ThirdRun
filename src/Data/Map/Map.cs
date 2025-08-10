@@ -146,19 +146,7 @@ namespace MonogameRPG.Map
             return positions;
         }
 
-        public void ConvertToTown()
-        {
-            IsTownZone = true;
-            monsters.Clear(); // Remove all monsters
-            SpawnNPCs(); // Add NPCs instead
-        }
 
-        public void ConvertToHostile()
-        {
-            IsTownZone = false;
-            npcs.Clear(); // Remove NPCs
-            SpawnMonsters(); // Add monsters back
-        }
 
         public void SetCharacters(List<Character> chars)
         {

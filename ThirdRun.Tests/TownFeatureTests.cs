@@ -36,7 +36,7 @@ namespace ThirdRun.Tests
         }
 
         [Fact]
-        public void Map_ShouldSupportTownConversion()
+        public void Map_ShouldSupportTownZone()
         {
             // Arrange
             var map = new Map(Point.Zero);
@@ -48,21 +48,16 @@ namespace ThirdRun.Tests
             Assert.NotEmpty(map.GetMonsters());
             Assert.Empty(map.NPCs);
             
-            // Act - Convert to town
-            map.ConvertToTown();
+            // Act - Create a town map
+            var townMap = new Map(new Point(-999, -999));
+            townMap.GenerateRandomMap();
+            townMap.IsTownZone = true;
+            townMap.SpawnNPCs();
             
             // Assert
-            Assert.True(map.IsTownZone);
-            Assert.Empty(map.GetMonsters()); // No monsters in town
-            Assert.NotEmpty(map.NPCs); // Should have NPCs
-            
-            // Act - Convert back to hostile
-            map.ConvertToHostile();
-            
-            // Assert
-            Assert.False(map.IsTownZone);
-            Assert.NotEmpty(map.GetMonsters()); // Monsters are back
-            Assert.Empty(map.NPCs); // No NPCs in hostile zone
+            Assert.True(townMap.IsTownZone);
+            Assert.Empty(townMap.GetMonsters()); // Town map starts with no monsters
+            Assert.NotEmpty(townMap.NPCs); // Should have NPCs
         }
 
         [Fact]

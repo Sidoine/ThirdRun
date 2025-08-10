@@ -13,10 +13,13 @@ namespace MonogameRPG.Map
         private Point currentMapPosition = Point.Zero;
         private Point lastHostileMapPosition = Point.Zero;
         private List<Character> characters = [];
+        private Map? townMap = null; // Dedicated town map
+        private bool isInTownMode = false; // Track if we're currently in town mode
 
-        public Map CurrentMap => maps.TryGetValue(currentMapPosition, out Map? value) ? value : throw new Exception("Current map not found at position: " + currentMapPosition);
+        public Map CurrentMap => isInTownMode && townMap != null ? townMap : 
+            (maps.TryGetValue(currentMapPosition, out Map? value) ? value : throw new Exception("Current map not found at position: " + currentMapPosition));
         public Point CurrentMapPosition => currentMapPosition;
-        public bool IsInTown => CurrentMap.IsTownZone;
+        public bool IsInTown => isInTownMode;
 
         public void Initialize()
         {
@@ -26,6 +29,12 @@ namespace MonogameRPG.Map
             initialMap.SpawnMonsters();
             maps[Point.Zero] = initialMap;
             currentMapPosition = Point.Zero;
+            
+            // Create dedicated town map at a special position
+            townMap = new Map(new Point(-999, -999)); // Special position for town
+            townMap.GenerateRandomMap();
+            townMap.IsTownZone = true;
+            townMap.SpawnNPCs();
         }
 
         public void SetCharacters(List<Character> chars)
@@ -302,13 +311,13 @@ namespace MonogameRPG.Map
 
         public void ToggleTownMode()
         {
-            if (IsInTown)
+            if (isInTownMode)
             {
                 // Switch back to hostile zone
-                CurrentMap.ConvertToHostile();
+                isInTownMode = false;
                 
-                // If we have a previous hostile position, go back to it
-                if (lastHostileMapPosition != Point.Zero && maps.ContainsKey(lastHostileMapPosition))
+                // Restore characters to the hostile map
+                if (maps.ContainsKey(lastHostileMapPosition))
                 {
                     currentMapPosition = lastHostileMapPosition;
                     CurrentMap.SetCharacters(characters);
@@ -319,8 +328,14 @@ namespace MonogameRPG.Map
                 // Remember current hostile position before going to town
                 lastHostileMapPosition = currentMapPosition;
                 
-                // Convert current map to town
-                CurrentMap.ConvertToTown();
+                // Switch to town mode
+                isInTownMode = true;
+                
+                // Set characters on the town map
+                if (townMap != null)
+                {
+                    townMap.SetCharacters(characters);
+                }
             }
         }
 
