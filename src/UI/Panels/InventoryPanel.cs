@@ -263,12 +263,6 @@ namespace ThirdRun.UI.Panels
             bool iconDrawn = false;
             string? imagePath = item.ImagePath;
             
-            // If item doesn't have an ImagePath, fall back to the mapper (for backward compatibility)
-            if (imagePath == null)
-            {
-                imagePath = ThirdRun.Utils.ItemImageMapper.GetImagePath(item.Name);
-            }
-            
             if (imagePath != null && itemIcons.TryGetValue(imagePath, out Texture2D? iconTexture))
             {
                 var iconRect = new Rectangle(itemRect.X + 4, itemRect.Y + 4, ItemSize - 8, ItemSize - 8);
