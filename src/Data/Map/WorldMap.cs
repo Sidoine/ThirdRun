@@ -29,12 +29,13 @@ namespace MonogameRPG.Map
             initialMap.SpawnMonsters();
             maps[Point.Zero] = initialMap;
             currentMapPosition = Point.Zero;
-            
+
             // Create dedicated town map at a special position
             townMap = new Map(new Point(-999, -999)); // Special position for town
             townMap.GenerateRandomMap();
             townMap.IsTownZone = true;
             townMap.SpawnNPCs();
+            maps[townMap.WorldPosition] = townMap;
         }
 
         public void SetCharacters(List<Character> chars)
@@ -224,6 +225,7 @@ namespace MonogameRPG.Map
 
         public IEnumerable<Map> GetAllMaps()
         {
+            if (isInTownMode && townMap != null) return [townMap];
             return maps.Values;
         }
 
