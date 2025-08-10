@@ -41,5 +41,6 @@ public class UiManager
         public bool IsInventoryVisible { get; set; } = false;
         public bool IsCharacterDetailsVisible { get; set; } = false;
         public Character? SelectedCharacter { get; set; } = null;
+        public bool IsInTown { get; set; } = false;
     }
 }

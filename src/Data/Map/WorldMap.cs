@@ -3,6 +3,7 @@ using System.Linq;
 using MonogameRPG.Monsters;
 using System;
 using Microsoft.Xna.Framework;
+using ThirdRun.Data.NPCs;
 
 namespace MonogameRPG.Map
 {
@@ -10,10 +11,15 @@ namespace MonogameRPG.Map
     {
         private readonly Dictionary<Point, Map> maps = new Dictionary<Point, Map>();
         private Point currentMapPosition = Point.Zero;
+        private Point lastHostileMapPosition = Point.Zero;
         private List<Character> characters = [];
+        private Map? townMap = null; // Dedicated town map
+        private bool isInTownMode = false; // Track if we're currently in town mode
 
-        public Map CurrentMap => maps.TryGetValue(currentMapPosition, out Map? value) ? value : throw new Exception("Current map not found at position: " + currentMapPosition);
+        public Map CurrentMap => isInTownMode && townMap != null ? townMap : 
+            (maps.TryGetValue(currentMapPosition, out Map? value) ? value : throw new Exception("Current map not found at position: " + currentMapPosition));
         public Point CurrentMapPosition => currentMapPosition;
+        public bool IsInTown => isInTownMode;
 
         public void Initialize()
         {
@@ -23,6 +29,13 @@ namespace MonogameRPG.Map
             initialMap.SpawnMonsters();
             maps[Point.Zero] = initialMap;
             currentMapPosition = Point.Zero;
+
+            // Create dedicated town map at a special position
+            townMap = new Map(new Point(-999, -999)); // Special position for town
+            townMap.GenerateRandomMap();
+            townMap.IsTownZone = true;
+            townMap.SpawnNPCs();
+            maps[townMap.WorldPosition] = townMap;
         }
 
         public void SetCharacters(List<Character> chars)
@@ -212,6 +225,7 @@ namespace MonogameRPG.Map
 
         public IEnumerable<Map> GetAllMaps()
         {
+            if (isInTownMode && townMap != null) return [townMap];
             return maps.Values;
         }
 
@@ -295,6 +309,41 @@ namespace MonogameRPG.Map
                 path.Insert(0, new Vector2(current.X * Map.TileWidth + Map.TileWidth / 2, current.Y * Map.TileHeight + Map.TileHeight / 2));
             }
             return path;
+        }
+
+        public void ToggleTownMode()
+        {
+            if (isInTownMode)
+            {
+                // Switch back to hostile zone
+                isInTownMode = false;
+                
+                // Teleport characters back to the hostile map
+                if (maps.ContainsKey(lastHostileMapPosition))
+                {
+                    currentMapPosition = lastHostileMapPosition;
+                    CurrentMap.TeleportCharacters(characters);
+                }
+            }
+            else
+            {
+                // Remember current hostile position before going to town
+                lastHostileMapPosition = currentMapPosition;
+                
+                // Switch to town mode
+                isInTownMode = true;
+                
+                // Teleport characters to the town map
+                if (townMap != null)
+                {
+                    townMap.TeleportCharacters(characters);
+                }
+            }
+        }
+
+        public List<NPC> GetNPCsOnCurrentMap()
+        {
+            return CurrentMap.NPCs;
         }
     }
 }

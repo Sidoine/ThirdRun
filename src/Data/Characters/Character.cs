@@ -6,6 +6,7 @@ using MonogameRPG.Map;
 using Microsoft.Xna.Framework;
 using MonogameRPG;
 using ThirdRun.Data.Abilities;
+using System;
 
 public enum CharacterClass
 {
@@ -83,6 +84,13 @@ public class Character : Unit
 
     public void Move(List<Monster> monsters)
     {
+        // Check if in town - if so, use town behavior instead
+        if (worldMap.IsInTown)
+        {
+            MoveInTown(worldMap.GetNPCsOnCurrentMap());
+            return;
+        }
+        
         // Trouver le monstre vivant le plus proche
         Monster? closest = null;
         float minDist = float.MaxValue;
@@ -109,6 +117,24 @@ public class Character : Unit
         if (Vector2.Distance(Position, closest.Position) < Map.TileHeight)
         {
             Attack(closest);
+        }
+    }
+    
+    private void MoveInTown(List<ThirdRun.Data.NPCs.NPC> npcs)
+    {
+        if (npcs.Count == 0) return;
+        
+        // Find nearest NPC or move randomly between NPCs
+        var rand = new Random();
+        var targetNPC = npcs[rand.Next(npcs.Count)];
+        
+        // Move towards the selected NPC
+        MoveTo(targetNPC.Position);
+        
+        // If close enough to NPC, maybe pause briefly or find new target
+        if (Vector2.Distance(Position, targetNPC.Position) < Map.TileHeight)
+        {
+            // Could add interaction logic here or just let them wander
         }
     }
 

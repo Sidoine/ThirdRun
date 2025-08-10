@@ -5,6 +5,7 @@ using MonogameRPG.Map;
 using FontStashSharp;
 using ThirdRun.Graphics.Characters;
 using ThirdRun.Graphics.Monsters;
+using ThirdRun.Graphics.NPCs;
 
 namespace ThirdRun.Graphics.Map
 {
@@ -13,12 +14,14 @@ namespace ThirdRun.Graphics.Map
         private readonly TileTypeView _tileTypeView;
         private readonly CharacterView _characterView;
         private readonly MonsterView _monsterView;
+        private readonly NPCView _npcView;
 
         public MapView(ContentManager contentManager)
         {
             _tileTypeView = new TileTypeView(contentManager);
             _characterView = new CharacterView(contentManager);
             _monsterView = new MonsterView(contentManager);
+            _npcView = new NPCView(contentManager);
         }
 
         public void Render(SpriteBatch spriteBatch, MonogameRPG.Map.Map map, DynamicSpriteFont dynamicFont, Vector2 offset = default)
@@ -41,6 +44,16 @@ namespace ThirdRun.Graphics.Map
                 {
                     Vector2 renderPos = monster.Position;
                     _monsterView.RenderAtPosition(spriteBatch, monster, dynamicFont, renderPos);
+                }
+            }
+            
+            // Affichage des NPCs
+            foreach (var npc in map.NPCs)
+            {
+                if (npc.Position != Vector2.Zero)
+                {
+                    Vector2 renderPos = npc.Position;
+                    _npcView.RenderAtPosition(spriteBatch, npc, dynamicFont, renderPos);
                 }
             }
             
