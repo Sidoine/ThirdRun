@@ -9,6 +9,14 @@
   - StbTrueTypeSharp (version 1.26.12) - TrueType font support
   - MonoGame.Content.Builder.Task - Content pipeline
 
+## Sprite Generation
+- **Tool**: ImageGenTool (https://www.nuget.org/packages/ImageGenTool)
+- **API Key**: GEMINI_API_KEY secret is available for AI-powered image generation
+- **Installation**: Install as a global .NET tool: `dotnet tool install --global ImageGenTool`
+- **Usage**: All sprites MUST be generated using this tool - no other image generation method is allowed
+- **Content Directory**: Generated sprites should be placed in appropriate subdirectories under `/Content/`
+- **Requirements**: Images must be generated with ImageGenTool and no other way
+
 ## Project Structure
 ```
 /src/
