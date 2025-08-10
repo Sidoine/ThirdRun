@@ -73,5 +73,29 @@ namespace ThirdRun.Tests
                 Assert.NotEmpty(character.Name);
             });
         }
+        
+        [Fact]
+        public void Player_WarriorShouldStartWithExactlyFiveRandomItems()
+        {
+            // Arrange
+            var worldMap = new WorldMap();
+            worldMap.Initialize();
+            
+            // Act
+            var player = new Player(worldMap);
+            var warrior = player.Characters.First(c => c.Class == CharacterClass.Guerrier);
+            
+            // Assert
+            Assert.Equal(5, warrior.Inventory.GetItems().Count);
+            Assert.All(warrior.Inventory.GetItems(), item => 
+            {
+                Assert.NotNull(item);
+                Assert.NotNull(item.Name);
+                Assert.NotEmpty(item.Name);
+                // All items should have image paths since they're generated from templates
+                Assert.NotNull(item.ImagePath);
+                Assert.NotEmpty(item.ImagePath);
+            });
+        }
     }
 }

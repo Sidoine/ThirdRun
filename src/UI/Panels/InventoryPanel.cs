@@ -36,35 +36,19 @@ namespace ThirdRun.UI.Panels
 
         private void LoadItemIcons()
         {
-            // Try to load common item icons, if they exist
-            // This is optional - if icons don't exist, we'll show names instead
-            
-            // Try to load each icon individually, catching exceptions for each one
-            try
+            // Load all available item images using the ItemTemplateRepository
+            foreach (string imagePath in ItemTemplateRepository.GetAllImagePaths())
             {
-                itemIcons["Potion"] = UiManager.ContentManager.Load<Texture2D>("Items/potion");
-            }
-            catch
-            {
-                // Potion icon not available, will use text fallback
-            }
-            
-            try
-            {
-                itemIcons["Sword"] = UiManager.ContentManager.Load<Texture2D>("Items/sword");
-            }
-            catch
-            {
-                // Sword icon not available, will use text fallback
-            }
-            
-            try
-            {
-                itemIcons["Armor"] = UiManager.ContentManager.Load<Texture2D>("Items/armor");
-            }
-            catch
-            {
-                // Armor icon not available, will use text fallback
+                try
+                {
+                    var texture = UiManager.ContentManager.Load<Texture2D>(imagePath);
+                    // Store by the image path for lookup
+                    itemIcons[imagePath] = texture;
+                }
+                catch
+                {
+                    // Image not available, will use text fallback
+                }
             }
         }
 
@@ -275,11 +259,12 @@ namespace ThirdRun.UI.Panels
             UiManager.SpriteBatch.Draw(pixel, 
                 new Rectangle(itemRect.Right - 1, itemRect.Y, 1, itemRect.Height), itemBorderColor);
 
-            // Essayer d'afficher l'icône de l'item
+            // Try to display the item icon using the item's ImagePath first
             bool iconDrawn = false;
-            if (itemIcons.ContainsKey(item.Name))
+            string? imagePath = item.ImagePath;
+            
+            if (imagePath != null && itemIcons.TryGetValue(imagePath, out Texture2D? iconTexture))
             {
-                var iconTexture = itemIcons[item.Name];
                 var iconRect = new Rectangle(itemRect.X + 4, itemRect.Y + 4, ItemSize - 8, ItemSize - 8);
                 UiManager.SpriteBatch.Draw(iconTexture, iconRect, Color.White * alpha);
                 iconDrawn = true;
