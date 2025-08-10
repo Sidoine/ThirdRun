@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework;
 using ThirdRun.Data.Map;
+using ThirdRun.Data.NPCs;
 
 namespace MonogameRPG.Map
 {
@@ -22,7 +23,10 @@ namespace MonogameRPG.Map
         private int monsterSize = 20;
         private List<Monster> monsters = new List<Monster>();
         private List<Character> characters = new List<Character>();
+        private List<NPC> npcs = new List<NPC>();
         public List<Character> Characters => characters;
+        public List<NPC> NPCs => npcs;
+        public bool IsTownZone { get; set; } = false;
         private Color characterColor = Color.CornflowerBlue;
         private readonly AdvancedMapGenerator mapGenerator;
 
@@ -92,6 +96,68 @@ namespace MonogameRPG.Map
                     spawn.Y * TileHeight + TileHeight / 2 - monsterSize / 2) + Position;
                 monsters.Add(monster);
             }
+        }
+
+        public void SpawnNPCs()
+        {
+            npcs.Clear();
+            var rand = new System.Random();
+            
+            // Define NPC names and types for the town
+            var npcDefinitions = new (string name, NPCType type)[]
+            {
+                ("Marcus", NPCType.Merchant),
+                ("Eleanor", NPCType.Innkeeper),
+                ("Gareth", NPCType.Guard),
+                ("Thorin", NPCType.Blacksmith)
+            };
+            
+            // Place NPCs at random walkable positions
+            var walkablePositions = GetWalkablePositions(4); // Get 4 random walkable positions
+            for (int i = 0; i < Math.Min(npcDefinitions.Length, walkablePositions.Count); i++)
+            {
+                var def = npcDefinitions[i];
+                var pos = walkablePositions[i];
+                var npc = new NPC(def.name, def.type, new Vector2(
+                    pos.X * TileWidth + TileWidth / 2,
+                    pos.Y * TileHeight + TileHeight / 2) + Position);
+                npcs.Add(npc);
+            }
+        }
+        
+        private List<Vector2> GetWalkablePositions(int count)
+        {
+            var positions = new List<Vector2>();
+            var rand = new System.Random();
+            int attempts = 0;
+            
+            while (positions.Count < count && attempts < 100)
+            {
+                int x = rand.Next(GridWidth);
+                int y = rand.Next(GridHeight);
+                
+                if (tiles[x, y].IsWalkable)
+                {
+                    positions.Add(new Vector2(x, y));
+                }
+                attempts++;
+            }
+            
+            return positions;
+        }
+
+        public void ConvertToTown()
+        {
+            IsTownZone = true;
+            monsters.Clear(); // Remove all monsters
+            SpawnNPCs(); // Add NPCs instead
+        }
+
+        public void ConvertToHostile()
+        {
+            IsTownZone = false;
+            npcs.Clear(); // Remove NPCs
+            SpawnMonsters(); // Add monsters back
         }
 
         public void SetCharacters(List<Character> chars)

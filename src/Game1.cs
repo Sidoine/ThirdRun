@@ -27,6 +27,7 @@ namespace MonogameRPG
         private Dictionary<string, Texture2D> _itemIcons = new();
         private MouseState _previousMouseState;
         private KeyboardState _previousKeyboardState;
+        private bool _previousTownState = false;
 
         public Game1()
         {
@@ -101,6 +102,17 @@ namespace MonogameRPG
             if (keyboard.IsKeyDown(Keys.I) && !_previousKeyboardState.IsKeyDown(Keys.I))
             {
                 _uiManager.CurrentState.IsInventoryVisible = !_uiManager.CurrentState.IsInventoryVisible;
+            }
+            if (keyboard.IsKeyDown(Keys.P) && !_previousKeyboardState.IsKeyDown(Keys.P))
+            {
+                _uiManager.CurrentState.IsInTown = !_uiManager.CurrentState.IsInTown;
+            }
+            
+            // Handle town state changes
+            if (_uiManager.CurrentState.IsInTown != _previousTownState)
+            {
+                worldMap.ToggleTownMode();
+                _previousTownState = _uiManager.CurrentState.IsInTown;
             }
             MouseState mouse = Mouse.GetState();
             _rootPanel.Update(gameTime);

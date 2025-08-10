@@ -3,6 +3,7 @@ using System.Linq;
 using MonogameRPG.Monsters;
 using System;
 using Microsoft.Xna.Framework;
+using ThirdRun.Data.NPCs;
 
 namespace MonogameRPG.Map
 {
@@ -10,10 +11,12 @@ namespace MonogameRPG.Map
     {
         private readonly Dictionary<Point, Map> maps = new Dictionary<Point, Map>();
         private Point currentMapPosition = Point.Zero;
+        private Point lastHostileMapPosition = Point.Zero;
         private List<Character> characters = [];
 
         public Map CurrentMap => maps.TryGetValue(currentMapPosition, out Map? value) ? value : throw new Exception("Current map not found at position: " + currentMapPosition);
         public Point CurrentMapPosition => currentMapPosition;
+        public bool IsInTown => CurrentMap.IsTownZone;
 
         public void Initialize()
         {
@@ -295,6 +298,35 @@ namespace MonogameRPG.Map
                 path.Insert(0, new Vector2(current.X * Map.TileWidth + Map.TileWidth / 2, current.Y * Map.TileHeight + Map.TileHeight / 2));
             }
             return path;
+        }
+
+        public void ToggleTownMode()
+        {
+            if (IsInTown)
+            {
+                // Switch back to hostile zone
+                CurrentMap.ConvertToHostile();
+                
+                // If we have a previous hostile position, go back to it
+                if (lastHostileMapPosition != Point.Zero && maps.ContainsKey(lastHostileMapPosition))
+                {
+                    currentMapPosition = lastHostileMapPosition;
+                    CurrentMap.SetCharacters(characters);
+                }
+            }
+            else
+            {
+                // Remember current hostile position before going to town
+                lastHostileMapPosition = currentMapPosition;
+                
+                // Convert current map to town
+                CurrentMap.ConvertToTown();
+            }
+        }
+
+        public List<NPC> GetNPCsOnCurrentMap()
+        {
+            return CurrentMap.NPCs;
         }
     }
 }
