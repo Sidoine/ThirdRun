@@ -316,11 +316,11 @@ namespace MonogameRPG.Map
                 // Switch back to hostile zone
                 isInTownMode = false;
                 
-                // Restore characters to the hostile map
+                // Teleport characters back to the hostile map
                 if (maps.ContainsKey(lastHostileMapPosition))
                 {
                     currentMapPosition = lastHostileMapPosition;
-                    CurrentMap.SetCharacters(characters);
+                    CurrentMap.TeleportCharacters(characters);
                 }
             }
             else
@@ -331,10 +331,10 @@ namespace MonogameRPG.Map
                 // Switch to town mode
                 isInTownMode = true;
                 
-                // Set characters on the town map
+                // Teleport characters to the town map
                 if (townMap != null)
                 {
-                    townMap.SetCharacters(characters);
+                    townMap.TeleportCharacters(characters);
                 }
             }
         }

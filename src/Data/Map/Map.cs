@@ -154,6 +154,24 @@ namespace MonogameRPG.Map
             characters.AddRange(chars);
         }
 
+        public void TeleportCharacters(List<Character> chars)
+        {
+            characters.Clear();
+            characters.AddRange(chars);
+            
+            // Get valid spawn positions for the characters
+            var validPositions = GetWalkablePositions(chars.Count);
+            
+            // Position each character at a valid location on this map
+            for (int i = 0; i < chars.Count && i < validPositions.Count; i++)
+            {
+                var pos = validPositions[i];
+                chars[i].Position = new Vector2(
+                    pos.X * TileWidth + TileWidth / 2,
+                    pos.Y * TileHeight + TileHeight / 2) + Position;
+            }
+        }
+
 
 
         public List<Vector2> GetMonsterSpawnPoints()

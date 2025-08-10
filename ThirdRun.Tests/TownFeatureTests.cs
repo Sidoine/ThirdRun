@@ -3,6 +3,7 @@ using ThirdRun.UI;
 using ThirdRun.Data.NPCs;
 using MonogameRPG.Map;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace ThirdRun.Tests
 {
@@ -83,6 +84,55 @@ namespace ThirdRun.Tests
             // Assert
             Assert.False(worldMap.IsInTown);
             Assert.False(worldMap.CurrentMap.IsTownZone);
+        }
+
+        [Fact]
+        public void Map_TeleportCharacters_ShouldUpdateCharacterPositions()
+        {
+            // Arrange
+            var map = new Map(Point.Zero);
+            map.GenerateRandomMap();
+            
+            var worldMap = new WorldMap();
+            worldMap.Initialize();
+            
+            var characters = new List<Character>
+            {
+                new Character("Test1", CharacterClass.Guerrier, 100, 10, worldMap),
+                new Character("Test2", CharacterClass.Mage, 80, 12, worldMap)
+            };
+            
+            // Set initial positions that are likely outside the map bounds
+            var originalPosition1 = new Vector2(10000, 10000);
+            var originalPosition2 = new Vector2(20000, 20000);
+            characters[0].Position = originalPosition1;
+            characters[1].Position = originalPosition2;
+            
+            // Act - Teleport characters to the map
+            map.TeleportCharacters(characters);
+            
+            // Assert - Positions should be changed to valid locations on the map
+            Assert.NotEqual(originalPosition1, characters[0].Position);
+            Assert.NotEqual(originalPosition2, characters[1].Position);
+            
+            // Positions should be within the map bounds
+            var mapWidth = Map.GridWidth * Map.TileWidth;
+            var mapHeight = Map.GridHeight * Map.TileHeight;
+            
+            Assert.True(characters[0].Position.X >= map.Position.X);
+            Assert.True(characters[0].Position.X <= map.Position.X + mapWidth);
+            Assert.True(characters[0].Position.Y >= map.Position.Y);
+            Assert.True(characters[0].Position.Y <= map.Position.Y + mapHeight);
+            
+            Assert.True(characters[1].Position.X >= map.Position.X);
+            Assert.True(characters[1].Position.X <= map.Position.X + mapWidth);
+            Assert.True(characters[1].Position.Y >= map.Position.Y);
+            Assert.True(characters[1].Position.Y <= map.Position.Y + mapHeight);
+            
+            // Characters should be added to the map
+            Assert.Equal(2, map.Characters.Count);
+            Assert.Contains(characters[0], map.Characters);
+            Assert.Contains(characters[1], map.Characters);
         }
     }
 }
