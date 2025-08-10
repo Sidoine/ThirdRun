@@ -16,7 +16,7 @@ namespace ThirdRun.Graphics.Map
 
         public MapView(ContentManager contentManager)
         {
-            _tileTypeView = new TileTypeView();
+            _tileTypeView = new TileTypeView(contentManager);
             _characterView = new CharacterView(contentManager);
             _monsterView = new MonsterView(contentManager);
         }
