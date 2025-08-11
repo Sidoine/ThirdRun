@@ -49,7 +49,7 @@ namespace MonogameRPG.Monsters
             Map = map; // Also set the base class Map property
         }
         
-        public void SetWorldMap(ThirdRun.Data.Map.WorldMap worldMap)
+        public void SetWorldMap(MonogameRPG.Map.WorldMap worldMap)
         {
             WorldMap = worldMap;
         }

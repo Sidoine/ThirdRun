@@ -14,8 +14,8 @@ namespace MonogameRPG
         public bool IsDead => CurrentHealth <= 0;
         
         // Map properties for movement and pathfinding
-        public MonogameRPG.Map.Map Map { get; set; }
-        protected ThirdRun.Data.Map.WorldMap WorldMap { get; set; }
+        public MonogameRPG.Map.Map? Map { get; set; }
+        protected MonogameRPG.Map.WorldMap? WorldMap { get; set; }
         
         // Ability system
         public List<Ability> Abilities { get; private set; }

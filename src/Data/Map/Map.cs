@@ -79,7 +79,7 @@ namespace MonogameRPG.Map
             }
         }
 
-        public void SpawnMonsters(ThirdRun.Data.Map.WorldMap? worldMap = null)
+        public void SpawnMonsters(MonogameRPG.Map.WorldMap? worldMap = null)
         {
             // Clear existing monsters from units list
             var existingMonsters = Monsters;

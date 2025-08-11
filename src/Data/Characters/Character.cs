@@ -26,7 +26,7 @@ public class Character : Unit
     public Equipment? Armor { get; private set; }
     public List<string> Techniques { get; private set; }
 
-    public Character(string name, CharacterClass characterClass, int health, int attackPower, ThirdRun.Data.Map.WorldMap worldMap)
+    public Character(string name, CharacterClass characterClass, int health, int attackPower, MonogameRPG.Map.WorldMap worldMap)
     {
         Name = name;
         Class = characterClass;
