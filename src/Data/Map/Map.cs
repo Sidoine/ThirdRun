@@ -103,6 +103,9 @@ namespace MonogameRPG.Map
                     spawn.X * TileWidth + TileWidth / 2 - monsterSize / 2,
                     spawn.Y * TileHeight + TileHeight / 2 - monsterSize / 2) + Position;
                 
+                // Set reference to current map for AI behavior
+                monster.SetCurrentMap(this);
+                
                 AddUnit(monster);
             }
         }

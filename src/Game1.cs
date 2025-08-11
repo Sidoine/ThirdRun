@@ -91,14 +91,21 @@ namespace MonogameRPG
             foreach (var character in worldMap.CurrentMap.Characters.ToArray())
             {
                 character.UpdateGameTime((float)gameTime.TotalGameTime.TotalSeconds);
-                character.Move(worldMap.GetMonstersOnCurrentMap());
+                if (!character.IsDead) // Only move if alive
+                {
+                    character.Move(worldMap.GetMonstersOnCurrentMap());
+                }
             }
             
-            // Update monsters with game time too
+            // Update monsters with game time and AI behavior
             foreach (var monster in worldMap.GetMonstersOnCurrentMap())
             {
                 monster.UpdateGameTime((float)gameTime.TotalGameTime.TotalSeconds);
+                monster.Update(); // Add monster AI update
             }
+            
+            // Check for party wipe (all characters dead) and handle recovery
+            CheckForPartyWipe();
             KeyboardState keyboard = Keyboard.GetState();
             if (keyboard.IsKeyDown(Keys.I) && !_previousKeyboardState.IsKeyDown(Keys.I))
             {
@@ -190,6 +197,39 @@ namespace MonogameRPG
             _rootPanel.Draw();
             _spriteBatch.End();
             base.Draw(gameTime);
+        }
+
+        /// <summary>
+        /// Checks if all characters are dead and handles party wipe recovery
+        /// </summary>
+        private void CheckForPartyWipe()
+        {
+            var allCharacters = _gameState.Player.Characters;
+            if (allCharacters.Count > 0 && allCharacters.All(c => c.IsDead))
+            {
+                // All characters are dead - initiate party wipe recovery
+                HandlePartyWipe();
+            }
+        }
+
+        /// <summary>
+        /// Handles party wipe recovery by teleporting all characters to town with full health
+        /// </summary>
+        private void HandlePartyWipe()
+        {
+            // Restore all characters to full health
+            foreach (var character in _gameState.Player.Characters)
+            {
+                character.CurrentHealth = character.MaxHealth;
+            }
+            
+            // Force toggle to town mode if not already there
+            if (!_uiManager.CurrentState.IsInTown)
+            {
+                _uiManager.CurrentState.IsInTown = true;
+                worldMap.ToggleTownMode();
+                _previousTownState = true;
+            }
         }
     }
 }
