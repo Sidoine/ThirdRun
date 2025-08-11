@@ -11,22 +11,7 @@ namespace ThirdRun.Tests
 {
     public class UnitCollisionTests
     {
-        [Fact]
-        public void Unit_MoveToPosition_UpdatesPositionWithoutCollisionDetection()
-        {
-            // Arrange
-            var mockUnit = new MockUnit();
-            var initialPosition = new Vector2(10, 20);
-            var targetPosition = new Vector2(100, 200);
-            mockUnit.Position = initialPosition;
-            
-            // Act
-            mockUnit.MoveToPosition(targetPosition);
-            
-            // Assert
-            Assert.Equal(targetPosition, mockUnit.Position);
-        }
-        
+
         [Fact]
         public void Map_Tiles_InitializedWithMapGeneration()
         {
@@ -253,11 +238,11 @@ namespace ThirdRun.Tests
             // Assert - filtered views should work correctly
             Assert.Contains(character, map.Characters);
             Assert.Contains(npc, map.NPCs);
-            Assert.True(map.Monsters.Count > 0); // Should have spawned monsters
+            Assert.True(map.Monsters.Count() > 0); // Should have spawned monsters
             
             // Verify character count makes sense
-            Assert.Equal(1, map.Characters.Count);
-            Assert.Equal(1, map.NPCs.Count);
+            Assert.Equal(1, map.Characters.Count());
+            Assert.Equal(1, map.NPCs.Count());
             
             // Verify the character is not in the wrong lists
             Assert.Empty(map.Characters.OfType<NPC>());

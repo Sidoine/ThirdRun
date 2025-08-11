@@ -26,9 +26,9 @@ namespace MonogameRPG.Map
         private List<Unit> units = new List<Unit>();
         
         // Filtered views of the central units list
-        public List<Character> Characters => units.OfType<Character>().ToList();
-        public List<Monster> Monsters => units.OfType<Monster>().ToList();  
-        public List<NPC> NPCs => units.OfType<NPC>().ToList();
+        public IEnumerable<Character> Characters => units.OfType<Character>();
+        public IEnumerable<Monster> Monsters => units.OfType<Monster>();  
+        public IEnumerable<NPC> NPCs => units.OfType<NPC>();
         public bool IsTownZone { get; set; } = false;
         private Color characterColor = Color.CornflowerBlue;
         private readonly AdvancedMapGenerator mapGenerator;
@@ -212,7 +212,7 @@ namespace MonogameRPG.Map
 
         public List<Monster> GetMonsters()
         {
-            return Monsters;
+            return Monsters.ToList();
         }
 
         public bool HasLivingMonsters()

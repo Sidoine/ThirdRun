@@ -358,7 +358,7 @@ namespace MonogameRPG.Map
 
         public List<NPC> GetNPCsOnCurrentMap()
         {
-            return CurrentMap.NPCs;
+            return CurrentMap.NPCs.ToList();
         }
     }
 }

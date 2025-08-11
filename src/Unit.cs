@@ -61,13 +61,6 @@ namespace MonogameRPG
             UseAbility(DefaultAbility, target);
         }
         
-        /// <summary>
-        /// Moves the unit to the specified position without collision detection
-        /// </summary>
-        /// <param name="newPosition">The new position for the unit</param>
-        public void MoveToPosition(Vector2 newPosition)
-        {
-            Position = newPosition;
-        }
+
     }
 }
