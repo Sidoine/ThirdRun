@@ -17,9 +17,9 @@ namespace ThirdRun.Tests
             
             var characters = new List<Character>
             {
-                new Character("Warrior", CharacterClass.Guerrier, 100, 10, worldMap),
-                new Character("Mage", CharacterClass.Mage, 80, 8, worldMap),
-                new Character("Priest", CharacterClass.Prêtre, 90, 7, worldMap)
+                new Character("Warrior", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap),
+                new Character("Mage", CharacterClass.Mage, 80, 8, worldMap.CurrentMap, worldMap),
+                new Character("Priest", CharacterClass.Prêtre, 90, 7, worldMap.CurrentMap, worldMap)
             };
             
             // Kill all characters
@@ -42,9 +42,9 @@ namespace ThirdRun.Tests
             
             var characters = new List<Character>
             {
-                new Character("Warrior", CharacterClass.Guerrier, 100, 10, worldMap),
-                new Character("Mage", CharacterClass.Mage, 80, 8, worldMap),
-                new Character("Priest", CharacterClass.Prêtre, 90, 7, worldMap)
+                new Character("Warrior", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap),
+                new Character("Mage", CharacterClass.Mage, 80, 8, worldMap.CurrentMap, worldMap),
+                new Character("Priest", CharacterClass.Prêtre, 90, 7, worldMap.CurrentMap, worldMap)
             };
             
             // Kill only some characters
@@ -64,10 +64,10 @@ namespace ThirdRun.Tests
             var worldMap = new WorldMap();
             worldMap.Initialize();
             
-            var warrior = new Character("Warrior", CharacterClass.Guerrier, 100, 10, worldMap);
+            var warrior = new Character("Warrior", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
             warrior.CurrentHealth = 0; // Dead
             
-            var mage = new Character("Mage", CharacterClass.Mage, 80, 8, worldMap);
+            var mage = new Character("Mage", CharacterClass.Mage, 80, 8, worldMap.CurrentMap, worldMap);
             mage.CurrentHealth = 0; // Dead
             
             var characters = new List<Character> { warrior, mage };
@@ -92,7 +92,7 @@ namespace ThirdRun.Tests
             var worldMap = new WorldMap();
             worldMap.Initialize();
             
-            var character = new Character("DeadChar", CharacterClass.Guerrier, 100, 10, worldMap);
+            var character = new Character("DeadChar", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
             character.CurrentHealth = 0; // Dead
             var initialPosition = character.Position;
             

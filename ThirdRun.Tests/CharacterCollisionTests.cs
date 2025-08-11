@@ -17,8 +17,8 @@ namespace ThirdRun.Tests
             var worldMap = new WorldMap();
             worldMap.Initialize();
             
-            var character1 = new Character("Hero", CharacterClass.Guerrier, 100, 10, worldMap);
-            var character2 = new Character("Blocker", CharacterClass.Mage, 80, 8, worldMap);
+            var character1 = new Character("Hero", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
+            var character2 = new Character("Blocker", CharacterClass.Mage, 80, 8, worldMap.CurrentMap, worldMap);
             
             // Position character1 at tile (0,0) and character2 at tile (1,0)
             character1.Position = new Vector2(Map.TileWidth / 2, Map.TileHeight / 2);
@@ -55,7 +55,7 @@ namespace ThirdRun.Tests
             var worldMap = new WorldMap();
             worldMap.Initialize();
             
-            var character = new Character("Hero", CharacterClass.Guerrier, 100, 10, worldMap);
+            var character = new Character("Hero", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
             character.Position = new Vector2(Map.TileWidth / 2, Map.TileHeight / 2); // Center of tile (0,0)
             
             worldMap.SetCharacters(new List<Character> { character });
@@ -72,7 +72,7 @@ namespace ThirdRun.Tests
             while (Vector2.Distance(character.Position, targetPosition) > Map.TileWidth / 2 && movementAttempts < maxAttempts)
             {
                 // Create a mock monster far away to trigger movement towards targetPosition
-                var mockMonster = new Monster(MonsterTemplateRepository.CreateRandomMonsterTypeForLevel(1, 1));
+                var mockMonster = new Monster(MonsterTemplateRepository.CreateRandomMonsterTypeForLevel(1, 1, worldMap.CurrentMap, worldMap));
                 mockMonster.Position = targetPosition;
                 
                 character.Move(new List<Monster> { mockMonster });
@@ -92,7 +92,7 @@ namespace ThirdRun.Tests
             var worldMap = new WorldMap();
             worldMap.Initialize();
             
-            var character = new Character("Hero", CharacterClass.Guerrier, 100, 10, worldMap);
+            var character = new Character("Hero", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
             var initialTilePosition = new Vector2(Map.TileWidth / 2, Map.TileHeight / 2); // Center of tile (0,0)
             character.Position = initialTilePosition;
             
@@ -104,7 +104,7 @@ namespace ThirdRun.Tests
             
             // Act - move character to a different tile
             var targetTilePosition = new Vector2(Map.TileWidth * 2.5f, Map.TileHeight * 2.5f); // Center of tile (2,2)
-            var mockMonster = new Monster(MonsterTemplateRepository.CreateRandomMonsterTypeForLevel(1, 1));
+            var mockMonster = new Monster(MonsterTemplateRepository.CreateRandomMonsterTypeForLevel(1, 1, worldMap.CurrentMap, worldMap));
             mockMonster.Position = targetTilePosition;
             
             // Simulate movement

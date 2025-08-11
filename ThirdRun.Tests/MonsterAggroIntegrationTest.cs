@@ -28,13 +28,13 @@ namespace ThirdRun.Tests
             worldMap.Initialize();
             
             // Create characters
-            var warrior = new Character("Aragorn", CharacterClass.Guerrier, 100, 15, worldMap);
+            var warrior = new Character("Aragorn", CharacterClass.Guerrier, 100, 15, worldMap.CurrentMap, worldMap);
             warrior.Position = new Vector2(100, 100);
             
-            var mage = new Character("Gandalf", CharacterClass.Mage, 80, 12, worldMap);
+            var mage = new Character("Gandalf", CharacterClass.Mage, 80, 12, worldMap.CurrentMap, worldMap);
             mage.Position = new Vector2(120, 120);
             
-            var priest = new Character("Elrond", CharacterClass.Prêtre, 90, 10, worldMap);
+            var priest = new Character("Elrond", CharacterClass.Prêtre, 90, 10, worldMap.CurrentMap, worldMap);
             priest.Position = new Vector2(140, 140);
             
             var characters = new List<Character> { warrior, mage, priest };
@@ -42,17 +42,14 @@ namespace ThirdRun.Tests
             // Create monsters
             var monsterType = new MonsterType("Orc", 60, 8, "test_orc");
             
-            var orc1 = new Monster(monsterType);
+            var orc1 = new Monster(monsterType, worldMap.CurrentMap, worldMap);
             orc1.Position = new Vector2(150, 100); // Near warrior (50px distance)
-            orc1.SetCurrentMap(worldMap.CurrentMap);
             
-            var orc2 = new Monster(monsterType);
+            var orc2 = new Monster(monsterType, worldMap.CurrentMap, worldMap);
             orc2.Position = new Vector2(200, 150); // Near orc1 (can be awakened)
-            orc2.SetCurrentMap(worldMap.CurrentMap);
             
-            var orc3 = new Monster(monsterType);
+            var orc3 = new Monster(monsterType, worldMap.CurrentMap, worldMap);
             orc3.Position = new Vector2(500, 500); // Far away
-            orc3.SetCurrentMap(worldMap.CurrentMap);
             
             // Add units to map
             foreach (var character in characters)

@@ -12,7 +12,7 @@ public class InventoryEquipmentTests
         // Arrange
         var worldMap = new WorldMap();
         worldMap.Initialize();
-        var character = new Character("Test Warrior", CharacterClass.Guerrier, 100, 10, worldMap);
+        var character = new Character("Test Warrior", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         var weapon = new Weapon("Test Sword", "A test sword", 100, 5, 10);
         character.Inventory.AddItem(weapon);
         
@@ -34,7 +34,7 @@ public class InventoryEquipmentTests
         // Arrange
         var worldMap = new WorldMap();
         worldMap.Initialize();
-        var character = new Character("Test Warrior", CharacterClass.Guerrier, 100, 10, worldMap);
+        var character = new Character("Test Warrior", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         var armor = new Armor("Test Armor", "A test armor", 100, 3, 15);
         character.Inventory.AddItem(armor);
         
@@ -56,7 +56,7 @@ public class InventoryEquipmentTests
         // Arrange
         var worldMap = new WorldMap();
         worldMap.Initialize();
-        var character = new Character("Test Warrior", CharacterClass.Guerrier, 100, 10, worldMap);
+        var character = new Character("Test Warrior", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         var oldWeapon = new Weapon("Old Sword", "An old sword", 50, 3, 8);
         var newWeapon = new Weapon("New Sword", "A new sword", 100, 7, 12);
         
@@ -84,7 +84,7 @@ public class InventoryEquipmentTests
         // Arrange
         var worldMap = new WorldMap();
         worldMap.Initialize();
-        var character = new Character("Test Warrior", CharacterClass.Guerrier, 100, 10, worldMap);
+        var character = new Character("Test Warrior", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         var oldArmor = new Armor("Old Armor", "An old armor", 50, 2, 10);
         var newArmor = new Armor("New Armor", "A new armor", 100, 5, 20);
         
@@ -112,7 +112,7 @@ public class InventoryEquipmentTests
         // Arrange
         var worldMap = new WorldMap();
         worldMap.Initialize();
-        var character = new Character("Test Warrior", CharacterClass.Guerrier, 100, 10, worldMap);
+        var character = new Character("Test Warrior", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         var potion = new Potion("Health Potion", "Restores health", 50, 25);
         character.Inventory.AddItem(potion);
         
@@ -130,7 +130,7 @@ public class InventoryEquipmentTests
         // Arrange
         var worldMap = new WorldMap();
         worldMap.Initialize();
-        var character = new Character("Test Mage", CharacterClass.Mage, 100, 10, worldMap);
+        var character = new Character("Test Mage", CharacterClass.Mage, 100, 10, worldMap.CurrentMap, worldMap);
         var sword = new Weapon("Épée", "A sword that mages can't use", 100, 5, 10);
         character.Inventory.AddItem(sword);
         

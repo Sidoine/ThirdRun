@@ -12,7 +12,7 @@ namespace ThirdRun.Tests
         {
             var worldMap = new WorldMap();
             worldMap.Initialize();
-            var character = new Character("Test Warrior", CharacterClass.Guerrier, 100, 20, worldMap);
+            var character = new Character("Test Warrior", CharacterClass.Guerrier, 100, 20, worldMap.CurrentMap, worldMap);
             
             Assert.Equal(2, character.Abilities.Count);
             Assert.True(character.Abilities.Any(a => a.Name == "Melee Attack"));
@@ -24,7 +24,7 @@ namespace ThirdRun.Tests
         {
             var worldMap = new WorldMap();
             worldMap.Initialize();
-            var character = new Character("Test Hunter", CharacterClass.Chasseur, 100, 15, worldMap);
+            var character = new Character("Test Hunter", CharacterClass.Chasseur, 100, 15, worldMap.CurrentMap, worldMap);
             
             Assert.Equal(2, character.Abilities.Count);
             Assert.True(character.Abilities.Any(a => a.Name == "Melee Attack"));
@@ -36,7 +36,7 @@ namespace ThirdRun.Tests
         {
             var worldMap = new WorldMap();
             worldMap.Initialize();
-            var character = new Character("Test Priest", CharacterClass.Prêtre, 80, 10, worldMap);
+            var character = new Character("Test Priest", CharacterClass.Prêtre, 80, 10, worldMap.CurrentMap, worldMap);
             
             Assert.Equal(3, character.Abilities.Count);
             Assert.True(character.Abilities.Any(a => a.Name == "Melee Attack"));
@@ -49,7 +49,7 @@ namespace ThirdRun.Tests
         {
             var worldMap = new WorldMap();
             worldMap.Initialize();
-            var character = new Character("Test Mage", CharacterClass.Mage, 70, 12, worldMap);
+            var character = new Character("Test Mage", CharacterClass.Mage, 70, 12, worldMap.CurrentMap, worldMap);
             
             Assert.Equal(2, character.Abilities.Count);
             Assert.True(character.Abilities.Any(a => a.Name == "Melee Attack"));

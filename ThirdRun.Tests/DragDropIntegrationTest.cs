@@ -16,7 +16,7 @@ public class DragDropIntegrationTest
         // Arrange - Simulate game setup with items
         var worldMap = new WorldMap();
         worldMap.Initialize();
-        var character = new Character("Test Player", CharacterClass.Guerrier, 100, 10, worldMap);
+        var character = new Character("Test Player", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         
         // Add items at specific coordinates like they would appear in the UI
         var sword = new Weapon("Iron Sword", "A sturdy iron sword", 100, 5, 12);
@@ -66,7 +66,7 @@ public class DragDropIntegrationTest
         // Arrange - Character with items in inventory
         var worldMap = new WorldMap();
         worldMap.Initialize();
-        var character = new Character("Test Player", CharacterClass.Guerrier, 100, 10, worldMap);
+        var character = new Character("Test Player", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         
         var sword = new Weapon("Iron Sword", "A sturdy iron sword", 100, 5, 12);
         var armor = new Armor("Leather Armor", "Basic leather protection", 80, 3, 8);

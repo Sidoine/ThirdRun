@@ -22,11 +22,8 @@ namespace MonogameRPG.Monsters
         public float AggroRadius { get; set; } = 100f; // Default aggro radius in pixels
 
         public Character? Target { get; private set; } // Current target being chased
-        
-        // Reference to the map for accessing other units
-        private MonogameRPG.Map.Map? _currentMap;
 
-        public Monster(MonsterType type)
+        public Monster(MonsterType type, MonogameRPG.Map.Map map, MonogameRPG.Map.WorldMap worldMap) : base(map, worldMap)
         {
             Type = type;
 
@@ -42,30 +39,9 @@ namespace MonogameRPG.Monsters
             Position = new Vector2(0, 0); // Initial position
         }
 
-        public void SetCurrentMap(MonogameRPG.Map.Map map)
-        {
-            _currentMap = map;
-            Map = map; // Also set the base class Map property
-        }
-        
-        public void SetWorldMap(MonogameRPG.Map.WorldMap worldMap)
-        {
-            WorldMap = worldMap;
-        }
 
-        /// <summary>
-        /// Gets the attack range from the first available ability that targets enemies
-        /// </summary>
-        /// <returns>Attack range in pixels, or 0 if no suitable ability is available</returns>
-        private float GetAttackRange()
-        {
-            // Find the first ability that is not on cooldown and targets enemies
-            var availableAbility = Abilities.FirstOrDefault(ability => 
-                ability.TargetType == ThirdRun.Data.Abilities.TargetType.Enemy && 
-                !ability.IsOnCooldown(CurrentGameTime));
-                
-            return availableAbility?.Range ?? 0f;
-        }
+
+
 
         /// <summary>
         /// Updates monster AI behavior based on current state and nearby characters
@@ -73,7 +49,7 @@ namespace MonogameRPG.Monsters
         public void Update()
         {
             if (IsDead) return;
-            if (_currentMap == null) return;
+            if (Map == null) return;
 
             switch (State)
             {
@@ -92,9 +68,9 @@ namespace MonogameRPG.Monsters
         /// </summary>
         private void CheckForAggroTrigger()
         {
-            if (_currentMap == null) return;
+            if (Map == null) return;
             
-            var characters = _currentMap.Characters.Where(c => !c.IsDead);
+            var characters = Map.Characters.Where(c => !c.IsDead);
             foreach (var character in characters)
             {
                 float distance = Vector2.Distance(Position, character.Position);
@@ -129,10 +105,10 @@ namespace MonogameRPG.Monsters
         /// </summary>
         private void WakeUpNearbyMonsters()
         {
-            if (_currentMap == null) return;
+            if (Map == null) return;
             
             float wakeUpRadius = 150f; // Slightly larger than aggro radius
-            var nearbyMonsters = _currentMap.Monsters.Where(m => m != this && m.State == MonsterState.Sleeping);
+            var nearbyMonsters = Map.Monsters.Where(m => m != this && m.State == MonsterState.Sleeping);
             
             foreach (var monster in nearbyMonsters)
             {
@@ -180,14 +156,14 @@ namespace MonogameRPG.Monsters
         /// </summary>
         private void FindNewTarget()
         {
-            if (_currentMap == null)
+            if (Map == null)
             {
                 State = MonsterState.Sleeping;
                 Target = null;
                 return;
             }
 
-            var nearestCharacter = _currentMap.Characters
+            var nearestCharacter = Map.Characters
                 .Where(c => !c.IsDead)
                 .OrderBy(c => Vector2.Distance(Position, c.Position))
                 .FirstOrDefault();
@@ -220,7 +196,7 @@ namespace MonogameRPG.Monsters
         /// </summary>
         private void MoveTowardTarget()
         {
-            if (Target == null || _currentMap == null) return;
+            if (Target == null || Map == null) return;
 
             // Use the sophisticated pathfinding from the base class
             MoveTo(Target.Position);

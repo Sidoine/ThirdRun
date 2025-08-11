@@ -34,7 +34,7 @@ namespace MonogameRPG.Map
             townMap = new Map(new Point(-999, -999)); // Special position for town
             townMap.GenerateRandomMap();
             townMap.IsTownZone = true;
-            townMap.SpawnNPCs();
+            townMap.SpawnNPCs(this);
             maps[townMap.WorldPosition] = townMap;
         }
 

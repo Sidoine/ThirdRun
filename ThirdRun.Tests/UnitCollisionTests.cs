@@ -120,11 +120,12 @@ namespace ThirdRun.Tests
         public void Map_SpawnMonsters_UpdatesUnitGrid()
         {
             // Arrange
+            var worldMap = new WorldMap();
             var map = new Map(Point.Zero);
             map.GenerateRandomMap();
             
             // Act
-            map.SpawnMonsters();
+            map.SpawnMonsters(worldMap);
             
             // Assert
             var monsters = map.GetMonsters();
@@ -147,7 +148,7 @@ namespace ThirdRun.Tests
             var worldMap = new WorldMap();
             worldMap.Initialize();
             
-            var character = new Character("TestChar", CharacterClass.Guerrier, 100, 10, worldMap);
+            var character = new Character("TestChar", CharacterClass.Guerrier, 100, 10, map, worldMap);
             character.Position = new Vector2(Map.TileWidth / 2, Map.TileHeight / 2);
             map.SetCharacters(new List<Character> { character });
             
@@ -171,8 +172,8 @@ namespace ThirdRun.Tests
             var worldMap = new WorldMap();
             worldMap.Initialize();
             
-            var character1 = new Character("Char1", CharacterClass.Guerrier, 100, 10, worldMap);
-            var character2 = new Character("Char2", CharacterClass.Mage, 80, 8, worldMap);
+            var character1 = new Character("Char1", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
+            var character2 = new Character("Char2", CharacterClass.Mage, 80, 8, worldMap.CurrentMap, worldMap);
             
             // Position characters so char2 blocks a direct path
             character1.Position = new Vector2(Map.TileWidth / 2, Map.TileHeight / 2); // (0,0)
@@ -199,8 +200,8 @@ namespace ThirdRun.Tests
             var worldMap = new WorldMap();
             worldMap.Initialize();
             
-            var character = new Character("Attacker", CharacterClass.Guerrier, 100, 10, worldMap);
-            var target = new Character("Target", CharacterClass.Mage, 80, 8, worldMap);
+            var character = new Character("Attacker", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
+            var target = new Character("Target", CharacterClass.Mage, 80, 8, worldMap.CurrentMap, worldMap);
             
             character.Position = new Vector2(Map.TileWidth / 2, Map.TileHeight / 2); // (0,0)
             target.Position = new Vector2(Map.TileWidth / 2, Map.TileHeight * 1.5f); // (0,1)
@@ -225,15 +226,15 @@ namespace ThirdRun.Tests
             var worldMap = new WorldMap();
             worldMap.Initialize();
             
-            var character = new Character("TestChar", CharacterClass.Guerrier, 100, 10, worldMap);
+            var character = new Character("TestChar", CharacterClass.Guerrier, 100, 10, map, worldMap);
             character.Position = new Vector2(Map.TileWidth / 2, Map.TileHeight / 2);
             
-            var npc = new NPC("TestNPC", NPCType.Merchant, new Vector2(Map.TileWidth * 1.5f, Map.TileHeight / 2));
+            var npc = new NPC("TestNPC", NPCType.Merchant, new Vector2(Map.TileWidth * 1.5f, Map.TileHeight / 2), map, worldMap);
             
             // Act
             map.AddUnit(character);
             map.AddUnit(npc);
-            map.SpawnMonsters(); // This will add monsters
+            map.SpawnMonsters(worldMap); // This will add monsters
             
             // Assert - filtered views should work correctly
             Assert.Contains(character, map.Characters);
@@ -253,7 +254,7 @@ namespace ThirdRun.Tests
     // Mock Unit class for testing
     public class MockUnit : Unit
     {
-        public MockUnit()
+        public MockUnit() : base(new Map(Point.Zero), new WorldMap())
         {
             Position = Vector2.Zero;
             CurrentHealth = 100;

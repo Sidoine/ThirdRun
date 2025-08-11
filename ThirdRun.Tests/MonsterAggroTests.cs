@@ -15,7 +15,7 @@ namespace ThirdRun.Tests
         {
             // Arrange
             var monsterType = new MonsterType("Test Monster", 50, 10, "test");
-            var monster = new Monster(monsterType);
+            var monster = new Monster(monsterType, worldMap.CurrentMap, worldMap);
 
             // Assert
             Assert.Equal(MonsterState.Sleeping, monster.State);
@@ -26,7 +26,7 @@ namespace ThirdRun.Tests
         {
             // Arrange
             var monsterType = new MonsterType("Test Monster", 50, 10, "test");
-            var monster = new Monster(monsterType);
+            var monster = new Monster(monsterType, worldMap.CurrentMap, worldMap);
 
             // Assert
             Assert.True(monster.AggroRadius > 0);
@@ -40,15 +40,12 @@ namespace ThirdRun.Tests
             var worldMap = new WorldMap();
             worldMap.Initialize();
             
-            var character = new Character("TestChar", CharacterClass.Guerrier, 100, 10, worldMap);
+            var character = new Character("TestChar", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
             character.Position = new Vector2(0, 0);
             
             var monsterType = new MonsterType("Test Monster", 50, 10, "test");
-            var monster = new Monster(monsterType);
-            monster.Position = new Vector2(50, 0); // Within default aggro radius (100)
-            monster.SetCurrentMap(worldMap.CurrentMap);
-            
-            // Add units to the map
+            var monster = new Monster(monsterType, worldMap.CurrentMap, worldMap);
+            monster.Position = new Vector2(50, 0); // Within default aggro radius (100)            // Add units to the map
             worldMap.CurrentMap.AddUnit(character);
             worldMap.CurrentMap.AddUnit(monster);
 
@@ -67,15 +64,12 @@ namespace ThirdRun.Tests
             var worldMap = new WorldMap();
             worldMap.Initialize();
             
-            var character = new Character("TestChar", CharacterClass.Guerrier, 100, 10, worldMap);
+            var character = new Character("TestChar", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
             character.Position = new Vector2(0, 0);
             
             var monsterType = new MonsterType("Test Monster", 50, 10, "test");
-            var monster = new Monster(monsterType);
-            monster.Position = new Vector2(200, 0); // Outside aggro radius (100)
-            monster.SetCurrentMap(worldMap.CurrentMap);
-            
-            // Add units to the map
+            var monster = new Monster(monsterType, worldMap.CurrentMap, worldMap);
+            monster.Position = new Vector2(200, 0); // Outside aggro radius (100)            // Add units to the map
             worldMap.CurrentMap.AddUnit(character);
             worldMap.CurrentMap.AddUnit(monster);
 
@@ -94,16 +88,13 @@ namespace ThirdRun.Tests
             var worldMap = new WorldMap();
             worldMap.Initialize();
             
-            var character = new Character("TestChar", CharacterClass.Guerrier, 100, 10, worldMap);
+            var character = new Character("TestChar", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
             character.Position = new Vector2(0, 0);
             character.CurrentHealth = 0; // Dead character
             
             var monsterType = new MonsterType("Test Monster", 50, 10, "test");
-            var monster = new Monster(monsterType);
-            monster.Position = new Vector2(50, 0); // Within aggro radius
-            monster.SetCurrentMap(worldMap.CurrentMap);
-            
-            // Add units to the map
+            var monster = new Monster(monsterType, worldMap.CurrentMap, worldMap);
+            monster.Position = new Vector2(50, 0); // Within aggro radius            // Add units to the map
             worldMap.CurrentMap.AddUnit(character);
             worldMap.CurrentMap.AddUnit(monster);
 
@@ -122,22 +113,19 @@ namespace ThirdRun.Tests
             var worldMap = new WorldMap();
             worldMap.Initialize();
             
-            var character = new Character("TestChar", CharacterClass.Guerrier, 100, 10, worldMap);
+            var character = new Character("TestChar", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
             character.Position = new Vector2(0, 0);
             
             var monsterType = new MonsterType("Test Monster", 50, 10, "test");
             
-            var monster1 = new Monster(monsterType);
+            var monster1 = new Monster(monsterType, worldMap.CurrentMap, worldMap);
             monster1.Position = new Vector2(50, 0); // Within aggro radius
-            monster1.SetCurrentMap(worldMap.CurrentMap);
             
-            var monster2 = new Monster(monsterType);
+            var monster2 = new Monster(monsterType, worldMap.CurrentMap, worldMap);
             monster2.Position = new Vector2(100, 0); // Within wake up radius of monster1
-            monster2.SetCurrentMap(worldMap.CurrentMap);
             
-            var monster3 = new Monster(monsterType);
+            var monster3 = new Monster(monsterType, worldMap.CurrentMap, worldMap);
             monster3.Position = new Vector2(300, 0); // Too far away
-            monster3.SetCurrentMap(worldMap.CurrentMap);
             
             // Add units to the map
             worldMap.CurrentMap.AddUnit(character);
@@ -161,18 +149,15 @@ namespace ThirdRun.Tests
             var worldMap = new WorldMap();
             worldMap.Initialize();
             
-            var character1 = new Character("Char1", CharacterClass.Guerrier, 100, 10, worldMap);
+            var character1 = new Character("Char1", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
             character1.Position = new Vector2(0, 0);
             
-            var character2 = new Character("Char2", CharacterClass.Mage, 80, 8, worldMap);
+            var character2 = new Character("Char2", CharacterClass.Mage, 80, 8, worldMap.CurrentMap, worldMap);
             character2.Position = new Vector2(50, 50);
             
             var monsterType = new MonsterType("Test Monster", 50, 10, "test");
-            var monster = new Monster(monsterType);
-            monster.Position = new Vector2(25, 25);
-            monster.SetCurrentMap(worldMap.CurrentMap);
-            
-            // Add units to the map
+            var monster = new Monster(monsterType, worldMap.CurrentMap, worldMap);
+            monster.Position = new Vector2(25, 25);            // Add units to the map
             worldMap.CurrentMap.AddUnit(character1);
             worldMap.CurrentMap.AddUnit(character2);
             worldMap.CurrentMap.AddUnit(monster);
@@ -197,15 +182,12 @@ namespace ThirdRun.Tests
             var worldMap = new WorldMap();
             worldMap.Initialize();
             
-            var character = new Character("TestChar", CharacterClass.Guerrier, 100, 10, worldMap);
+            var character = new Character("TestChar", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
             character.Position = new Vector2(0, 0);
             
             var monsterType = new MonsterType("Test Monster", 50, 10, "test");
-            var monster = new Monster(monsterType);
-            monster.Position = new Vector2(50, 0);
-            monster.SetCurrentMap(worldMap.CurrentMap);
-            
-            // Add units to the map
+            var monster = new Monster(monsterType, worldMap.CurrentMap, worldMap);
+            monster.Position = new Vector2(50, 0);            // Add units to the map
             worldMap.CurrentMap.AddUnit(character);
             worldMap.CurrentMap.AddUnit(monster);
 
@@ -230,14 +212,12 @@ namespace ThirdRun.Tests
             var worldMap = new WorldMap();
             worldMap.Initialize();
             
-            var character = new Character("TestChar", CharacterClass.Guerrier, 100, 10, worldMap);
+            var character = new Character("TestChar", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
             character.Position = new Vector2(0, 0);
             
             var monsterType = new MonsterType("Test Monster", 50, 10, "test");
-            var monster = new Monster(monsterType);
-            monster.Position = new Vector2(25, 0); // Within melee attack range (32)
-            monster.SetCurrentMap(worldMap.CurrentMap);
-            monster.UpdateGameTime(0f); // Set game time for cooldown checks
+            var monster = new Monster(monsterType, worldMap.CurrentMap, worldMap);
+            monster.Position = new Vector2(25, 0); // Within melee attack range (32)            monster.UpdateGameTime(0f); // Set game time for cooldown checks
             
             // Add units to the map
             worldMap.CurrentMap.AddUnit(character);
@@ -263,16 +243,13 @@ namespace ThirdRun.Tests
             var worldMap = new WorldMap();
             worldMap.Initialize();
             
-            var character = new Character("TestChar", CharacterClass.Guerrier, 100, 10, worldMap);
+            var character = new Character("TestChar", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
             character.Position = new Vector2(0, 0);
             
             var monsterType = new MonsterType("Test Monster", 50, 10, "test");
-            var monster = new Monster(monsterType);
+            var monster = new Monster(monsterType, worldMap.CurrentMap, worldMap);
             monster.Position = new Vector2(50, 0);
-            monster.CurrentHealth = 0; // Dead monster
-            monster.SetCurrentMap(worldMap.CurrentMap);
-            
-            // Add units to the map
+            monster.CurrentHealth = 0; // Dead monster            // Add units to the map
             worldMap.CurrentMap.AddUnit(character);
             worldMap.CurrentMap.AddUnit(monster);
 

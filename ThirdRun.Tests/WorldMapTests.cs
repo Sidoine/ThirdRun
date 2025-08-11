@@ -64,7 +64,7 @@ namespace ThirdRun.Tests
                 // This might fail due to ContentManager being null, but that's expected in unit tests
                 for (int i = 0; i < 3; i++)
                 {
-                    var character = new Character($"TestChar{i}", CharacterClass.Guerrier, 100, 10, worldMap);
+                    var character = new Character($"TestChar{i}", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
                     character.Position = new Vector2(i * 10, i * 10);
                     characters.Add(character);
                 }
@@ -114,7 +114,7 @@ namespace ThirdRun.Tests
 
             try
             {
-                var character = new Character("TestTransition", CharacterClass.Mage, 50, 15, worldMap);
+                var character = new Character("TestTransition", CharacterClass.Mage, 50, 15, worldMap.CurrentMap, worldMap);
                 character.Position = new Vector2(100, 100);
                 characters.Add(character);
 

@@ -8,7 +8,7 @@ namespace ThirdRun.Data.NPCs
         public string Name { get; set; }
         public NPCType Type { get; set; }
 
-        public NPC(string name, NPCType type, Vector2 position)
+        public NPC(string name, NPCType type, Vector2 position, MonogameRPG.Map.Map map, MonogameRPG.Map.WorldMap worldMap) : base(map, worldMap)
         {
             Name = name;
             Type = type;

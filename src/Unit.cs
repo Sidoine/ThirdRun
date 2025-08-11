@@ -34,12 +34,14 @@ namespace MonogameRPG
             set => Characteristics.SetValue(Characteristic.MeleeAttackPower, value);
         }
 
-        protected Unit()
+        protected Unit(MonogameRPG.Map.Map map, MonogameRPG.Map.WorldMap worldMap)
         {
             Characteristics = new CharacteristicValues();
             Abilities = new List<Ability>();
             DefaultAbility = new MeleeAttackAbility();
             Abilities.Add(DefaultAbility);
+            Map = map;
+            WorldMap = worldMap;
         }
         
         // Game time tracking - this should be set by the game loop
@@ -64,6 +66,20 @@ namespace MonogameRPG
         public void Attack(Unit target)
         {
             UseAbility(DefaultAbility, target);
+        }
+        
+        /// <summary>
+        /// Gets the attack range from the first available ability that targets enemies
+        /// </summary>
+        /// <returns>Attack range in pixels, or 0 if no suitable ability is available</returns>
+        protected float GetAttackRange()
+        {
+            // Find the first ability that is not on cooldown and targets enemies
+            var availableAbility = Abilities.FirstOrDefault(ability => 
+                ability.TargetType == ThirdRun.Data.Abilities.TargetType.Enemy && 
+                !ability.IsOnCooldown(CurrentGameTime));
+                
+            return availableAbility?.Range ?? 0f;
         }
         
         /// <summary>

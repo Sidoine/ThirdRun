@@ -27,7 +27,9 @@ namespace ThirdRun.Tests
         public void NPC_ShouldHavePropertiesAndGreeting()
         {
             // Arrange
-            var npc = new NPC("Marcus", NPCType.Merchant, Vector2.Zero);
+            var worldMap = new WorldMap();
+            var map = new Map(Point.Zero);
+            var npc = new NPC("Marcus", NPCType.Merchant, Vector2.Zero, map, worldMap);
             
             // Assert
             Assert.Equal("Marcus", npc.Name);
@@ -40,9 +42,10 @@ namespace ThirdRun.Tests
         public void Map_ShouldSupportTownZone()
         {
             // Arrange
+            var worldMap = new WorldMap();
             var map = new Map(Point.Zero);
             map.GenerateRandomMap();
-            map.SpawnMonsters();
+            map.SpawnMonsters(worldMap);
             
             // Initially should not be a town and have monsters
             Assert.False(map.IsTownZone);
@@ -53,7 +56,7 @@ namespace ThirdRun.Tests
             var townMap = new Map(new Point(-999, -999));
             townMap.GenerateRandomMap();
             townMap.IsTownZone = true;
-            townMap.SpawnNPCs();
+            townMap.SpawnNPCs(worldMap);
             
             // Assert
             Assert.True(townMap.IsTownZone);
@@ -98,8 +101,8 @@ namespace ThirdRun.Tests
             
             var characters = new List<Character>
             {
-                new Character("Test1", CharacterClass.Guerrier, 100, 10, worldMap),
-                new Character("Test2", CharacterClass.Mage, 80, 12, worldMap)
+                new Character("Test1", CharacterClass.Guerrier, 100, 10, map, worldMap),
+                new Character("Test2", CharacterClass.Mage, 80, 12, map, worldMap)
             };
             
             // Set initial positions that are likely outside the map bounds

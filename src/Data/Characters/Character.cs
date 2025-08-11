@@ -26,11 +26,10 @@ public class Character : Unit
     public Equipment? Armor { get; private set; }
     public List<string> Techniques { get; private set; }
 
-    public Character(string name, CharacterClass characterClass, int health, int attackPower, MonogameRPG.Map.WorldMap worldMap)
+    public Character(string name, CharacterClass characterClass, int health, int attackPower, MonogameRPG.Map.Map map, MonogameRPG.Map.WorldMap worldMap) : base(map, worldMap)
     {
         Name = name;
         Class = characterClass;
-        WorldMap = worldMap;
 
         CurrentHealth = health;
         MaxHealth = health;
@@ -39,7 +38,6 @@ public class Character : Unit
         Inventory = new Inventory() { Owner = this };
         Techniques = new List<string>();
         Position = new Vector2(0, 0); // Position initiale
-        Map = worldMap.CurrentMap;
         
         // Add class-specific abilities
         InitializeClassAbilities();

@@ -23,22 +23,22 @@ namespace ThirdRun.Data
                 MonogameRPG.Map.Map.GridHeight / 2 * MonogameRPG.Map.Map.TileHeight + MonogameRPG.Map.Map.TileHeight / 2);
             
             // Création des quatre personnages requis
-            var warrior = new Character("Guerrier", CharacterClass.Guerrier, 35, 12, worldMap)
+            var warrior = new Character("Guerrier", CharacterClass.Guerrier, 35, 12, worldMap.CurrentMap, worldMap)
             {
                 Position = startPosition
             };
             
-            var hunter = new Character("Chasseur", CharacterClass.Chasseur, 30, 10, worldMap)
+            var hunter = new Character("Chasseur", CharacterClass.Chasseur, 30, 10, worldMap.CurrentMap, worldMap)
             {
                 Position = startPosition + new Vector2(20, 0) // Légèrement décalé
             };
             
-            var mage = new Character("Mage", CharacterClass.Mage, 25, 8, worldMap)
+            var mage = new Character("Mage", CharacterClass.Mage, 25, 8, worldMap.CurrentMap, worldMap)
             {
                 Position = startPosition + new Vector2(0, 20) // Légèrement décalé
             };
             
-            var priest = new Character("Prêtre", CharacterClass.Prêtre, 28, 6, worldMap)
+            var priest = new Character("Prêtre", CharacterClass.Prêtre, 28, 6, worldMap.CurrentMap, worldMap)
             {
                 Position = startPosition + new Vector2(20, 20) // Légèrement décalé
             };

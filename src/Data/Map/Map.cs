@@ -79,7 +79,7 @@ namespace MonogameRPG.Map
             }
         }
 
-        public void SpawnMonsters(MonogameRPG.Map.WorldMap? worldMap = null)
+        public void SpawnMonsters(MonogameRPG.Map.WorldMap worldMap)
         {
             // Clear existing monsters from units list
             var existingMonsters = Monsters;
@@ -98,25 +98,16 @@ namespace MonogameRPG.Map
             {
                 // Use MonsterTemplateRepository to get appropriate monster for area level
                 var type = MonsterTemplateRepository.CreateRandomMonsterTypeForLevel(1, areaLevel + 1);
-                var monster = new Monster(type);
+                var monster = new Monster(type, this, worldMap);
                 monster.Position = new Vector2(
                     spawn.X * TileWidth + TileWidth / 2 - monsterSize / 2,
                     spawn.Y * TileHeight + TileHeight / 2 - monsterSize / 2) + Position;
-                
-                // Set reference to current map for AI behavior
-                monster.SetCurrentMap(this);
-                
-                // Set WorldMap reference if provided
-                if (worldMap != null)
-                {
-                    monster.SetWorldMap(worldMap);
-                }
                 
                 AddUnit(monster);
             }
         }
 
-        public void SpawnNPCs()
+        public void SpawnNPCs(MonogameRPG.Map.WorldMap worldMap)
         {
             // Clear existing NPCs from units list
             var existingNPCs = NPCs;
@@ -144,7 +135,7 @@ namespace MonogameRPG.Map
                 var pos = walkablePositions[i];
                 var npc = new NPC(def.name, def.type, new Vector2(
                     pos.X * TileWidth + TileWidth / 2,
-                    pos.Y * TileHeight + TileHeight / 2) + Position);
+                    pos.Y * TileHeight + TileHeight / 2) + Position, this, worldMap);
                 AddUnit(npc);
             }
         }
