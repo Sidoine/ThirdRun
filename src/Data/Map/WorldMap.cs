@@ -230,7 +230,7 @@ namespace MonogameRPG.Map
         }
 
         // Retourne la liste des cases accessibles (Herbe) autour d'une case
-        public List<(Point point, int cost)> GetNeighbors(Point cell)
+        public List<(Point point, int cost)> GetNeighbors(Point cell, Point? targetCell = null)
         {
             var neighbors = new List<(Point point, int cost)>();
             int[,] directions = new int[,] { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 } };
@@ -252,10 +252,25 @@ namespace MonogameRPG.Map
                 {
                     var rx = nx - mapX * Map.GridWidth;
                     var ry = ny - mapY * Map.GridHeight;
+                    
+                    Point neighborPoint = new Point(nx, ny);
+                    
                     if (map.Tiles[rx, ry].IsWalkable)
-                        neighbors.Add((new Point(nx, ny), 1));
+                    {
+                        // Check for unit collision
+                        var unitAtTile = map.GetUnitAtTile(rx, ry);
+                        bool isOccupied = unitAtTile != null;
+                        bool isTarget = targetCell.HasValue && neighborPoint == targetCell.Value;
+                        
+                        if (!isOccupied || isTarget)
+                        {
+                            // Allow movement to unoccupied tiles or to the target tile (for combat)
+                            neighbors.Add((neighborPoint, 1));
+                        }
+                        // If occupied and not target, don't add as neighbor (blocked)
+                    }
                     else if (map != CurrentMap)
-                        neighbors.Add((new Point(nx, ny), 10));
+                        neighbors.Add((neighborPoint, 10));
                 }
             }
             return neighbors;
@@ -279,7 +294,7 @@ namespace MonogameRPG.Map
                 if (current == endCell)
                     return ReconstructPath(cameFrom, current);
                 openSet.Remove(openSet.Min);
-                foreach (var (neighbor, cost) in GetNeighbors(current))
+                foreach (var (neighbor, cost) in GetNeighbors(current, endCell))
                 {
                     float tentativeG = gScore[current] + cost;
                     if (!gScore.ContainsKey(neighbor) || tentativeG < gScore[neighbor])

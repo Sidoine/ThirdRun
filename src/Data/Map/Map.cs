@@ -29,6 +29,10 @@ namespace MonogameRPG.Map
         public bool IsTownZone { get; set; } = false;
         private Color characterColor = Color.CornflowerBlue;
         private readonly AdvancedMapGenerator mapGenerator;
+        
+        // Unit collision tracking - grid that tracks which unit is on each tile
+        private Unit?[,] unitGrid;
+        public Unit?[,] UnitGrid => unitGrid;
 
 
 
@@ -37,6 +41,7 @@ namespace MonogameRPG.Map
             WorldPosition = worldPosition;
             monsterSpawnPoints = new List<Vector2>();
             tiles = new TileType[0, 0];
+            unitGrid = new Unit?[0, 0];
             
             // Create map generator with seed based on world position for consistency
             int seed = worldPosition.X * 1000 + worldPosition.Y;
@@ -47,6 +52,8 @@ namespace MonogameRPG.Map
         {
             // Use advanced map generator instead of simple random generation
             tiles = mapGenerator.GenerateMap(GridWidth, GridHeight, WorldPosition);
+            // Initialize unit grid with same dimensions
+            unitGrid = new Unit?[GridWidth, GridHeight];
             
             // Find suitable spawn points for monsters on walkable terrain
             monsterSpawnPoints.Clear();
@@ -85,6 +92,9 @@ namespace MonogameRPG.Map
                     spawn.X * TileWidth + TileWidth / 2 - monsterSize / 2,
                     spawn.Y * TileHeight + TileHeight / 2 - monsterSize / 2) + Position;
                 monsters.Add(monster);
+                
+                // Update unit grid
+                UpdateUnitPosition(monster);
             }
         }
 
@@ -126,7 +136,7 @@ namespace MonogameRPG.Map
                 int x = rand.Next(GridWidth);
                 int y = rand.Next(GridHeight);
                 
-                if (tiles[x, y].IsWalkable)
+                if (tiles[x, y].IsWalkable && unitGrid[x, y] == null)
                 {
                     positions.Add(new Vector2(x, y));
                 }
@@ -140,12 +150,30 @@ namespace MonogameRPG.Map
 
         public void SetCharacters(List<Character> chars)
         {
+            // Clear old characters from grid
+            foreach (var oldChar in characters)
+            {
+                RemoveUnitFromGrid(oldChar);
+            }
+            
             characters.Clear();
             characters.AddRange(chars);
+            
+            // Add new characters to grid
+            foreach (var character in characters)
+            {
+                UpdateUnitPosition(character);
+            }
         }
 
         public void TeleportCharacters(List<Character> chars)
         {
+            // Clear old characters from grid
+            foreach (var oldChar in characters)
+            {
+                RemoveUnitFromGrid(oldChar);
+            }
+            
             characters.Clear();
             characters.AddRange(chars);
             
@@ -159,6 +187,9 @@ namespace MonogameRPG.Map
                 chars[i].Position = new Vector2(
                     pos.X * TileWidth + TileWidth / 2,
                     pos.Y * TileHeight + TileHeight / 2) + Position;
+                
+                // Update unit grid
+                UpdateUnitPosition(chars[i]);
             }
         }
 
@@ -182,6 +213,139 @@ namespace MonogameRPG.Map
                     return true;
             }
             return false;
+        }
+        
+        /// <summary>
+        /// Converts world position to tile coordinates on this map
+        /// </summary>
+        /// <param name="worldPosition">World position in pixels</param>
+        /// <returns>Tile coordinates, or null if position is outside this map</returns>
+        public Point? WorldPositionToTileCoordinates(Vector2 worldPosition)
+        {
+            // Convert world position to relative position on this map
+            Vector2 relativePos = worldPosition - Position;
+            
+            // Convert to tile coordinates
+            int tileX = (int)(relativePos.X / TileWidth);
+            int tileY = (int)(relativePos.Y / TileHeight);
+            
+            // Check bounds
+            if (tileX >= 0 && tileX < GridWidth && tileY >= 0 && tileY < GridHeight)
+            {
+                return new Point(tileX, tileY);
+            }
+            
+            return null;
+        }
+        
+        /// <summary>
+        /// Gets the unit at the specified tile coordinates
+        /// </summary>
+        /// <param name="tileX">X coordinate of the tile</param>
+        /// <param name="tileY">Y coordinate of the tile</param>
+        /// <returns>Unit at the tile, or null if no unit or out of bounds</returns>
+        public Unit? GetUnitAtTile(int tileX, int tileY)
+        {
+            if (tileX >= 0 && tileX < GridWidth && tileY >= 0 && tileY < GridHeight)
+            {
+                return unitGrid[tileX, tileY];
+            }
+            return null;
+        }
+        
+        /// <summary>
+        /// Gets the unit at the specified world position
+        /// </summary>
+        /// <param name="worldPosition">World position in pixels</param>
+        /// <returns>Unit at the position, or null if no unit or out of bounds</returns>
+        public Unit? GetUnitAtWorldPosition(Vector2 worldPosition)
+        {
+            var tileCoords = WorldPositionToTileCoordinates(worldPosition);
+            if (tileCoords.HasValue)
+            {
+                return GetUnitAtTile(tileCoords.Value.X, tileCoords.Value.Y);
+            }
+            return null;
+        }
+        
+        /// <summary>
+        /// Updates the unit's position in the unit grid
+        /// </summary>
+        /// <param name="unit">The unit to update</param>
+        /// <param name="oldPosition">The unit's previous position (to clear the old grid location)</param>
+        public void UpdateUnitPosition(Unit unit, Vector2? oldPosition = null)
+        {
+            // Clear old position if provided
+            if (oldPosition.HasValue)
+            {
+                var oldTileCoords = WorldPositionToTileCoordinates(oldPosition.Value);
+                if (oldTileCoords.HasValue)
+                {
+                    var oldX = oldTileCoords.Value.X;
+                    var oldY = oldTileCoords.Value.Y;
+                    if (unitGrid[oldX, oldY] == unit)
+                    {
+                        unitGrid[oldX, oldY] = null;
+                    }
+                }
+            }
+            
+            // Set new position
+            var newTileCoords = WorldPositionToTileCoordinates(unit.Position);
+            if (newTileCoords.HasValue)
+            {
+                var newX = newTileCoords.Value.X;
+                var newY = newTileCoords.Value.Y;
+                unitGrid[newX, newY] = unit;
+            }
+        }
+        
+        /// <summary>
+        /// Removes a unit from the unit grid
+        /// </summary>
+        /// <param name="unit">The unit to remove</param>
+        public void RemoveUnitFromGrid(Unit unit)
+        {
+            var tileCoords = WorldPositionToTileCoordinates(unit.Position);
+            if (tileCoords.HasValue)
+            {
+                var x = tileCoords.Value.X;
+                var y = tileCoords.Value.Y;
+                if (unitGrid[x, y] == unit)
+                {
+                    unitGrid[x, y] = null;
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Refreshes the entire unit grid by clearing it and re-adding all units
+        /// </summary>
+        public void RefreshUnitGrid()
+        {
+            // Clear the grid
+            for (int x = 0; x < GridWidth; x++)
+            {
+                for (int y = 0; y < GridHeight; y++)
+                {
+                    unitGrid[x, y] = null;
+                }
+            }
+            
+            // Re-add all characters
+            foreach (var character in characters)
+            {
+                UpdateUnitPosition(character);
+            }
+            
+            // Re-add all monsters
+            foreach (var monster in monsters)
+            {
+                if (!monster.IsDead)
+                {
+                    UpdateUnitPosition(monster);
+                }
+            }
         }
     }
 
