@@ -253,6 +253,12 @@ namespace MonogameRPG.Map
                     var rx = nx - mapX * Map.GridWidth;
                     var ry = ny - mapY * Map.GridHeight;
                     
+                    // Add bounds checking to prevent IndexOutOfRangeException
+                    if (rx < 0 || rx >= Map.GridWidth || ry < 0 || ry >= Map.GridHeight)
+                    {
+                        continue; // Skip this neighbor as coordinates are out of bounds
+                    }
+                    
                     Point neighborPoint = new Point(nx, ny);
                     
                     if (map.Tiles[rx, ry].IsWalkable)

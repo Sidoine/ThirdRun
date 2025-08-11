@@ -32,8 +32,7 @@ namespace ThirdRun.Tests
             
             var startTime = TimeSpan.Zero;
             var frameTimeIncrement = TimeSpan.FromMilliseconds(16.67); // ~60 FPS
-            var criticalExceptions = new List<Exception>();
-            var pathfindingExceptionCount = 0;
+            var exceptions = new List<Exception>();
             
             // Track character positions to verify movement occurs
             var previousPositions = new Dictionary<Character, Vector2>();
@@ -68,32 +67,16 @@ namespace ThirdRun.Tests
                 }
                 catch (Exception ex)
                 {
-                    // Separate pathfinding exceptions (known issue with long runs) from critical exceptions
-                    if (ex.InnerException is IndexOutOfRangeException && 
-                        ex.Message.Contains("Index was outside the bounds of the array"))
-                    {
-                        pathfindingExceptionCount++;
-                        // Allow pathfinding exceptions but stop if they become excessive (>50% of frames)
-                        if (pathfindingExceptionCount > 5000)
-                        {
-                            criticalExceptions.Add(new Exception($"Excessive pathfinding exceptions (>{pathfindingExceptionCount}) - game became unstable", ex));
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        // These are unexpected critical exceptions that should cause failure
-                        criticalExceptions.Add(new Exception($"Critical exception on frame {frame}: {ex.Message}", ex));
-                    }
+                    exceptions.Add(new Exception($"Exception on frame {frame}: {ex.Message}", ex));
                 }
             }
             
-            // Assert - Verify no critical exceptions occurred during the 10000 frame simulation
-            if (criticalExceptions.Count > 0)
+            // Assert - Verify no exceptions occurred during the 10000 frame simulation
+            if (exceptions.Count > 0)
             {
                 var aggregateException = new AggregateException(
-                    $"Game engine threw {criticalExceptions.Count} critical exception(s) during 10000 frame test. Pathfinding exceptions: {pathfindingExceptionCount}",
-                    criticalExceptions
+                    $"Game engine threw {exceptions.Count} exception(s) during 10000 frame test",
+                    exceptions
                 );
                 throw aggregateException;
             }
@@ -259,6 +242,74 @@ namespace ThirdRun.Tests
             // Verify the world map is still in a valid state
             Assert.NotNull(worldMap.CurrentMap);
             Assert.NotEmpty(gameState.Player.Characters);
+        }
+        
+        [Fact]
+        public void GameEngine_PathfindingBoundsCheck_ShouldNotThrowIndexOutOfRangeException()
+        {
+            // This test specifically targets the pathfinding bounds issue
+            // that could cause IndexOutOfRangeException during long runs
+            
+            var worldMap = new WorldMap();
+            worldMap.Initialize();
+            
+            var gameState = new GameState
+            {
+                Player = new Player(worldMap),
+                WorldMap = worldMap,
+            };
+            
+            worldMap.SetCharacters(gameState.Player.Characters);
+            
+            var exceptions = new List<Exception>();
+            
+            // Test edge cases that could trigger bounds issues
+            var testCells = new[]
+            {
+                new Point(-1, -1),         // Negative coordinates
+                new Point(0, -1),          // Edge case at Y boundary
+                new Point(-1, 0),          // Edge case at X boundary
+                new Point(Map.GridWidth, 0),     // At X boundary
+                new Point(0, Map.GridHeight),    // At Y boundary
+                new Point(Map.GridWidth, Map.GridHeight), // At both boundaries
+                new Point(1000, 1000),     // Very large coordinates
+                new Point(Map.GridWidth - 1, Map.GridHeight - 1), // Valid edge case
+            };
+            
+            foreach (var cell in testCells)
+            {
+                try
+                {
+                    // This should not throw IndexOutOfRangeException
+                    var neighbors = worldMap.GetNeighbors(cell);
+                    Assert.NotNull(neighbors);
+                }
+                catch (Exception ex)
+                {
+                    exceptions.Add(new Exception($"GetNeighbors failed for cell {cell}: {ex.Message}", ex));
+                }
+            }
+            
+            // Also test pathfinding which uses GetNeighbors internally
+            try
+            {
+                var path = worldMap.FindPathAStar(Vector2.Zero, new Vector2(-100, -100));
+                Assert.NotNull(path);
+            }
+            catch (Exception ex)
+            {
+                exceptions.Add(new Exception($"FindPathAStar failed: {ex.Message}", ex));
+            }
+            
+            // Assert no exceptions occurred
+            if (exceptions.Count > 0)
+            {
+                var aggregateException = new AggregateException(
+                    $"Pathfinding bounds check threw {exceptions.Count} exception(s)",
+                    exceptions
+                );
+                throw aggregateException;
+            }
         }
     }
 }
