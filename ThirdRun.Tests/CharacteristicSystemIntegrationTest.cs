@@ -15,6 +15,10 @@ namespace ThirdRun.Tests
         [Fact]
         public void CharacteristicSystem_Integration_WorksCorrectly()
         {
+            // Setup world map for testing
+            var worldMap = new WorldMap();
+            worldMap.Initialize();
+            
             // Create a powerful weapon with multiple characteristics
             var flamingSword = new Weapon("Flaming Sword", "A sword wreathed in fire", 500, 15, 25);
             flamingSword.Characteristics.AddValue(Characteristic.MeleeAttackPower, 20); // Add 20 more to the 15 from legacy
@@ -54,8 +58,6 @@ namespace ThirdRun.Tests
             Assert.Equal(5, dragon.Characteristics.GetValue(Characteristic.Haste));
             
             // Test equipment application on character
-            var worldMap = new WorldMap();
-            worldMap.Initialize();
             var warrior = new Character("Brave Warrior", CharacterClass.Guerrier, 120, 20, worldMap.CurrentMap, worldMap);
             
             // Check warrior's initial state

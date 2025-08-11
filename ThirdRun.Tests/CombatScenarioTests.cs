@@ -15,7 +15,7 @@ namespace ThirdRun.Tests
             var worldMap = new WorldMap();
             worldMap.Initialize();
             var hunter = new Character("Archer", CharacterClass.Chasseur, 100, 15, worldMap.CurrentMap, worldMap);
-            var monster = new Monster(new MonsterType("Orc", 50, 12, "Monsters/orc", 1, worldMap.CurrentMap, worldMap));
+            var monster = new Monster(new MonsterType("Orc", 50, 12, "Monsters/orc", 1), worldMap.CurrentMap, worldMap);
             
             // Position them at range (hunter can use ranged attack)
             hunter.Position = new Vector2(0, 0);
@@ -66,7 +66,7 @@ namespace ThirdRun.Tests
             var worldMap = new WorldMap();
             worldMap.Initialize();
             var warrior = new Character("Fighter", CharacterClass.Guerrier, 100, 20, worldMap.CurrentMap, worldMap);
-            var monster = new Monster(new MonsterType("Goblin", 100, 8, "Monsters/goblin", 1, worldMap.CurrentMap, worldMap));
+            var monster = new Monster(new MonsterType("Goblin", 100, 8, "Monsters/goblin", 1), worldMap.CurrentMap, worldMap);
             
             warrior.Position = new Vector2(0, 0);
             monster.Position = new Vector2(20, 0); // Within melee range

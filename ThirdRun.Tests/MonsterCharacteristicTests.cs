@@ -39,13 +39,15 @@ namespace ThirdRun.Tests
         public void Monster_InheritsCharacteristicsFromType()
         {
             // Arrange
+            var worldMap = new MonogameRPG.Map.WorldMap();
+            worldMap.Initialize();
             var monsterType = new MonsterType("Ice Mage", 60, 10, "monsters/ice_mage");
             monsterType.Characteristics.SetValue(Characteristic.SpellPower, 20);
             monsterType.Characteristics.SetValue(Characteristic.IceResistance, 30);
             monsterType.Characteristics.SetValue(Characteristic.FireResistance, -15);
 
             // Act
-            var monster = new Monster(monsterType);
+            var monster = new Monster(monsterType, worldMap.CurrentMap, worldMap);
 
             // Assert
             Assert.Equal(20, monster.Characteristics.GetValue(Characteristic.SpellPower));
@@ -61,10 +63,12 @@ namespace ThirdRun.Tests
         public void Monster_PreservesLegacyFunctionality()
         {
             // Arrange
+            var worldMap = new MonogameRPG.Map.WorldMap();
+            worldMap.Initialize();
             var monsterType = new MonsterType("Goblin", 30, 8, "monsters/goblin", 2);
             
             // Act
-            var monster = new Monster(monsterType);
+            var monster = new Monster(monsterType, worldMap.CurrentMap, worldMap);
 
             // Assert - Legacy properties still work
             Assert.Equal("Goblin", monster.Type.Name);

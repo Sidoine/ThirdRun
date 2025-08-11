@@ -14,6 +14,8 @@ namespace ThirdRun.Tests
         public void Monster_StartsInSleepingState()
         {
             // Arrange
+            var worldMap = new WorldMap();
+            worldMap.Initialize();
             var monsterType = new MonsterType("Test Monster", 50, 10, "test");
             var monster = new Monster(monsterType, worldMap.CurrentMap, worldMap);
 
@@ -25,6 +27,8 @@ namespace ThirdRun.Tests
         public void Monster_HasDefaultAggroRadius()
         {
             // Arrange
+            var worldMap = new WorldMap();
+            worldMap.Initialize();
             var monsterType = new MonsterType("Test Monster", 50, 10, "test");
             var monster = new Monster(monsterType, worldMap.CurrentMap, worldMap);
 
