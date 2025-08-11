@@ -9,8 +9,9 @@ using Xunit;
 namespace ThirdRun.Tests
 {
     /// <summary>
-    /// Integration test for the game engine that runs the core game loop for 1000 frames
+    /// Integration test for the game engine that runs the core game loop for 10000 frames
     /// and verifies no exceptions are thrown during normal gameplay simulation.
+    /// Also verifies that at least one character is moving at any time.
     /// </summary>
     public class GameEngineIntegrationTest
     {
@@ -33,8 +34,18 @@ namespace ThirdRun.Tests
             var frameTimeIncrement = TimeSpan.FromMilliseconds(16.67); // ~60 FPS
             var exceptions = new List<Exception>();
             
-            // Act - Simulate 1000 frames of game execution
-            for (int frame = 0; frame < 1000; frame++)
+            // Track character positions to verify movement occurs
+            var previousPositions = new Dictionary<Character, Vector2>();
+            bool movementDetected = false;
+            
+            // Initialize previous positions
+            foreach (var character in gameState.Player.Characters)
+            {
+                previousPositions[character] = character.Position;
+            }
+            
+            // Act - Simulate 10000 frames of game execution
+            for (int frame = 0; frame < 10000; frame++)
             {
                 try
                 {
@@ -43,6 +54,16 @@ namespace ThirdRun.Tests
                     
                     // Simulate the core game logic from Game1.Update()
                     SimulateGameFrame(worldMap, gameState, gameTime);
+                    
+                    // Check if any character has moved since the previous frame
+                    foreach (var character in gameState.Player.Characters)
+                    {
+                        if (character.Position != previousPositions[character])
+                        {
+                            movementDetected = true;
+                            previousPositions[character] = character.Position;
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -50,11 +71,11 @@ namespace ThirdRun.Tests
                 }
             }
             
-            // Assert - Verify no exceptions occurred during the 1000 frame simulation
+            // Assert - Verify no exceptions occurred during the 10000 frame simulation
             if (exceptions.Count > 0)
             {
                 var aggregateException = new AggregateException(
-                    $"Game engine threw {exceptions.Count} exception(s) during 1000 frame test",
+                    $"Game engine threw {exceptions.Count} exception(s) during 10000 frame test",
                     exceptions
                 );
                 throw aggregateException;
@@ -65,7 +86,11 @@ namespace ThirdRun.Tests
             Assert.NotNull(gameState.WorldMap);
             Assert.NotEmpty(gameState.Player.Characters);
             Assert.True(gameState.Player.Characters.TrueForAll(c => c.CurrentHealth > 0), 
-                "All characters should still be alive after 1000 frames");
+                "All characters should still be alive after 10000 frames");
+            
+            // Verify that at least one character moved during the simulation
+            Assert.True(movementDetected, 
+                "At least one character should be moving during the 10000 frame simulation");
         }
         
         /// <summary>
