@@ -70,8 +70,7 @@ namespace ThirdRun.Tests
                 {
                     // Separate pathfinding exceptions (known issue with long runs) from critical exceptions
                     if (ex.InnerException is IndexOutOfRangeException && 
-                        (ex.Message.Contains("Index was outside the bounds of the array") ||
-                         ex.StackTrace?.Contains("WorldMap.GetNeighbors") == true))
+                        ex.Message.Contains("Index was outside the bounds of the array"))
                     {
                         pathfindingExceptionCount++;
                         // Allow pathfinding exceptions but stop if they become excessive (>50% of frames)
