@@ -224,7 +224,7 @@ namespace ThirdRun.Tests
         }
 
         [Fact]
-        public void Monster_SwitchesToAttackingWhenInRange()
+        public void Monster_AttacksWhenInRange()
         {
             // Arrange
             var worldMap = new WorldMap();
@@ -235,8 +235,9 @@ namespace ThirdRun.Tests
             
             var monsterType = new MonsterType("Test Monster", 50, 10, "test");
             var monster = new Monster(monsterType);
-            monster.Position = new Vector2(40, 0); // Within attack range (48)
+            monster.Position = new Vector2(25, 0); // Within melee attack range (32)
             monster.SetCurrentMap(worldMap.CurrentMap);
+            monster.UpdateGameTime(0f); // Set game time for cooldown checks
             
             // Add units to the map
             worldMap.CurrentMap.AddUnit(character);
@@ -245,11 +246,14 @@ namespace ThirdRun.Tests
             // Wake up monster
             monster.WakeUp(character);
             
-            // Act - update to trigger attack mode
+            var initialHealth = character.CurrentHealth;
+            
+            // Act - update to trigger attack
             monster.Update();
 
-            // Assert
-            Assert.Equal(MonsterState.Attacking, monster.State);
+            // Assert - monster should still be chasing but character should take damage
+            Assert.Equal(MonsterState.Chasing, monster.State);
+            Assert.True(character.CurrentHealth < initialHealth, "Character should have taken damage from monster attack");
         }
 
         [Fact]

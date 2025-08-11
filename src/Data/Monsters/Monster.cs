@@ -11,8 +11,7 @@ namespace MonogameRPG.Monsters
     {
         Sleeping,   // Default state, monster doesn't move or attack
         Awake,      // Monster is awake but not actively chasing
-        Chasing,    // Monster is actively chasing a character
-        Attacking   // Monster is attacking a character
+        Chasing     // Monster is actively chasing and attacking when in range
     }
 
     public class Monster : Unit
@@ -21,7 +20,7 @@ namespace MonogameRPG.Monsters
         public int Level => Type.Level;
         public MonsterState State { get; private set; } = MonsterState.Sleeping;
         public float AggroRadius { get; set; } = 100f; // Default aggro radius in pixels
-        public float AttackRange { get; set; } = 48f;  // Default attack range (1 tile)
+
         public Character? Target { get; private set; } // Current target being chased
         
         // Reference to the map for accessing other units
@@ -55,6 +54,20 @@ namespace MonogameRPG.Monsters
         }
 
         /// <summary>
+        /// Gets the attack range from the first available ability that targets enemies
+        /// </summary>
+        /// <returns>Attack range in pixels, or 0 if no suitable ability is available</returns>
+        private float GetAttackRange()
+        {
+            // Find the first ability that is not on cooldown and targets enemies
+            var availableAbility = Abilities.FirstOrDefault(ability => 
+                ability.TargetType == ThirdRun.Data.Abilities.TargetType.Enemy && 
+                !ability.IsOnCooldown(CurrentGameTime));
+                
+            return availableAbility?.Range ?? 0f;
+        }
+
+        /// <summary>
         /// Updates monster AI behavior based on current state and nearby characters
         /// </summary>
         public void Update()
@@ -70,9 +83,6 @@ namespace MonogameRPG.Monsters
                 case MonsterState.Awake:
                 case MonsterState.Chasing:
                     UpdateChasing();
-                    break;
-                case MonsterState.Attacking:
-                    UpdateAttacking();
                     break;
             }
         }
@@ -149,41 +159,21 @@ namespace MonogameRPG.Monsters
             }
 
             float distanceToTarget = Vector2.Distance(Position, Target.Position);
+            float attackRange = GetAttackRange();
             
-            if (distanceToTarget <= AttackRange)
+            if (attackRange > 0 && distanceToTarget <= attackRange)
             {
-                State = MonsterState.Attacking;
+                // In range of an available ability, attack
                 AttackTarget();
             }
             else
             {
+                // Not in range or no available abilities, move toward target
                 MoveTowardTarget();
             }
         }
 
-        /// <summary>
-        /// Updates attacking behavior
-        /// </summary>
-        private void UpdateAttacking()
-        {
-            if (Target == null || Target.IsDead)
-            {
-                FindNewTarget();
-                return;
-            }
 
-            float distanceToTarget = Vector2.Distance(Position, Target.Position);
-            
-            if (distanceToTarget > AttackRange)
-            {
-                // Target moved out of range, chase again
-                State = MonsterState.Chasing;
-            }
-            else
-            {
-                AttackTarget();
-            }
-        }
 
         /// <summary>
         /// Finds a new target or returns to sleep if no characters are nearby
@@ -237,14 +227,21 @@ namespace MonogameRPG.Monsters
         }
 
         /// <summary>
-        /// Attacks the current target using monster abilities
+        /// Attacks the current target using the first available ability that targets enemies
         /// </summary>
         private void AttackTarget()
         {
             if (Target == null) return;
 
-            // Use the inherited Attack method from Unit which uses the default ability
-            Attack((Unit)Target);
+            // Find the first ability that is not on cooldown and targets enemies
+            var availableAbility = Abilities.FirstOrDefault(ability => 
+                ability.TargetType == ThirdRun.Data.Abilities.TargetType.Enemy && 
+                !ability.IsOnCooldown(CurrentGameTime));
+
+            if (availableAbility != null)
+            {
+                UseAbility(availableAbility, Target);
+            }
         }
 
         public void Attack(Character target)
