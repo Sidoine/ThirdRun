@@ -155,8 +155,8 @@ public class Character : Unit
             var mapAtPosition = worldMap.GetMapAtPosition(Position);
             if (mapAtPosition != null && mapAtPosition != Map)
             {
-                Map.Characters.Remove(this);
-                mapAtPosition.Characters.Add(this);
+                Map.RemoveUnit(this);
+                mapAtPosition.AddUnit(this);
                 Map = mapAtPosition;
                 worldMap.UpdateCurrentMap();
             }

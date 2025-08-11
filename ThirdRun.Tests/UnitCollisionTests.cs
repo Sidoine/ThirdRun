@@ -5,11 +5,28 @@ using MonogameRPG.Monsters;
 using MonogameRPG;
 using System.Collections.Generic;
 using System.Linq;
+using ThirdRun.Data.NPCs;
 
 namespace ThirdRun.Tests
 {
     public class UnitCollisionTests
     {
+        [Fact]
+        public void Unit_MoveToPosition_UpdatesPositionWithoutCollisionDetection()
+        {
+            // Arrange
+            var mockUnit = new MockUnit();
+            var initialPosition = new Vector2(10, 20);
+            var targetPosition = new Vector2(100, 200);
+            mockUnit.Position = initialPosition;
+            
+            // Act
+            mockUnit.MoveToPosition(targetPosition);
+            
+            // Assert
+            Assert.Equal(targetPosition, mockUnit.Position);
+        }
+        
         [Fact]
         public void Map_Tiles_InitializedWithMapGeneration()
         {
@@ -211,6 +228,40 @@ namespace ThirdRun.Tests
             // Assert - should find a direct path to the target
             Assert.NotEmpty(path);
             Assert.Equal(target.Position, path.Last());
+        }
+        
+        [Fact]
+        public void Map_CentralUnitsList_FiltersCorrectly()
+        {
+            // Arrange
+            var map = new Map(Point.Zero);
+            map.GenerateRandomMap();
+            
+            var worldMap = new WorldMap();
+            worldMap.Initialize();
+            
+            var character = new Character("TestChar", CharacterClass.Guerrier, 100, 10, worldMap);
+            character.Position = new Vector2(Map.TileWidth / 2, Map.TileHeight / 2);
+            
+            var npc = new NPC("TestNPC", NPCType.Merchant, new Vector2(Map.TileWidth * 1.5f, Map.TileHeight / 2));
+            
+            // Act
+            map.AddUnit(character);
+            map.AddUnit(npc);
+            map.SpawnMonsters(); // This will add monsters
+            
+            // Assert - filtered views should work correctly
+            Assert.Contains(character, map.Characters);
+            Assert.Contains(npc, map.NPCs);
+            Assert.True(map.Monsters.Count > 0); // Should have spawned monsters
+            
+            // Verify character count makes sense
+            Assert.Equal(1, map.Characters.Count);
+            Assert.Equal(1, map.NPCs.Count);
+            
+            // Verify the character is not in the wrong lists
+            Assert.Empty(map.Characters.OfType<NPC>());
+            Assert.Empty(map.NPCs.OfType<Character>());
         }
     }
     

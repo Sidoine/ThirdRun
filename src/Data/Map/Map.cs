@@ -21,11 +21,14 @@ namespace MonogameRPG.Map
         public Vector2 Position => new Vector2(WorldPosition.X * GridWidth * TileWidth, WorldPosition.Y * GridHeight * TileHeight);
         private List<Vector2> monsterSpawnPoints;
         private int monsterSize = 20;
-        private List<Monster> monsters = new List<Monster>();
-        private List<Character> characters = new List<Character>();
-        private List<NPC> npcs = new List<NPC>();
-        public List<Character> Characters => characters;
-        public List<NPC> NPCs => npcs;
+        
+        // Central list containing all units on this map
+        private List<Unit> units = new List<Unit>();
+        
+        // Filtered views of the central units list
+        public List<Character> Characters => units.OfType<Character>().ToList();
+        public List<Monster> Monsters => units.OfType<Monster>().ToList();  
+        public List<NPC> NPCs => units.OfType<NPC>().ToList();
         public bool IsTownZone { get; set; } = false;
         private Color characterColor = Color.CornflowerBlue;
         private readonly AdvancedMapGenerator mapGenerator;
@@ -78,7 +81,13 @@ namespace MonogameRPG.Map
 
         public void SpawnMonsters()
         {
-            monsters.Clear();
+            // Clear existing monsters from units list
+            var existingMonsters = Monsters;
+            foreach (var monster in existingMonsters)
+            {
+                RemoveUnit(monster);
+            }
+            
             var rand = new System.Random();
             
             // Calculate area difficulty based on distance from origin (0,0)
@@ -93,16 +102,20 @@ namespace MonogameRPG.Map
                 monster.Position = new Vector2(
                     spawn.X * TileWidth + TileWidth / 2 - monsterSize / 2,
                     spawn.Y * TileHeight + TileHeight / 2 - monsterSize / 2) + Position;
-                monsters.Add(monster);
                 
-                // Update unit grid
-                UpdateUnitPosition(monster);
+                AddUnit(monster);
             }
         }
 
         public void SpawnNPCs()
         {
-            npcs.Clear();
+            // Clear existing NPCs from units list
+            var existingNPCs = NPCs;
+            foreach (var npc in existingNPCs)
+            {
+                RemoveUnit(npc);
+            }
+            
             var rand = new System.Random();
             
             // Define NPC names and types for the town
@@ -123,7 +136,7 @@ namespace MonogameRPG.Map
                 var npc = new NPC(def.name, def.type, new Vector2(
                     pos.X * TileWidth + TileWidth / 2,
                     pos.Y * TileHeight + TileHeight / 2) + Position);
-                npcs.Add(npc);
+                AddUnit(npc);
             }
         }
         
@@ -152,37 +165,33 @@ namespace MonogameRPG.Map
 
         public void SetCharacters(List<Character> chars)
         {
-            // Clear old characters from grid
-            foreach (var oldChar in characters)
+            // Clear existing characters from units list
+            var existingCharacters = Characters;
+            foreach (var character in existingCharacters)
             {
-                RemoveUnitFromGrid(oldChar);
+                RemoveUnit(character);
             }
             
-            characters.Clear();
-            characters.AddRange(chars);
-            
-            // Add new characters to grid
-            foreach (var character in characters)
+            // Add new characters to units list
+            foreach (var character in chars)
             {
-                UpdateUnitPosition(character);
+                AddUnit(character);
             }
         }
 
         public void TeleportCharacters(List<Character> chars)
         {
-            // Clear old characters from grid
-            foreach (var oldChar in characters)
+            // Clear existing characters from units list
+            var existingCharacters = Characters;
+            foreach (var character in existingCharacters)
             {
-                RemoveUnitFromGrid(oldChar);
+                RemoveUnit(character);
             }
-            
-            characters.Clear();
-            characters.AddRange(chars);
             
             // Get valid spawn positions for the characters
             var validPositions = GetWalkablePositions(chars.Count);
             
-            // Position each character at a valid location on this map
+            // Position each character at a valid location on this map and add to units list
             for (int i = 0; i < chars.Count && i < validPositions.Count; i++)
             {
                 var pos = validPositions[i];
@@ -190,8 +199,7 @@ namespace MonogameRPG.Map
                     pos.X * TileWidth + TileWidth / 2,
                     pos.Y * TileHeight + TileHeight / 2) + Position;
                 
-                // Update unit grid
-                UpdateUnitPosition(chars[i]);
+                AddUnit(chars[i]);
             }
         }
 
@@ -204,17 +212,43 @@ namespace MonogameRPG.Map
 
         public List<Monster> GetMonsters()
         {
-            return monsters;
+            return Monsters;
         }
 
         public bool HasLivingMonsters()
         {
-            foreach (var monster in monsters)
+            foreach (var monster in Monsters)
             {
                 if (!monster.IsDead)
                     return true;
             }
             return false;
+        }
+        
+        /// <summary>
+        /// Adds a unit to this map
+        /// </summary>
+        /// <param name="unit">The unit to add</param>
+        public void AddUnit(Unit unit)
+        {
+            if (!units.Contains(unit))
+            {
+                units.Add(unit);
+                UpdateUnitPosition(unit);
+            }
+        }
+        
+        /// <summary>
+        /// Removes a unit from this map
+        /// </summary>
+        /// <param name="unit">The unit to remove</param>
+        public void RemoveUnit(Unit unit)
+        {
+            if (units.Contains(unit))
+            {
+                RemoveUnitFromGrid(unit);
+                units.Remove(unit);
+            }
         }
         
         /// <summary>
