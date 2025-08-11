@@ -30,14 +30,7 @@ namespace MonogameRPG.Map
         private Color characterColor = Color.CornflowerBlue;
         private readonly AdvancedMapGenerator mapGenerator;
 
-        private static readonly MonsterType[] MonsterTypes = new MonsterType[]
-        {
-            new MonsterType("Orc Faible", 15, 3, "Monsters/orc", 1),
-            new MonsterType("Orc", 20, 4, "Monsters/orc", 2),
-            new MonsterType("Orc Guerrier", 25, 6, "Monsters/orc", 3),
-            new MonsterType("Orc Chef", 35, 8, "Monsters/orc", 4),
-            new MonsterType("Orc Élite", 50, 12, "Monsters/orc", 5),
-        };
+
 
         public Map(Point worldPosition)
         {
@@ -85,11 +78,8 @@ namespace MonogameRPG.Map
             
             foreach (var spawn in monsterSpawnPoints)
             {
-                // Choose monster type appropriate for area level
-                var availableTypes = MonsterTypes.Where(mt => mt.Level <= areaLevel + 1).ToArray();
-                if (availableTypes.Length == 0) availableTypes = MonsterTypes; // Fallback
-                
-                var type = availableTypes[rand.Next(availableTypes.Length)];
+                // Use MonsterTemplateRepository to get appropriate monster for area level
+                var type = MonsterTemplateRepository.CreateRandomMonsterTypeForLevel(1, areaLevel + 1);
                 var monster = new Monster(type);
                 monster.Position = new Vector2(
                     spawn.X * TileWidth + TileWidth / 2 - monsterSize / 2,
