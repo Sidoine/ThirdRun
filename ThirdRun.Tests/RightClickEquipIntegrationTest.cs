@@ -16,7 +16,7 @@ public class RightClickEquipIntegrationTest
         // Arrange - Simulate game setup
         var worldMap = new WorldMap();
         worldMap.Initialize();
-        var character = new Character("Test Player", CharacterClass.Guerrier, 100, 10, worldMap);
+        var character = new Character("Test Player", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         
         // Add some items to inventory like monsters would drop
         var sword = new Weapon("Iron Sword", "A sturdy iron sword", 100, 5, 12);

@@ -15,6 +15,10 @@ namespace ThirdRun.Tests
         [Fact]
         public void CharacteristicSystem_Integration_WorksCorrectly()
         {
+            // Setup world map for testing
+            var worldMap = new WorldMap();
+            worldMap.Initialize();
+            
             // Create a powerful weapon with multiple characteristics
             var flamingSword = new Weapon("Flaming Sword", "A sword wreathed in fire", 500, 15, 25);
             flamingSword.Characteristics.AddValue(Characteristic.MeleeAttackPower, 20); // Add 20 more to the 15 from legacy
@@ -44,7 +48,7 @@ namespace ThirdRun.Tests
             fireDragon.Characteristics.SetValue(Characteristic.IceResistance, -25); // Weakness
             fireDragon.Characteristics.SetValue(Characteristic.Haste, 5);
             
-            var dragon = new Monster(fireDragon);
+            var dragon = new Monster(fireDragon, worldMap.CurrentMap, worldMap);
             
             // Verify monster characteristics are copied correctly
             Assert.Equal(200, dragon.MaxHealth);
@@ -54,9 +58,7 @@ namespace ThirdRun.Tests
             Assert.Equal(5, dragon.Characteristics.GetValue(Characteristic.Haste));
             
             // Test equipment application on character
-            var worldMap = new WorldMap();
-            worldMap.Initialize();
-            var warrior = new Character("Brave Warrior", CharacterClass.Guerrier, 120, 20, worldMap);
+            var warrior = new Character("Brave Warrior", CharacterClass.Guerrier, 120, 20, worldMap.CurrentMap, worldMap);
             
             // Check warrior's initial state
             Assert.Equal(20, warrior.AttackPower);
@@ -85,7 +87,7 @@ namespace ThirdRun.Tests
             // Test the new Health characteristic
             var worldMap = new WorldMap();
             worldMap.Initialize();
-            var character = new Character("Test Character", CharacterClass.Guerrier, 100, 15, worldMap);
+            var character = new Character("Test Character", CharacterClass.Guerrier, 100, 15, worldMap.CurrentMap, worldMap);
             
             // Verify initial health
             Assert.Equal(100, character.MaxHealth);
@@ -100,7 +102,7 @@ namespace ThirdRun.Tests
             Assert.Equal(300, toughMonster.BaseHealth);
             Assert.Equal(300, toughMonster.Characteristics.GetValue(Characteristic.Health));
             
-            var monster = new Monster(toughMonster);
+            var monster = new Monster(toughMonster, worldMap.CurrentMap, worldMap);
             Assert.Equal(300, monster.MaxHealth);
             Assert.Equal(300, monster.CurrentHealth);
         }

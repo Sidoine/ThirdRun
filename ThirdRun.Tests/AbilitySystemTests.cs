@@ -8,9 +8,17 @@ namespace ThirdRun.Tests
 {
     public class AbilitySystemTests
     {
+        private (MonogameRPG.Map.Map map, MonogameRPG.Map.WorldMap worldMap) CreateTestMapAndWorld()
+        {
+            var worldMap = new MonogameRPG.Map.WorldMap();
+            worldMap.Initialize();
+            return (worldMap.CurrentMap, worldMap);
+        }
+
         private class TestUnit : Unit
         {
-            public TestUnit(int health = 100, int attackPower = 10)
+            public TestUnit(MonogameRPG.Map.Map map, MonogameRPG.Map.WorldMap worldMap, int health = 100, int attackPower = 10) 
+                : base(map, worldMap)
             {
                 CurrentHealth = health;
                 MaxHealth = health;
@@ -41,7 +49,8 @@ namespace ThirdRun.Tests
         [Fact]
         public void Unit_ShouldHaveDefaultMeleeAbility()
         {
-            var unit = new TestUnit();
+            var (map, worldMap) = CreateTestMapAndWorld();
+            var unit = new TestUnit(map, worldMap);
             
             Assert.NotNull(unit.DefaultAbility);
             Assert.Equal("Melee Attack", unit.DefaultAbility.Name);
@@ -52,8 +61,9 @@ namespace ThirdRun.Tests
         [Fact]
         public void MeleeAttackAbility_ShouldDamageTarget()
         {
-            var attacker = new TestUnit(health: 100, attackPower: 25);
-            var target = new TestUnit(health: 100);
+            var (map, worldMap) = CreateTestMapAndWorld();
+            var attacker = new TestUnit(map, worldMap, health: 100, attackPower: 25);
+            var target = new TestUnit(map, worldMap, health: 100);
             
             attacker.UpdateGameTime(1f);
             attacker.UseAbility(attacker.DefaultAbility, target);
@@ -64,11 +74,12 @@ namespace ThirdRun.Tests
         [Fact]
         public void Ability_ShouldRespectCooldown()
         {
-            var unit = new TestUnit();
+            var (map, worldMap) = CreateTestMapAndWorld();
+            var unit = new TestUnit(map, worldMap);
             var ability = new TestAbility(cooldown: 2f);
             
             unit.UpdateGameTime(0f);
-            unit.UseAbility(ability, new TestUnit());
+            unit.UseAbility(ability, new TestUnit(map, worldMap));
             Assert.True(ability.WasExecuted);
             
             // Reset for second test
@@ -76,20 +87,21 @@ namespace ThirdRun.Tests
             testAbility!.WasExecuted = false;
             
             // Try to use again immediately - should be on cooldown
-            unit.UseAbility(ability, new TestUnit());
+            unit.UseAbility(ability, new TestUnit(map, worldMap));
             Assert.False(ability.WasExecuted);
             
             // Wait for cooldown to expire
             unit.UpdateGameTime(3f);
-            unit.UseAbility(ability, new TestUnit());
+            unit.UseAbility(ability, new TestUnit(map, worldMap));
             Assert.True(ability.WasExecuted);
         }
         
         [Fact]
         public void Ability_ShouldRespectRange()
         {
-            var caster = new TestUnit();
-            var target = new TestUnit();
+            var (map, worldMap) = CreateTestMapAndWorld();
+            var caster = new TestUnit(map, worldMap);
+            var target = new TestUnit(map, worldMap);
             var ability = new TestAbility(range: 50f);
             
             caster.Position = new Vector2(0, 0);
@@ -112,8 +124,9 @@ namespace ThirdRun.Tests
         [Fact]
         public void Ability_ShouldValidateTargetType()
         {
-            var caster = new TestUnit();
-            var target = new TestUnit();
+            var (map, worldMap) = CreateTestMapAndWorld();
+            var caster = new TestUnit(map, worldMap);
+            var target = new TestUnit(map, worldMap);
             
             // Test self-target ability
             var selfAbility = new TestAbility(targetType: TargetType.Self);
@@ -134,8 +147,9 @@ namespace ThirdRun.Tests
         [Fact]
         public void Attack_ShouldUseDefaultAbility()
         {
-            var attacker = new TestUnit(attackPower: 15);
-            var target = new TestUnit(health: 50);
+            var (map, worldMap) = CreateTestMapAndWorld();
+            var attacker = new TestUnit(map, worldMap, attackPower: 15);
+            var target = new TestUnit(map, worldMap, health: 50);
             
             attacker.UpdateGameTime(0f);
             attacker.Attack(target);
@@ -146,13 +160,14 @@ namespace ThirdRun.Tests
         [Fact]
         public void Ability_IsOnCooldown_ShouldReturnCorrectStatus()
         {
+            var (map, worldMap) = CreateTestMapAndWorld();
             var ability = new TestAbility(cooldown: 2f);
-            var unit = new TestUnit();
+            var unit = new TestUnit(map, worldMap);
             
             unit.UpdateGameTime(0f);
             Assert.False(ability.IsOnCooldown(0f));
             
-            unit.UseAbility(ability, new TestUnit());
+            unit.UseAbility(ability, new TestUnit(map, worldMap));
             Assert.True(ability.IsOnCooldown(1f));
             Assert.True(ability.IsOnCooldown(1.5f));
             Assert.False(ability.IsOnCooldown(2.1f));
@@ -161,11 +176,12 @@ namespace ThirdRun.Tests
         [Fact]
         public void Ability_GetCooldownRemaining_ShouldReturnCorrectTime()
         {
+            var (map, worldMap) = CreateTestMapAndWorld();
             var ability = new TestAbility(cooldown: 3f);
-            var unit = new TestUnit();
+            var unit = new TestUnit(map, worldMap);
             
             unit.UpdateGameTime(0f);
-            unit.UseAbility(ability, new TestUnit());
+            unit.UseAbility(ability, new TestUnit(map, worldMap));
             
             Assert.True(Math.Abs(2f - ability.GetCooldownRemaining(1f)) < 0.1f);
             Assert.True(Math.Abs(0.5f - ability.GetCooldownRemaining(2.5f)) < 0.1f);
@@ -175,9 +191,10 @@ namespace ThirdRun.Tests
         [Fact]
         public void RangedAttackAbility_ShouldDamageTarget()
         {
-            var attacker = new TestUnit(health: 100, attackPower: 20);
+            var (map, worldMap) = CreateTestMapAndWorld();
+            var attacker = new TestUnit(map, worldMap, health: 100, attackPower: 20);
             attacker.Characteristics.SetValue(Characteristic.RangedAttackPower, 15);
-            var target = new TestUnit(health: 80);
+            var target = new TestUnit(map, worldMap, health: 80);
             
             var rangedAttack = new RangedAttackAbility();
             attacker.UpdateGameTime(0f);
@@ -189,9 +206,10 @@ namespace ThirdRun.Tests
         [Fact]
         public void HealAbility_ShouldHealTarget()
         {
-            var healer = new TestUnit();
+            var (map, worldMap) = CreateTestMapAndWorld();
+            var healer = new TestUnit(map, worldMap);
             healer.Characteristics.SetValue(Characteristic.HealingPower, 20);
-            var target = new TestUnit(health: 50);
+            var target = new TestUnit(map, worldMap, health: 50);
             target.MaxHealth = 100;
             
             var healAbility = new HealAbility();
@@ -204,7 +222,8 @@ namespace ThirdRun.Tests
         [Fact]
         public void SelfHealAbility_ShouldHealCaster()
         {
-            var unit = new TestUnit(health: 30);
+            var (map, worldMap) = CreateTestMapAndWorld();
+            var unit = new TestUnit(map, worldMap, health: 30);
             unit.MaxHealth = 100;
             unit.Characteristics.SetValue(Characteristic.HealingPower, 25);
             
@@ -218,9 +237,10 @@ namespace ThirdRun.Tests
         [Fact]
         public void HealAbility_ShouldNotExceedMaxHealth()
         {
-            var healer = new TestUnit();
+            var (map, worldMap) = CreateTestMapAndWorld();
+            var healer = new TestUnit(map, worldMap);
             healer.Characteristics.SetValue(Characteristic.HealingPower, 30);
-            var target = new TestUnit(health: 90);
+            var target = new TestUnit(map, worldMap, health: 90);
             target.MaxHealth = 100;
             
             var healAbility = new HealAbility();

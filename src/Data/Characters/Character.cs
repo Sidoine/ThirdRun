@@ -25,15 +25,11 @@ public class Character : Unit
     public Equipment? Weapon { get; private set; }
     public Equipment? Armor { get; private set; }
     public List<string> Techniques { get; private set; }
-    public Map Map { get; set; }
 
-    private readonly WorldMap worldMap;
-
-    public Character(string name, CharacterClass characterClass, int health, int attackPower, WorldMap worldMap)
+    public Character(string name, CharacterClass characterClass, int health, int attackPower, MonogameRPG.Map.Map map, MonogameRPG.Map.WorldMap worldMap) : base(map, worldMap)
     {
         Name = name;
         Class = characterClass;
-        this.worldMap = worldMap;
 
         CurrentHealth = health;
         MaxHealth = health;
@@ -42,7 +38,6 @@ public class Character : Unit
         Inventory = new Inventory() { Owner = this };
         Techniques = new List<string>();
         Position = new Vector2(0, 0); // Position initiale
-        Map = worldMap.CurrentMap;
         
         // Add class-specific abilities
         InitializeClassAbilities();
@@ -85,9 +80,9 @@ public class Character : Unit
     public void Move(List<Monster> monsters)
     {
         // Check if in town - if so, use town behavior instead
-        if (worldMap.IsInTown)
+        if (WorldMap.IsInTown)
         {
-            MoveInTown(worldMap.GetNPCsOnCurrentMap());
+            MoveInTown(WorldMap.GetNPCsOnCurrentMap());
             return;
         }
         
@@ -106,7 +101,7 @@ public class Character : Unit
         }
         if (closest == null)
         {
-            var nextMap = worldMap.GetAdjacentCardWithMonsters();
+            var nextMap = WorldMap.GetAdjacentCardWithMonsters();
             MoveTo(nextMap.Position + new Vector2(Map.GridWidth / 2 * Map.TileWidth, Map.GridHeight / 2 * Map.TileHeight));
             return;
         }
@@ -137,73 +132,6 @@ public class Character : Unit
             // Could add interaction logic here or just let them wander
         }
     }
-
-    private void MoveTo(Vector2 position)
-    {
-        // Utiliser A* pour trouver le chemin sur la carte actuelle
-        var path = worldMap.FindPathAStar(Position, position);
-        if (path.Count > 1)
-        {
-            Vector2 next = path[1]; // [0] = position actuelle
-            Vector2 direction = next - Position;
-            if (direction.Length() > 1f)
-            {
-                direction.Normalize();
-                
-                // Calculate the new position we want to move to
-                Vector2 newPosition = Position + direction * 2f; // Vitesse de déplacement (pixels par frame)
-                
-                // Collision detection: check if the new position would collide with another unit
-                if (!WouldCollideWithOtherUnit(newPosition))
-                {
-                    var oldPosition = Position;
-                    Position = newPosition;
-                    
-                    // Update unit position tracking on the current map
-                    Map.UpdateUnitPosition(this, oldPosition);
-                }
-                // If collision would occur, don't move (character stops)
-            }
-            
-            // Check for map transitions
-            var mapAtPosition = worldMap.GetMapAtPosition(Position);
-            if (mapAtPosition != null && mapAtPosition != Map)
-            {
-                Map.RemoveUnit(this);
-                mapAtPosition.AddUnit(this);
-                Map = mapAtPosition;
-                worldMap.UpdateCurrentMap();
-            }
-        }
-    }
-    
-    /// <summary>
-    /// Checks if moving to the specified position would cause a collision with another unit
-    /// </summary>
-    /// <param name="newPosition">The position we want to move to</param>
-    /// <returns>True if collision would occur, false otherwise</returns>
-    private bool WouldCollideWithOtherUnit(Vector2 newPosition)
-    {
-        // Convert new position to tile coordinates
-        var tileCoords = Map.WorldPositionToTileCoordinates(newPosition);
-        if (!tileCoords.HasValue)
-        {
-            // Position is outside the map, consider it a collision
-            return true;
-        }
-        
-        // Check if there's another unit at this tile position
-        var unitAtTile = Map.GetUnitAtTile(tileCoords.Value.X, tileCoords.Value.Y);
-        if (unitAtTile != null && unitAtTile != this)
-        {
-            // There's another unit occupying this tile
-            return true;
-        }
-        
-        // No collision detected
-        return false;
-    }
-
 
     public void Attack(Monster monster)
     {

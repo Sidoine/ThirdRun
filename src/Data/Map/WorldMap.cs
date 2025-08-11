@@ -26,7 +26,7 @@ namespace MonogameRPG.Map
             // Create the initial card at (0,0)
             var initialMap = new Map(Point.Zero);
             initialMap.GenerateRandomMap();
-            initialMap.SpawnMonsters();
+            initialMap.SpawnMonsters(this);
             maps[Point.Zero] = initialMap;
             currentMapPosition = Point.Zero;
 
@@ -34,7 +34,7 @@ namespace MonogameRPG.Map
             townMap = new Map(new Point(-999, -999)); // Special position for town
             townMap.GenerateRandomMap();
             townMap.IsTownZone = true;
-            townMap.SpawnNPCs();
+            townMap.SpawnNPCs(this);
             maps[townMap.WorldPosition] = townMap;
         }
 
@@ -117,7 +117,7 @@ namespace MonogameRPG.Map
             {
                 var newCard = new Map(newCardPos);
                 newCard.GenerateRandomMap();
-                newCard.SpawnMonsters();
+                newCard.SpawnMonsters(this);
                 maps[newCardPos] = newCard;
             }
             return maps[newCardPos];

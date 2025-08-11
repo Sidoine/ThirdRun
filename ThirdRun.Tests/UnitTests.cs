@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using MonogameRPG;
+using MonogameRPG.Map;
 
 namespace ThirdRun.Tests;
 
@@ -75,6 +76,9 @@ public class UnitTests
     // Test implementation of abstract Unit class
     private class TestUnit : Unit
     {
-        // No additional implementation needed for testing basic properties
+        public TestUnit() : base(new Map(Point.Zero), new WorldMap())
+        {
+            // No additional implementation needed for testing basic properties
+        }
     }
 }

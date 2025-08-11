@@ -13,7 +13,7 @@ public class DragDropTests
         // Arrange
         var worldMap = new WorldMap();
         worldMap.Initialize();
-        var character = new Character("Test Character", CharacterClass.Guerrier, 100, 10, worldMap);
+        var character = new Character("Test Character", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         var sword = new Weapon("Test Sword", "A test sword", 100, 5, 10);
         var armor = new Armor("Test Armor", "A test armor", 100, 3, 15);
         
@@ -42,7 +42,7 @@ public class DragDropTests
         // Arrange
         var worldMap = new WorldMap();
         worldMap.Initialize();
-        var character = new Character("Test Character", CharacterClass.Guerrier, 100, 10, worldMap);
+        var character = new Character("Test Character", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         var sword = new Weapon("Test Sword", "A test sword", 100, 5, 10);
         var armor = new Armor("Test Armor", "A test armor", 100, 3, 15);
         
@@ -64,7 +64,7 @@ public class DragDropTests
         // Arrange
         var worldMap = new WorldMap();
         worldMap.Initialize();
-        var character = new Character("Test Character", CharacterClass.Guerrier, 100, 10, worldMap);
+        var character = new Character("Test Character", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         var sword = new Weapon("Test Sword", "A test sword", 100, 5, 10);
         
         character.Inventory.AddItem(sword, new Point(1, 1));
@@ -87,7 +87,7 @@ public class DragDropTests
         // Arrange
         var worldMap = new WorldMap();
         worldMap.Initialize();
-        var character = new Character("Test Character", CharacterClass.Guerrier, 100, 10, worldMap);
+        var character = new Character("Test Character", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         var sword = new Weapon("Test Sword", "A test sword", 100, 5, 10);
         
         character.Inventory.AddItem(sword, new Point(1, 1));

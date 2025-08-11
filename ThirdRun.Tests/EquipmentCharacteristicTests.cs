@@ -39,7 +39,7 @@ namespace ThirdRun.Tests
             // Arrange
             var worldMap = new WorldMap(); // Use parameterless constructor
             worldMap.Initialize();
-            var character = new Character("TestHero", CharacterClass.Guerrier, 100, 10, worldMap);
+            var character = new Character("TestHero", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
             var equipment = new Equipment("Enhanced Armor", "Magical armor", 300, 8);
             
             equipment.Characteristics.SetValue(Characteristic.Armor, 12);
@@ -63,7 +63,7 @@ namespace ThirdRun.Tests
             // Arrange
             var worldMap = new WorldMap();
             worldMap.Initialize();
-            var character = new Character("TestHero", CharacterClass.Guerrier, 100, 10, worldMap);
+            var character = new Character("TestHero", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
             var equipment = new Equipment("Enhanced Weapon", "Magical weapon", 250, 6);
             
             equipment.Characteristics.SetValue(Characteristic.SpellPower, 20);
@@ -90,7 +90,7 @@ namespace ThirdRun.Tests
             // Arrange
             var worldMap = new WorldMap();
             worldMap.Initialize();
-            var character = new Character("TestHero", CharacterClass.Mage, 80, 8, worldMap);
+            var character = new Character("TestHero", CharacterClass.Mage, 80, 8, worldMap.CurrentMap, worldMap);
             var equipment = new Equipment("Arcane Robes", "Robes of the arcane", 400, 0); // No legacy bonus stats
             
             // Set multiple characteristics
@@ -119,7 +119,7 @@ namespace ThirdRun.Tests
             // Arrange
             var worldMap = new WorldMap();
             worldMap.Initialize();
-            var character = new Character("TestHero", CharacterClass.Guerrier, 100, 12, worldMap);
+            var character = new Character("TestHero", CharacterClass.Guerrier, 100, 12, worldMap.CurrentMap, worldMap);
             var equipment = new Equipment("Basic Sword", "A simple sword", 150, 7);
 
             // Act - Don't set any characteristics, just use legacy BonusStats

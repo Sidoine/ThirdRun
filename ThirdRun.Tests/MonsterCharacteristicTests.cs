@@ -1,5 +1,7 @@
 using MonogameRPG.Monsters;
+using MonogameRPG.Map;
 using ThirdRun.Data;
+using Microsoft.Xna.Framework;
 using Xunit;
 
 namespace ThirdRun.Tests
@@ -37,13 +39,15 @@ namespace ThirdRun.Tests
         public void Monster_InheritsCharacteristicsFromType()
         {
             // Arrange
+            var worldMap = new MonogameRPG.Map.WorldMap();
+            worldMap.Initialize();
             var monsterType = new MonsterType("Ice Mage", 60, 10, "monsters/ice_mage");
             monsterType.Characteristics.SetValue(Characteristic.SpellPower, 20);
             monsterType.Characteristics.SetValue(Characteristic.IceResistance, 30);
             monsterType.Characteristics.SetValue(Characteristic.FireResistance, -15);
 
             // Act
-            var monster = new Monster(monsterType);
+            var monster = new Monster(monsterType, worldMap.CurrentMap, worldMap);
 
             // Assert
             Assert.Equal(20, monster.Characteristics.GetValue(Characteristic.SpellPower));
@@ -59,10 +63,12 @@ namespace ThirdRun.Tests
         public void Monster_PreservesLegacyFunctionality()
         {
             // Arrange
+            var worldMap = new MonogameRPG.Map.WorldMap();
+            worldMap.Initialize();
             var monsterType = new MonsterType("Goblin", 30, 8, "monsters/goblin", 2);
             
             // Act
-            var monster = new Monster(monsterType);
+            var monster = new Monster(monsterType, worldMap.CurrentMap, worldMap);
 
             // Assert - Legacy properties still work
             Assert.Equal("Goblin", monster.Type.Name);
@@ -80,8 +86,12 @@ namespace ThirdRun.Tests
             var monsterType = new MonsterType("Shadow Beast", 70, 14, "monsters/shadow");
             monsterType.Characteristics.SetValue(Characteristic.ShadowResistance, 40);
             
-            var monster1 = new Monster(monsterType);
-            var monster2 = new Monster(monsterType);
+            var worldMap = new WorldMap();
+            var map = new Map(Point.Zero);
+            map.GenerateRandomMap();
+            
+            var monster1 = new Monster(monsterType, map, worldMap);
+            var monster2 = new Monster(monsterType, map, worldMap);
 
             // Act - Modify one monster's characteristics
             monster1.Characteristics.AddValue(Characteristic.ShadowResistance, 10);
@@ -111,7 +121,10 @@ namespace ThirdRun.Tests
             monsterType.Characteristics.SetValue(Characteristic.ShadowResistance, 5);
 
             // Act
-            var monster = new Monster(monsterType);
+            var worldMap = new WorldMap();
+            var map = new Map(Point.Zero);
+            map.GenerateRandomMap();
+            var monster = new Monster(monsterType, map, worldMap);
 
             // Assert - All resistances properly inherited
             Assert.Equal(10, monster.Characteristics.GetValue(Characteristic.FireResistance));
