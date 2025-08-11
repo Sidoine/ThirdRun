@@ -11,7 +11,7 @@ namespace ThirdRun.Tests
     public class UnitCollisionTests
     {
         [Fact]
-        public void Map_UnitGrid_InitializedWithMapGeneration()
+        public void Map_Tiles_InitializedWithMapGeneration()
         {
             // Arrange
             var map = new Map(Point.Zero);
@@ -20,16 +20,17 @@ namespace ThirdRun.Tests
             map.GenerateRandomMap();
             
             // Assert
-            Assert.NotNull(map.UnitGrid);
-            Assert.Equal(Map.GridWidth, map.UnitGrid.GetLength(0));
-            Assert.Equal(Map.GridHeight, map.UnitGrid.GetLength(1));
+            Assert.NotNull(map.Tiles);
+            Assert.Equal(Map.GridWidth, map.Tiles.GetLength(0));
+            Assert.Equal(Map.GridHeight, map.Tiles.GetLength(1));
             
-            // Initially all tiles should be empty
+            // Initially all tiles should be empty of units
             for (int x = 0; x < Map.GridWidth; x++)
             {
                 for (int y = 0; y < Map.GridHeight; y++)
                 {
-                    Assert.Null(map.UnitGrid[x, y]);
+                    Assert.NotNull(map.Tiles[x, y]);
+                    Assert.False(map.Tiles[x, y].IsOccupied);
                 }
             }
         }
@@ -135,7 +136,7 @@ namespace ThirdRun.Tests
         }
         
         [Fact]
-        public void Map_RefreshUnitGrid_RebuildsGrid()
+        public void Map_UpdateUnitPosition_HandlesMoveCorrectly()
         {
             // Arrange
             var map = new Map(Point.Zero);
@@ -148,14 +149,17 @@ namespace ThirdRun.Tests
             character.Position = new Vector2(Map.TileWidth / 2, Map.TileHeight / 2);
             map.SetCharacters(new List<Character> { character });
             
-            // Manually corrupt the grid
-            map.UnitGrid[0, 0] = null;
+            // Verify initial position
+            Assert.Equal(character, map.GetUnitAtTile(0, 0));
             
-            // Act
-            map.RefreshUnitGrid();
+            // Act - Move character to a different tile
+            var oldPosition = character.Position;
+            character.Position = new Vector2(Map.TileWidth * 1.5f, Map.TileHeight * 1.5f); // Move to (1,1)
+            map.UpdateUnitPosition(character, oldPosition);
             
             // Assert
-            Assert.Equal(character, map.GetUnitAtTile(0, 0));
+            Assert.Null(map.GetUnitAtTile(0, 0)); // Old position should be empty
+            Assert.Equal(character, map.GetUnitAtTile(1, 1)); // New position should have character
         }
         
         [Fact]

@@ -11,8 +11,8 @@ namespace MonogameRPG.Map
 {
     public class Map
     {
-        private TileType[,] tiles;
-        public TileType[,] Tiles => tiles;
+        private Tile[,] tiles;
+        public Tile[,] Tiles => tiles;
         public const int TileWidth = 48;
         public const int TileHeight = 48;
         public const int GridWidth = 25;
@@ -29,10 +29,6 @@ namespace MonogameRPG.Map
         public bool IsTownZone { get; set; } = false;
         private Color characterColor = Color.CornflowerBlue;
         private readonly AdvancedMapGenerator mapGenerator;
-        
-        // Unit collision tracking - grid that tracks which unit is on each tile
-        private Unit?[,] unitGrid;
-        public Unit?[,] UnitGrid => unitGrid;
 
 
 
@@ -40,8 +36,7 @@ namespace MonogameRPG.Map
         {
             WorldPosition = worldPosition;
             monsterSpawnPoints = new List<Vector2>();
-            tiles = new TileType[0, 0];
-            unitGrid = new Unit?[0, 0];
+            tiles = new Tile[0, 0];
             
             // Create map generator with seed based on world position for consistency
             int seed = worldPosition.X * 1000 + worldPosition.Y;
@@ -51,9 +46,16 @@ namespace MonogameRPG.Map
         public void GenerateRandomMap(int spawnCount = 2)
         {
             // Use advanced map generator instead of simple random generation
-            tiles = mapGenerator.GenerateMap(GridWidth, GridHeight, WorldPosition);
-            // Initialize unit grid with same dimensions
-            unitGrid = new Unit?[GridWidth, GridHeight];
+            var tileTypes = mapGenerator.GenerateMap(GridWidth, GridHeight, WorldPosition);
+            // Initialize tiles array with Tile objects
+            tiles = new Tile[GridWidth, GridHeight];
+            for (int x = 0; x < GridWidth; x++)
+            {
+                for (int y = 0; y < GridHeight; y++)
+                {
+                    tiles[x, y] = new Tile(tileTypes[x, y]);
+                }
+            }
             
             // Find suitable spawn points for monsters on walkable terrain
             monsterSpawnPoints.Clear();
@@ -136,7 +138,7 @@ namespace MonogameRPG.Map
                 int x = rand.Next(GridWidth);
                 int y = rand.Next(GridHeight);
                 
-                if (tiles[x, y].IsWalkable && unitGrid[x, y] == null)
+                if (tiles[x, y].IsWalkable && !tiles[x, y].IsOccupied)
                 {
                     positions.Add(new Vector2(x, y));
                 }
@@ -248,7 +250,7 @@ namespace MonogameRPG.Map
         {
             if (tileX >= 0 && tileX < GridWidth && tileY >= 0 && tileY < GridHeight)
             {
-                return unitGrid[tileX, tileY];
+                return tiles[tileX, tileY].GetFirstUnit();
             }
             return null;
         }
@@ -269,10 +271,10 @@ namespace MonogameRPG.Map
         }
         
         /// <summary>
-        /// Updates the unit's position in the unit grid
+        /// Updates the unit's position in the tile grid
         /// </summary>
         /// <param name="unit">The unit to update</param>
-        /// <param name="oldPosition">The unit's previous position (to clear the old grid location)</param>
+        /// <param name="oldPosition">The unit's previous position (to clear the old tile location)</param>
         public void UpdateUnitPosition(Unit unit, Vector2? oldPosition = null)
         {
             // Clear old position if provided
@@ -283,10 +285,7 @@ namespace MonogameRPG.Map
                 {
                     var oldX = oldTileCoords.Value.X;
                     var oldY = oldTileCoords.Value.Y;
-                    if (unitGrid[oldX, oldY] == unit)
-                    {
-                        unitGrid[oldX, oldY] = null;
-                    }
+                    tiles[oldX, oldY].RemoveUnit(unit);
                 }
             }
             
@@ -296,12 +295,12 @@ namespace MonogameRPG.Map
             {
                 var newX = newTileCoords.Value.X;
                 var newY = newTileCoords.Value.Y;
-                unitGrid[newX, newY] = unit;
+                tiles[newX, newY].AddUnit(unit);
             }
         }
         
         /// <summary>
-        /// Removes a unit from the unit grid
+        /// Removes a unit from the tile grid
         /// </summary>
         /// <param name="unit">The unit to remove</param>
         public void RemoveUnitFromGrid(Unit unit)
@@ -311,40 +310,7 @@ namespace MonogameRPG.Map
             {
                 var x = tileCoords.Value.X;
                 var y = tileCoords.Value.Y;
-                if (unitGrid[x, y] == unit)
-                {
-                    unitGrid[x, y] = null;
-                }
-            }
-        }
-        
-        /// <summary>
-        /// Refreshes the entire unit grid by clearing it and re-adding all units
-        /// </summary>
-        public void RefreshUnitGrid()
-        {
-            // Clear the grid
-            for (int x = 0; x < GridWidth; x++)
-            {
-                for (int y = 0; y < GridHeight; y++)
-                {
-                    unitGrid[x, y] = null;
-                }
-            }
-            
-            // Re-add all characters
-            foreach (var character in characters)
-            {
-                UpdateUnitPosition(character);
-            }
-            
-            // Re-add all monsters
-            foreach (var monster in monsters)
-            {
-                if (!monster.IsDead)
-                {
-                    UpdateUnitPosition(monster);
-                }
+                tiles[x, y].RemoveUnit(unit);
             }
         }
     }

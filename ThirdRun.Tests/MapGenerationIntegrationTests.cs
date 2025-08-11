@@ -27,7 +27,7 @@ namespace ThirdRun.Tests
                 for (int y = 0; y < Map.GridHeight; y++)
                 {
                     Assert.NotNull(map.Tiles[x, y]);
-                    Assert.NotNull(map.Tiles[x, y].Name);
+                    Assert.NotNull(map.Tiles[x, y].TileType.Name);
                 }
             }
         }
@@ -47,7 +47,7 @@ namespace ThirdRun.Tests
             {
                 for (int y = 0; y < Map.GridHeight; y++)
                 {
-                    tileTypes.Add(map.Tiles[x, y].Type);
+                    tileTypes.Add(map.Tiles[x, y].TileType.Type);
                 }
             }
             
@@ -127,7 +127,7 @@ namespace ThirdRun.Tests
             {
                 for (int y = 0; y < Map.GridHeight && !foundDifference; y++)
                 {
-                    if (map1.Tiles[x, y].Type != map2.Tiles[x, y].Type)
+                    if (map1.Tiles[x, y].TileType.Type != map2.Tiles[x, y].TileType.Type)
                     {
                         foundDifference = true;
                     }
@@ -153,7 +153,7 @@ namespace ThirdRun.Tests
             {
                 for (int y = 0; y < Map.GridHeight; y++)
                 {
-                    Assert.Equal(map1.Tiles[x, y].Type, map2.Tiles[x, y].Type);
+                    Assert.Equal(map1.Tiles[x, y].TileType.Type, map2.Tiles[x, y].TileType.Type);
                     Assert.Equal(map1.Tiles[x, y].IsWalkable, map2.Tiles[x, y].IsWalkable);
                 }
             }
@@ -178,7 +178,7 @@ namespace ThirdRun.Tests
                 {
                     for (int y = 0; y < Map.GridHeight && !foundExpectedTile; y++)
                     {
-                        if (map.Tiles[x, y].Type == expectedTileType)
+                        if (map.Tiles[x, y].TileType.Type == expectedTileType)
                         {
                             foundExpectedTile = true;
                         }

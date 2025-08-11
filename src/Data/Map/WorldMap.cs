@@ -258,8 +258,8 @@ namespace MonogameRPG.Map
                     if (map.Tiles[rx, ry].IsWalkable)
                     {
                         // Check for unit collision
-                        var unitAtTile = map.GetUnitAtTile(rx, ry);
-                        bool isOccupied = unitAtTile != null;
+                        var tile = map.Tiles[rx, ry];
+                        bool isOccupied = tile.IsOccupied;
                         bool isTarget = targetCell.HasValue && neighborPoint == targetCell.Value;
                         
                         if (!isOccupied || isTarget)
