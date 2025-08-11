@@ -46,6 +46,12 @@ namespace MonogameRPG.Monsters
         public void SetCurrentMap(MonogameRPG.Map.Map map)
         {
             _currentMap = map;
+            Map = map; // Also set the base class Map property
+        }
+        
+        public void SetWorldMap(ThirdRun.Data.Map.WorldMap worldMap)
+        {
+            WorldMap = worldMap;
         }
 
         /// <summary>
@@ -226,28 +232,8 @@ namespace MonogameRPG.Monsters
         {
             if (Target == null || _currentMap == null) return;
 
-            Vector2 direction = Target.Position - Position;
-            if (direction.Length() > 1f)
-            {
-                direction.Normalize();
-                
-                // Calculate new position
-                Vector2 newPosition = Position + direction * 1.5f; // Monster movement speed
-                
-                // Simple collision detection - check if new position would collide with other units
-                var tileCoords = _currentMap.WorldPositionToTileCoordinates(newPosition);
-                if (tileCoords.HasValue)
-                {
-                    var unitAtTile = _currentMap.GetUnitAtTile(tileCoords.Value.X, tileCoords.Value.Y);
-                    if (unitAtTile == null || unitAtTile == Target)
-                    {
-                        // Update position tracking on the map
-                        var oldPosition = Position;
-                        Position = newPosition;
-                        _currentMap.UpdateUnitPosition(this, oldPosition);
-                    }
-                }
-            }
+            // Use the sophisticated pathfinding from the base class
+            MoveTo(Target.Position);
         }
 
         /// <summary>
