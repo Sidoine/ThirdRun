@@ -60,5 +60,7 @@ namespace MonogameRPG
         {
             UseAbility(DefaultAbility, target);
         }
+        
+
     }
 }

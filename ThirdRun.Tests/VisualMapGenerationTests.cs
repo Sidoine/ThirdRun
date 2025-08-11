@@ -56,7 +56,7 @@ namespace ThirdRun.Tests
                     }
                     else
                     {
-                        char symbol = map.Tiles[x, y].Type switch
+                        char symbol = map.Tiles[x, y].TileType.Type switch
                         {
                             TileTypeEnum.Grass => 'G',
                             TileTypeEnum.Water => 'W',
@@ -82,7 +82,7 @@ namespace ThirdRun.Tests
             {
                 for (int y = 0; y < MonogameRPG.Map.Map.GridHeight; y++)
                 {
-                    var type = map.Tiles[x, y].Type;
+                    var type = map.Tiles[x, y].TileType.Type;
                     tileStats.TryGetValue(type, out int count);
                     tileStats[type] = count + 1;
                 }

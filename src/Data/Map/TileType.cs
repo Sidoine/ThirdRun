@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace MonogameRPG.Map
 {
@@ -65,5 +66,63 @@ namespace MonogameRPG.Map
 
         public static TileType CreateHill(int width, int height) => 
             new TileType("Colline", Color.YellowGreen, width, height, true, TileTypeEnum.Hill);
+    }
+
+    /// <summary>
+    /// Represents a single tile on the map containing both terrain information and units
+    /// </summary>
+    public class Tile
+    {
+        public TileType TileType { get; set; }
+        public List<Unit> Units { get; private set; }
+
+        public Tile(TileType tileType)
+        {
+            TileType = tileType;
+            Units = new List<Unit>();
+        }
+
+        /// <summary>
+        /// Adds a unit to this tile
+        /// </summary>
+        public void AddUnit(Unit unit)
+        {
+            if (!Units.Contains(unit))
+            {
+                Units.Add(unit);
+            }
+        }
+
+        /// <summary>
+        /// Removes a unit from this tile
+        /// </summary>
+        public void RemoveUnit(Unit unit)
+        {
+            Units.Remove(unit);
+        }
+
+        /// <summary>
+        /// Gets the first unit on this tile, or null if none
+        /// </summary>
+        public Unit? GetFirstUnit()
+        {
+            return Units.Count > 0 ? Units[0] : null;
+        }
+
+        /// <summary>
+        /// Checks if this tile has any units
+        /// </summary>
+        public bool HasUnits => Units.Count > 0;
+
+        /// <summary>
+        /// Checks if this tile is walkable (based on terrain and not blocked by units)
+        /// For pathfinding purposes - considers tile walkable if terrain allows it
+        /// </summary>
+        public bool IsWalkable => TileType.IsWalkable;
+
+        /// <summary>
+        /// Checks if this tile is occupied by any units
+        /// </summary>
+        public bool IsOccupied => Units.Count > 0;
     }
 }

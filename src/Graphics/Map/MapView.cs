@@ -34,7 +34,7 @@ namespace ThirdRun.Graphics.Map
                 for (int y = 0; y < MonogameRPG.Map.Map.GridHeight; y++)
                 {
                     Vector2 tilePos = renderOffset + new Vector2(x * MonogameRPG.Map.Map.TileWidth, y * MonogameRPG.Map.Map.TileHeight);
-                    _tileTypeView.Render(spriteBatch, map.Tiles[x, y], (int)tilePos.X, (int)tilePos.Y);
+                    _tileTypeView.Render(spriteBatch, map.Tiles[x, y].TileType, (int)tilePos.X, (int)tilePos.Y);
                 }
             
             // Affichage des monstres

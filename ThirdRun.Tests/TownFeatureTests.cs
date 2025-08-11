@@ -130,7 +130,7 @@ namespace ThirdRun.Tests
             Assert.True(characters[1].Position.Y <= map.Position.Y + mapHeight);
             
             // Characters should be added to the map
-            Assert.Equal(2, map.Characters.Count);
+            Assert.Equal(2, map.Characters.Count());
             Assert.Contains(characters[0], map.Characters);
             Assert.Contains(characters[1], map.Characters);
         }
