@@ -5,6 +5,7 @@ namespace ThirdRun.Data.Abilities
     public abstract class Ability
     {
         public string Name { get; protected set; }
+        public string IconPath { get; protected set; }
         public float Range { get; protected set; }
         public float CastTime { get; protected set; }
         public TargetType TargetType { get; protected set; }
@@ -13,9 +14,10 @@ namespace ThirdRun.Data.Abilities
         // Track when the ability was last used for cooldown calculation
         public float LastUsedTime { get; private set; }
         
-        protected Ability(string name, float range, float castTime, TargetType targetType, float cooldown)
+        protected Ability(string name, string iconPath, float range, float castTime, TargetType targetType, float cooldown)
         {
             Name = name;
+            IconPath = iconPath;
             Range = range;
             CastTime = castTime;
             TargetType = targetType;
