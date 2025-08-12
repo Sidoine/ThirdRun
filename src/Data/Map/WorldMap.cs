@@ -7,7 +7,7 @@ using ThirdRun.Data.NPCs;
 
 namespace MonogameRPG.Map
 {
-    public class WorldMap(int? seed = null)
+    public class WorldMap(Random random)
     {
         private readonly Dictionary<Point, Map> maps = new Dictionary<Point, Map>();
         private Point currentMapPosition = Point.Zero;
@@ -15,7 +15,7 @@ namespace MonogameRPG.Map
         private List<Character> characters = [];
         private Map? townMap = null; // Dedicated town map
         private bool isInTownMode = false; // Track if we're currently in town mode
-        private readonly Random random = new Random(seed ?? Environment.TickCount); // Use provided seed or default
+        private readonly Random random = random;
 
         public Map CurrentMap => isInTownMode && townMap != null ? townMap : 
             (maps.TryGetValue(currentMapPosition, out Map? value) ? value : throw new Exception("Current map not found at position: " + currentMapPosition));
@@ -25,14 +25,14 @@ namespace MonogameRPG.Map
         public void Initialize()
         {
             // Create the initial card at (0,0)
-            var initialMap = new Map(Point.Zero);
+            var initialMap = new Map(Point.Zero, random);
             initialMap.GenerateRandomMap();
             initialMap.SpawnMonsters(this);
             maps[Point.Zero] = initialMap;
             currentMapPosition = Point.Zero;
 
             // Create dedicated town map at a special position
-            townMap = new Map(new Point(-999, -999)); // Special position for town
+            townMap = new Map(new Point(-999, -999), random); // Special position for town
             townMap.GenerateRandomMap();
             townMap.IsTownZone = true;
             townMap.SpawnNPCs(this);
@@ -114,7 +114,7 @@ namespace MonogameRPG.Map
 
             if (!maps.ContainsKey(newCardPos))
             {
-                var newCard = new Map(newCardPos);
+                var newCard = new Map(newCardPos, random);
                 newCard.GenerateRandomMap();
                 newCard.SpawnMonsters(this);
                 maps[newCardPos] = newCard;

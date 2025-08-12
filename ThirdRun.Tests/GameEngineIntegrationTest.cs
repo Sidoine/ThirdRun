@@ -30,12 +30,13 @@ namespace ThirdRun.Tests
         public void GameEngine_RunFor1000Frames_ShouldNotThrowExceptions_WithSeed(int seed)
         {
             // Arrange - Set up the game state similar to Game1.Initialize() and LoadContent()
-            var worldMap = new WorldMap(seed);
+            var random = new Random(seed);
+            var worldMap = new WorldMap(random);
             worldMap.Initialize();
             
             var gameState = new GameState
             {
-                Player = new Player(worldMap, seed),
+                Player = new Player(worldMap, random),
                 WorldMap = worldMap,
             };
             

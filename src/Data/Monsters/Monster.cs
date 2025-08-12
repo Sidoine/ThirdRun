@@ -1,3 +1,4 @@
+using System;
 using ThirdRun.Items;
 using ThirdRun.Characters;
 using Microsoft.Xna.Framework;
@@ -20,11 +21,13 @@ namespace MonogameRPG.Monsters
         public int Level => Type.Level;
         public MonsterState State { get; private set; } = MonsterState.Sleeping;
         public float AggroRadius { get; set; } = 100f; // Default aggro radius in pixels
+        private readonly Random random;
 
         public Character? Target { get; private set; } // Current target being chased
 
-        public Monster(MonsterType type, MonogameRPG.Map.Map map, MonogameRPG.Map.WorldMap worldMap) : base(map, worldMap)
+        public Monster(MonsterType type, MonogameRPG.Map.Map map, MonogameRPG.Map.WorldMap worldMap, Random random) : base(map, worldMap)
         {
+            this.random = random;
             Type = type;
 
             // Copy all characteristics from monster type
@@ -229,7 +232,7 @@ namespace MonogameRPG.Monsters
         public Item DropLoot()
         {
             // Generate a random item based on monster level
-            return RandomItemGenerator.GenerateRandomItem(Level);
+            return RandomItemGenerator.GenerateRandomItem(Level, random);
         }
 
         public int GetExperienceValue()

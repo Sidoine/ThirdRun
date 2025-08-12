@@ -1,5 +1,6 @@
 namespace ThirdRun.Data
 {
+    using System;
     using System.Collections.Generic;
     using Microsoft.Xna.Framework;
     using MonogameRPG.Map;
@@ -13,15 +14,11 @@ namespace ThirdRun.Data
     public class Player
     {
         public List<Character> Characters { get; set; }
+        private readonly Random random;
 
-        public Player(WorldMap worldMap, int? seed = null)
+        public Player(WorldMap worldMap, Random random)
         {
-            // Set up seeded randomization if provided
-            if (seed.HasValue)
-            {
-                Helpers.SetRandomSeed(seed.Value + 1000); // Offset seed to avoid conflicts with WorldMap
-            }
-            
+            this.random = random;
             Characters = new List<Character>();
             
             // Position de départ au centre de la carte
@@ -53,7 +50,7 @@ namespace ThirdRun.Data
             // Ajout d'objets générés aléatoirement dans l'inventaire du guerrier (leader du groupe)
             for (int i = 0; i < 5; i++)
             {
-                var randomItem = RandomItemGenerator.GenerateRandomItem(5); // Niveau 5 pour les objets de départ
+                var randomItem = RandomItemGenerator.GenerateRandomItem(5, random); // Niveau 5 pour les objets de départ
                 warrior.Inventory.AddItem(randomItem);
             }
             

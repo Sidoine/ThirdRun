@@ -57,41 +57,41 @@ namespace ThirdRun.Items
         /// <summary>
         /// Get a random weapon template
         /// </summary>
-        public static WeaponTemplate GetRandomWeaponTemplate()
+        public static WeaponTemplate GetRandomWeaponTemplate(Random random)
         {
-            return WeaponTemplates[Utils.Helpers.RandomNumber(0, WeaponTemplates.Length)];
+            return WeaponTemplates[random.Next(0, WeaponTemplates.Length)];
         }
 
         /// <summary>
         /// Get a random armor template
         /// </summary>
-        public static ArmorTemplate GetRandomArmorTemplate()
+        public static ArmorTemplate GetRandomArmorTemplate(Random random)
         {
-            return ArmorTemplates[Utils.Helpers.RandomNumber(0, ArmorTemplates.Length)];
+            return ArmorTemplates[random.Next(0, ArmorTemplates.Length)];
         }
 
         /// <summary>
         /// Get a random potion template
         /// </summary>
-        public static PotionTemplate GetRandomPotionTemplate()
+        public static PotionTemplate GetRandomPotionTemplate(Random random)
         {
-            return PotionTemplates[Utils.Helpers.RandomNumber(0, PotionTemplates.Length)];
+            return PotionTemplates[random.Next(0, PotionTemplates.Length)];
         }
 
         /// <summary>
         /// Get a random weapon prefix
         /// </summary>
-        public static string GetRandomWeaponPrefix()
+        public static string GetRandomWeaponPrefix(Random random)
         {
-            return WeaponPrefixes[Utils.Helpers.RandomNumber(0, WeaponPrefixes.Length)];
+            return WeaponPrefixes[random.Next(0, WeaponPrefixes.Length)];
         }
 
         /// <summary>
         /// Get a random armor prefix
         /// </summary>
-        public static string GetRandomArmorPrefix()
+        public static string GetRandomArmorPrefix(Random random)
         {
-            return ArmorPrefixes[Utils.Helpers.RandomNumber(0, ArmorPrefixes.Length)];
+            return ArmorPrefixes[random.Next(0, ArmorPrefixes.Length)];
         }
 
         /// <summary>

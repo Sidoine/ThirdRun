@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
@@ -46,7 +47,7 @@ namespace MonogameRPG
 
         protected override void Initialize()
         {
-            worldMap = new Map.WorldMap();
+            worldMap = new Map.WorldMap(new Random());
             
             base.Initialize();
         }
@@ -58,7 +59,7 @@ namespace MonogameRPG
             _worldMapView = new WorldMapView(Content);
             _gameState = new GameState
             {
-                Player = new Player(worldMap),
+                Player = new Player(worldMap, new Random()),
                 WorldMap = worldMap,
             };
             worldMap.SetCharacters(_gameState.Player.Characters);
