@@ -54,7 +54,8 @@ namespace ThirdRun.Tests
             Assert.Empty(map.NPCs);
             
             // Act - Create a town map
-            var townMap = new Map(new Point(-999, -999));
+            var random = new Random(12345);
+            var townMap = new Map(new Point(-999, -999), random);
             townMap.GenerateRandomMap();
             townMap.IsTownZone = true;
             townMap.SpawnNPCs(worldMap);

@@ -10,8 +10,9 @@ public class MapSpawningTests
     public void Map_AreaLevel_ShouldIncreaseLevelWithDistance()
     {
         // Arrange & Act
-        var mapOrigin = new Map(new Point(0, 0));
-        var mapFar = new Map(new Point(3, 2)); // Distance = 5
+        var random = new Random(12345);
+        var mapOrigin = new Map(new Point(0, 0), random);
+        var mapFar = new Map(new Point(3, 2), random); // Distance = 5
         
         // Assert - Maps should have correct world positions
         Assert.Equal(new Point(0, 0), mapOrigin.WorldPosition);
@@ -25,7 +26,8 @@ public class MapSpawningTests
     public void Map_Constructor_ShouldSetWorldPositionCorrectly(int x, int y)
     {
         // Arrange & Act
-        var map = new Map(new Point(x, y));
+        var random = new Random(12345);
+        var map = new Map(new Point(x, y), random);
         
         // Assert
         Assert.Equal(new Point(x, y), map.WorldPosition);

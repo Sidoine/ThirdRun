@@ -40,7 +40,8 @@ namespace ThirdRun.Tests
         public void Monster_InheritsCharacteristicsFromType()
         {
             // Arrange
-            var worldMap = new MonogameRPG.Map.WorldMap();
+            var random = new Random(12345);
+            var worldMap = new MonogameRPG.Map.WorldMap(random);
             worldMap.Initialize();
             var monsterType = new MonsterType("Ice Mage", 60, 10, "monsters/ice_mage");
             monsterType.Characteristics.SetValue(Characteristic.SpellPower, 20);
@@ -64,7 +65,8 @@ namespace ThirdRun.Tests
         public void Monster_PreservesLegacyFunctionality()
         {
             // Arrange
-            var worldMap = new MonogameRPG.Map.WorldMap();
+            var random = new Random(12345);
+            var worldMap = new MonogameRPG.Map.WorldMap(random);
             worldMap.Initialize();
             var monsterType = new MonsterType("Goblin", 30, 8, "monsters/goblin", 2);
             

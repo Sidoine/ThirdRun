@@ -115,8 +115,9 @@ namespace ThirdRun.Tests
         public void Map_WithDifferentWorldPositions_GeneratesDifferentMaps()
         {
             // Arrange
-            var map1 = new Map(new Point(0, 0));
-            var map2 = new Map(new Point(1, 0));
+            var random = new Random(12345);
+            var map1 = new Map(new Point(0, 0), random);
+            var map2 = new Map(new Point(1, 0), random);
             
             // Act
             map1.GenerateRandomMap(2);
@@ -142,8 +143,10 @@ namespace ThirdRun.Tests
         public void Map_SameWorldPosition_GeneratesSameMap()
         {
             // Arrange
-            var map1 = new Map(new Point(2, 3));
-            var map2 = new Map(new Point(2, 3));
+            var random1 = new Random(12345);
+            var random2 = new Random(12345);
+            var map1 = new Map(new Point(2, 3), random1);
+            var map2 = new Map(new Point(2, 3), random2);
             
             // Act
             map1.GenerateRandomMap(3);
@@ -172,7 +175,8 @@ namespace ThirdRun.Tests
             // Generate multiple maps to increase chances of finding the expected tile type
             for (int mapAttempt = 0; mapAttempt < 10 && !foundExpectedTile; mapAttempt++)
             {
-                var map = new Map(new Point(mapAttempt, mapAttempt));
+                var random = new Random(12345 + mapAttempt);
+                var map = new Map(new Point(mapAttempt, mapAttempt), random);
                 map.GenerateRandomMap(2);
                 
                 for (int x = 0; x < Map.GridWidth && !foundExpectedTile; x++)

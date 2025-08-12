@@ -12,9 +12,10 @@ namespace ThirdRun.Tests
         {
             // Arrange
             var template = new WeaponTemplate("Épée", "Une épée classique", "Items/Weapons/epee", 2);
+            var random = new Random(12345);
             
             // Act
-            var weapon = (Weapon)template.CreateItem(3, "Magique");
+            var weapon = (Weapon)template.CreateItem(3, random, "Magique");
             
             // Assert
             Assert.Equal("Magique Épée", weapon.Name);
@@ -29,9 +30,10 @@ namespace ThirdRun.Tests
         {
             // Arrange
             var template = new ArmorTemplate("Casque", "Un casque de protection", "Items/Armors/casque", 2);
+            var random = new Random(12345);
             
             // Act
-            var armor = (Armor)template.CreateItem(2, "Renforcé");
+            var armor = (Armor)template.CreateItem(2, random, "Renforcé");
             
             // Assert
             Assert.Equal("Renforcé Casque", armor.Name);
@@ -46,9 +48,10 @@ namespace ThirdRun.Tests
         {
             // Arrange
             var template = new PotionTemplate("Potion de Soin", "Restaure la santé", "Items/Potions/potion_soin", 3);
+            var random = new Random(12345);
             
             // Act
-            var potion = (Potion)template.CreateItem(4);
+            var potion = (Potion)template.CreateItem(4, random);
             
             // Assert
             Assert.Equal("Potion de Soin (Niv. 4)", potion.Name);
@@ -104,7 +107,7 @@ namespace ThirdRun.Tests
         public void GetAllImagePaths_ReturnsAllAvailableImages()
         {
             // Act
-            var imagePaths = ItemTemplateRepository.GetAllImagePaths(new Random(12345)).ToList();
+            var imagePaths = ItemTemplateRepository.GetAllImagePaths().ToList();
             
             // Assert
             Assert.True(imagePaths.Count > 0);
@@ -126,9 +129,9 @@ namespace ThirdRun.Tests
         public void AllTemplates_HaveValidImagePaths()
         {
             // Act
-            var allWeapons = ItemTemplateRepository.GetAllWeaponTemplates(new Random(12345));
-            var allArmors = ItemTemplateRepository.GetAllArmorTemplates(new Random(12345));
-            var allPotions = ItemTemplateRepository.GetAllPotionTemplates(new Random(12345));
+            var allWeapons = ItemTemplateRepository.GetAllWeaponTemplates();
+            var allArmors = ItemTemplateRepository.GetAllArmorTemplates();
+            var allPotions = ItemTemplateRepository.GetAllPotionTemplates();
             
             // Assert - All weapon templates should have valid image paths
             foreach (var weapon in allWeapons)
