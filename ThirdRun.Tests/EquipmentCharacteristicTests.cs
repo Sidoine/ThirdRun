@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using ThirdRun.Items;
 using ThirdRun.Data;
@@ -37,7 +38,7 @@ namespace ThirdRun.Tests
         public void Equipment_Equip_AppliesBothLegacyAndCharacteristicBonuses()
         {
             // Arrange
-            var worldMap = new WorldMap(); // Use parameterless constructor
+            var worldMap = new WorldMap(new Random(12345)); // Use parameterless constructor
             worldMap.Initialize();
             var character = new Character("TestHero", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
             var equipment = new Equipment("Enhanced Armor", "Magical armor", 300, 8);
@@ -61,7 +62,7 @@ namespace ThirdRun.Tests
         public void Equipment_Unequip_RemovesBothLegacyAndCharacteristicBonuses()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             var character = new Character("TestHero", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
             var equipment = new Equipment("Enhanced Weapon", "Magical weapon", 250, 6);
@@ -88,7 +89,7 @@ namespace ThirdRun.Tests
         public void Equipment_MultipleCharacteristics_AllAppliedCorrectly()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             var character = new Character("TestHero", CharacterClass.Mage, 80, 8, worldMap.CurrentMap, worldMap);
             var equipment = new Equipment("Arcane Robes", "Robes of the arcane", 400, 0); // No legacy bonus stats
@@ -117,7 +118,7 @@ namespace ThirdRun.Tests
         public void Equipment_PreservesLegacyBehavior()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             var character = new Character("TestHero", CharacterClass.Guerrier, 100, 12, worldMap.CurrentMap, worldMap);
             var equipment = new Equipment("Basic Sword", "A simple sword", 150, 7);

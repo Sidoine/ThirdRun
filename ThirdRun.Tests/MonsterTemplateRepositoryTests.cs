@@ -1,3 +1,4 @@
+using System;
 using MonogameRPG.Monsters;
 using Xunit;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace ThirdRun.Tests
         public void GetRandomTemplate_ReturnsValidTemplate()
         {
             // Act
-            var template = MonsterTemplateRepository.GetRandomTemplate();
+            var template = MonsterTemplateRepository.GetRandomTemplate(new Random(12345));
 
             // Assert
             Assert.NotNull(template);
@@ -83,7 +84,7 @@ namespace ThirdRun.Tests
         public void MonsterTemplate_ToMonsterType_CreatesValidMonsterType()
         {
             // Arrange
-            var template = MonsterTemplateRepository.GetRandomTemplate();
+            var template = MonsterTemplateRepository.GetRandomTemplate(new Random(12345));
 
             // Act
             var monsterType = template.ToMonsterType();

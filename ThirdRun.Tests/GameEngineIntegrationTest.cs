@@ -141,12 +141,12 @@ namespace ThirdRun.Tests
         public void GameEngine_RunFor100FramesWithCombat_ShouldHandleCombatCorrectly()
         {
             // Arrange - Set up a game state with characters positioned near monsters
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             
             var gameState = new GameState
             {
-                Player = new Player(worldMap),
+                Player = new Player(worldMap, new Random(12345)),
                 WorldMap = worldMap,
             };
             
@@ -203,12 +203,12 @@ namespace ThirdRun.Tests
         public void GameEngine_RunFor50FramesWithMapTransitions_ShouldHandleTransitionsCorrectly()
         {
             // Arrange - Set up game state and force map transitions
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             
             var gameState = new GameState
             {
-                Player = new Player(worldMap),
+                Player = new Player(worldMap, new Random(12345)),
                 WorldMap = worldMap,
             };
             
@@ -262,12 +262,12 @@ namespace ThirdRun.Tests
             // This test specifically targets the pathfinding bounds issue
             // that could cause IndexOutOfRangeException during long runs
             
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             
             var gameState = new GameState
             {
-                Player = new Player(worldMap),
+                Player = new Player(worldMap, new Random(12345)),
                 WorldMap = worldMap,
             };
             

@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
@@ -19,7 +20,7 @@ namespace ThirdRun.Tests
             GraphicsDevice? graphicsDevice = null;
 
             // Act
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
 
             // Assert
             Assert.NotNull(worldMap);
@@ -29,7 +30,7 @@ namespace ThirdRun.Tests
         public void CurrentMapPosition_ShouldInitiallyBeZero_WhenNotInitialized()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
 
             // Act
             var position = worldMap.CurrentMapPosition;
@@ -42,7 +43,7 @@ namespace ThirdRun.Tests
         public void SetCharacters_WithEmptyList_ShouldNotThrow()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             var emptyCharacters = new List<Character>();
 
@@ -54,7 +55,7 @@ namespace ThirdRun.Tests
         public void SetCharacters_WithMultipleCharacters_ShouldNotThrow()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             var characters = new List<Character>();
             
@@ -85,7 +86,7 @@ namespace ThirdRun.Tests
         public void Update_WithoutInitialization_ShouldNotThrow()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
 
             // Act & Assert - Should not throw
@@ -96,7 +97,7 @@ namespace ThirdRun.Tests
         public void Update_WithEmptyCharacterList_ShouldNotThrow()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             var characters = new List<Character>();
             worldMap.SetCharacters(characters);
@@ -109,7 +110,7 @@ namespace ThirdRun.Tests
         public void CharacterTransition_ShouldMaintainCharacterProperties()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             var characters = new List<Character>();
 
             try
@@ -150,7 +151,7 @@ namespace ThirdRun.Tests
         public void WorldMap_ShouldHandleMultipleUpdates()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             var characters = new List<Character>();
             worldMap.SetCharacters(characters);
@@ -174,7 +175,7 @@ namespace ThirdRun.Tests
         public void WorldMap_ShouldHandleCharacterListModification()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             var characters = new List<Character>();
 
@@ -197,7 +198,7 @@ namespace ThirdRun.Tests
         public void WorldMap_CharacterTransitionBehavior_ShouldBeStable()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             
             // Test the core character transition logic by simulating character list changes

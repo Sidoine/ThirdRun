@@ -1,3 +1,4 @@
+using System;
 using MonogameRPG.Monsters;
 using MonogameRPG.Map;
 using MonogameRPG;
@@ -24,7 +25,7 @@ namespace ThirdRun.Tests
             // Arrange
             output.WriteLine("=== Monster Aggro Integration Test ===\n");
             
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             
             // Create characters
@@ -42,13 +43,13 @@ namespace ThirdRun.Tests
             // Create monsters
             var monsterType = new MonsterType("Orc", 60, 8, "test_orc");
             
-            var orc1 = new Monster(monsterType, worldMap.CurrentMap, worldMap);
+            var orc1 = new Monster(monsterType, worldMap.CurrentMap, worldMap, new Random(12345));
             orc1.Position = new Vector2(150, 100); // Near warrior (50px distance)
             
-            var orc2 = new Monster(monsterType, worldMap.CurrentMap, worldMap);
+            var orc2 = new Monster(monsterType, worldMap.CurrentMap, worldMap, new Random(12345));
             orc2.Position = new Vector2(200, 150); // Near orc1 (can be awakened)
             
-            var orc3 = new Monster(monsterType, worldMap.CurrentMap, worldMap);
+            var orc3 = new Monster(monsterType, worldMap.CurrentMap, worldMap, new Random(12345));
             orc3.Position = new Vector2(500, 500); // Far away
             
             // Add units to map

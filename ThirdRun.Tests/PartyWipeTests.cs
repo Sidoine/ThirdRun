@@ -1,3 +1,4 @@
+using System;
 using MonogameRPG;
 using MonogameRPG.Map;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace ThirdRun.Tests
         public void AllCharactersDead_ShouldTriggerPartyWipe()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             
             var characters = new List<Character>
@@ -37,7 +38,7 @@ namespace ThirdRun.Tests
         public void SomeCharactersAlive_ShouldNotTriggerPartyWipe()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             
             var characters = new List<Character>
@@ -61,7 +62,7 @@ namespace ThirdRun.Tests
         public void PartyWipeRecovery_ShouldRestoreFullHealth()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             
             var warrior = new Character("Warrior", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
@@ -89,7 +90,7 @@ namespace ThirdRun.Tests
         public void DeadCharacter_ShouldNotMove()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             
             var character = new Character("DeadChar", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);

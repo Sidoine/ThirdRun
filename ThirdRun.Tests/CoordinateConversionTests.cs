@@ -16,7 +16,7 @@ namespace ThirdRun.Tests
         public void GetRelativeTileCoordinate_PositiveCoordinates_ShouldCalculateCorrectly()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
 
             // Test cases for positive coordinates
@@ -50,7 +50,7 @@ namespace ThirdRun.Tests
         public void GetRelativeTileCoordinate_NegativeCoordinates_ShouldCalculateCorrectly()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
 
             // Test cases for negative coordinates - this is where the bug likely was
@@ -84,7 +84,7 @@ namespace ThirdRun.Tests
         public void GetRelativeTileCoordinate_MixedCoordinates_ShouldCalculateCorrectly()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
 
             // Test cases with mixed positive/negative coordinates
@@ -114,7 +114,7 @@ namespace ThirdRun.Tests
         public void GetRelativeTileCoordinate_EdgeCases_ShouldHandleGracefully()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
 
             // Test extreme edge cases
@@ -151,7 +151,7 @@ namespace ThirdRun.Tests
         public void GetNeighbors_WithNewCoordinateLogic_ShouldNotThrowIndexOutOfRangeException()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
 
             // Test the same edge cases that were causing issues before
@@ -199,7 +199,7 @@ namespace ThirdRun.Tests
         public void GetRelativeTileCoordinate_RoundTrip_ShouldBeConsistent(int absoluteX, int absoluteY)
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
 
             // Act

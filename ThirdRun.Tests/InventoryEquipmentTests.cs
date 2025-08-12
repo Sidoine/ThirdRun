@@ -1,3 +1,4 @@
+using System;
 using ThirdRun.Characters;
 using ThirdRun.Items;
 using MonogameRPG.Map;
@@ -10,7 +11,7 @@ public class InventoryEquipmentTests
     public void EquipItem_WithWeapon_EquipsWeaponAndUpdatesStats()
     {
         // Arrange
-        var worldMap = new WorldMap();
+        var worldMap = new WorldMap(new Random(12345));
         worldMap.Initialize();
         var character = new Character("Test Warrior", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         var weapon = new Weapon("Test Sword", "A test sword", 100, 5, 10);
@@ -32,7 +33,7 @@ public class InventoryEquipmentTests
     public void EquipItem_WithArmor_EquipsArmorAndUpdatesStats()
     {
         // Arrange
-        var worldMap = new WorldMap();
+        var worldMap = new WorldMap(new Random(12345));
         worldMap.Initialize();
         var character = new Character("Test Warrior", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         var armor = new Armor("Test Armor", "A test armor", 100, 3, 15);
@@ -54,7 +55,7 @@ public class InventoryEquipmentTests
     public void EquipItem_WithWeaponWhenAlreadyEquipped_SwapsWeaponsCorrectly()
     {
         // Arrange
-        var worldMap = new WorldMap();
+        var worldMap = new WorldMap(new Random(12345));
         worldMap.Initialize();
         var character = new Character("Test Warrior", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         var oldWeapon = new Weapon("Old Sword", "An old sword", 50, 3, 8);
@@ -82,7 +83,7 @@ public class InventoryEquipmentTests
     public void EquipItem_WithArmorWhenAlreadyEquipped_SwapsArmorCorrectly()
     {
         // Arrange
-        var worldMap = new WorldMap();
+        var worldMap = new WorldMap(new Random(12345));
         worldMap.Initialize();
         var character = new Character("Test Warrior", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         var oldArmor = new Armor("Old Armor", "An old armor", 50, 2, 10);
@@ -110,7 +111,7 @@ public class InventoryEquipmentTests
     public void EquipItem_WithNonEquipment_ReturnsFalse()
     {
         // Arrange
-        var worldMap = new WorldMap();
+        var worldMap = new WorldMap(new Random(12345));
         worldMap.Initialize();
         var character = new Character("Test Warrior", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         var potion = new Potion("Health Potion", "Restores health", 50, 25);
@@ -128,7 +129,7 @@ public class InventoryEquipmentTests
     public void EquipItem_WithClassRestriction_ReturnsFalse()
     {
         // Arrange
-        var worldMap = new WorldMap();
+        var worldMap = new WorldMap(new Random(12345));
         worldMap.Initialize();
         var character = new Character("Test Mage", CharacterClass.Mage, 100, 10, worldMap.CurrentMap, worldMap);
         var sword = new Weapon("Épée", "A sword that mages can't use", 100, 5, 10);

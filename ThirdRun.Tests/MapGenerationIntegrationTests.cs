@@ -1,3 +1,4 @@
+using System;
 using Xunit;
 using Microsoft.Xna.Framework;
 using MonogameRPG.Map;
@@ -11,7 +12,7 @@ namespace ThirdRun.Tests
         public void Map_GenerateRandomMap_UsesAdvancedGenerator()
         {
             // Arrange
-            var map = new Map(Point.Zero);
+            var map = new Map(Point.Zero, new Random(12345));
             
             // Act
             map.GenerateRandomMap(3);
@@ -36,7 +37,7 @@ namespace ThirdRun.Tests
         public void Map_GenerateRandomMap_ProducesVarietyOfTileTypes()
         {
             // Arrange
-            var map = new Map(Point.Zero);
+            var map = new Map(Point.Zero, new Random(12345));
             
             // Act
             map.GenerateRandomMap(2);
@@ -60,7 +61,7 @@ namespace ThirdRun.Tests
         public void Map_GenerateRandomMap_HasWalkableTiles()
         {
             // Arrange
-            var map = new Map(Point.Zero);
+            var map = new Map(Point.Zero, new Random(12345));
             
             // Act
             map.GenerateRandomMap(2);
@@ -87,7 +88,7 @@ namespace ThirdRun.Tests
         public void Map_GenerateRandomMap_CreatesMonsterSpawnPoints()
         {
             // Arrange
-            var map = new Map(Point.Zero);
+            var map = new Map(Point.Zero, new Random(12345));
             int requestedSpawnCount = 4;
             
             // Act

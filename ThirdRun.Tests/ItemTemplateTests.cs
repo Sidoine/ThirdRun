@@ -65,7 +65,7 @@ namespace ThirdRun.Tests
         public void GetRandomWeaponTemplate_ReturnsValidTemplate()
         {
             // Act
-            var template = ItemTemplateRepository.GetRandomWeaponTemplate();
+            var template = ItemTemplateRepository.GetRandomWeaponTemplate(new Random(12345));
             
             // Assert
             Assert.NotNull(template);
@@ -78,7 +78,7 @@ namespace ThirdRun.Tests
         public void GetRandomArmorTemplate_ReturnsValidTemplate()
         {
             // Act
-            var template = ItemTemplateRepository.GetRandomArmorTemplate();
+            var template = ItemTemplateRepository.GetRandomArmorTemplate(new Random(12345));
             
             // Assert
             Assert.NotNull(template);
@@ -91,7 +91,7 @@ namespace ThirdRun.Tests
         public void GetRandomPotionTemplate_ReturnsValidTemplate()
         {
             // Act
-            var template = ItemTemplateRepository.GetRandomPotionTemplate();
+            var template = ItemTemplateRepository.GetRandomPotionTemplate(new Random(12345));
             
             // Assert
             Assert.NotNull(template);
@@ -104,7 +104,7 @@ namespace ThirdRun.Tests
         public void GetAllImagePaths_ReturnsAllAvailableImages()
         {
             // Act
-            var imagePaths = ItemTemplateRepository.GetAllImagePaths().ToList();
+            var imagePaths = ItemTemplateRepository.GetAllImagePaths(new Random(12345)).ToList();
             
             // Assert
             Assert.True(imagePaths.Count > 0);
@@ -126,9 +126,9 @@ namespace ThirdRun.Tests
         public void AllTemplates_HaveValidImagePaths()
         {
             // Act
-            var allWeapons = ItemTemplateRepository.GetAllWeaponTemplates();
-            var allArmors = ItemTemplateRepository.GetAllArmorTemplates();
-            var allPotions = ItemTemplateRepository.GetAllPotionTemplates();
+            var allWeapons = ItemTemplateRepository.GetAllWeaponTemplates(new Random(12345));
+            var allArmors = ItemTemplateRepository.GetAllArmorTemplates(new Random(12345));
+            var allPotions = ItemTemplateRepository.GetAllPotionTemplates(new Random(12345));
             
             // Assert - All weapon templates should have valid image paths
             foreach (var weapon in allWeapons)
@@ -156,7 +156,7 @@ namespace ThirdRun.Tests
         public void GetRandomWeaponPrefix_ReturnsValidPrefix()
         {
             // Act
-            var prefix = ItemTemplateRepository.GetRandomWeaponPrefix();
+            var prefix = ItemTemplateRepository.GetRandomWeaponPrefix(new Random(12345));
             
             // Assert
             Assert.NotNull(prefix);
@@ -167,7 +167,7 @@ namespace ThirdRun.Tests
         public void GetRandomArmorPrefix_ReturnsValidPrefix()
         {
             // Act
-            var prefix = ItemTemplateRepository.GetRandomArmorPrefix();
+            var prefix = ItemTemplateRepository.GetRandomArmorPrefix(new Random(12345));
             
             // Assert
             Assert.NotNull(prefix);
@@ -181,7 +181,7 @@ namespace ThirdRun.Tests
         public void GenerateRandomItem_CreatesItemWithImagePath()
         {
             // Act
-            var item = RandomItemGenerator.GenerateRandomItem(1);
+            var item = RandomItemGenerator.GenerateRandomItem(1, new Random(12345));
             
             // Assert
             Assert.NotNull(item);
@@ -195,7 +195,7 @@ namespace ThirdRun.Tests
             // Act - Generate many items to test different weapon types
             for (int i = 0; i < 50; i++)
             {
-                var item = RandomItemGenerator.GenerateRandomItem(1);
+                var item = RandomItemGenerator.GenerateRandomItem(1, new Random(12345));
                 if (item is Weapon weapon)
                 {
                     // Assert
@@ -211,7 +211,7 @@ namespace ThirdRun.Tests
             // Act - Generate many items to test different armor types
             for (int i = 0; i < 50; i++)
             {
-                var item = RandomItemGenerator.GenerateRandomItem(1);
+                var item = RandomItemGenerator.GenerateRandomItem(1, new Random(12345));
                 if (item is Armor armor)
                 {
                     // Assert
@@ -227,7 +227,7 @@ namespace ThirdRun.Tests
             // Act - Generate many items to test different potion types
             for (int i = 0; i < 50; i++)
             {
-                var item = RandomItemGenerator.GenerateRandomItem(1);
+                var item = RandomItemGenerator.GenerateRandomItem(1, new Random(12345));
                 if (item is Potion potion)
                 {
                     // Assert

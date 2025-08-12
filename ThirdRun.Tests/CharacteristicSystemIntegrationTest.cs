@@ -16,7 +16,7 @@ namespace ThirdRun.Tests
         public void CharacteristicSystem_Integration_WorksCorrectly()
         {
             // Setup world map for testing
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             
             // Create a powerful weapon with multiple characteristics
@@ -48,7 +48,7 @@ namespace ThirdRun.Tests
             fireDragon.Characteristics.SetValue(Characteristic.IceResistance, -25); // Weakness
             fireDragon.Characteristics.SetValue(Characteristic.Haste, 5);
             
-            var dragon = new Monster(fireDragon, worldMap.CurrentMap, worldMap);
+            var dragon = new Monster(fireDragon, worldMap.CurrentMap, worldMap, new Random(12345));
             
             // Verify monster characteristics are copied correctly
             Assert.Equal(200, dragon.MaxHealth);
@@ -85,7 +85,7 @@ namespace ThirdRun.Tests
         public void CharacteristicSystem_HealthCharacteristic_WorksCorrectly()
         {
             // Test the new Health characteristic
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             var character = new Character("Test Character", CharacterClass.Guerrier, 100, 15, worldMap.CurrentMap, worldMap);
             
@@ -102,7 +102,7 @@ namespace ThirdRun.Tests
             Assert.Equal(300, toughMonster.BaseHealth);
             Assert.Equal(300, toughMonster.Characteristics.GetValue(Characteristic.Health));
             
-            var monster = new Monster(toughMonster, worldMap.CurrentMap, worldMap);
+            var monster = new Monster(toughMonster, worldMap.CurrentMap, worldMap, new Random(12345));
             Assert.Equal(300, monster.MaxHealth);
             Assert.Equal(300, monster.CurrentHealth);
         }

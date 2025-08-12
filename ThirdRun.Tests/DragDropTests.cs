@@ -1,3 +1,4 @@
+using System;
 using ThirdRun.Characters;
 using ThirdRun.Items;
 using MonogameRPG.Map;
@@ -11,7 +12,7 @@ public class DragDropTests
     public void Inventory_WithCoordinates_AllowsItemMovement()
     {
         // Arrange
-        var worldMap = new WorldMap();
+        var worldMap = new WorldMap(new Random(12345));
         worldMap.Initialize();
         var character = new Character("Test Character", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         var sword = new Weapon("Test Sword", "A test sword", 100, 5, 10);
@@ -40,7 +41,7 @@ public class DragDropTests
     public void Inventory_MoveToOccupiedSlot_SwapsItems()
     {
         // Arrange
-        var worldMap = new WorldMap();
+        var worldMap = new WorldMap(new Random(12345));
         worldMap.Initialize();
         var character = new Character("Test Character", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         var sword = new Weapon("Test Sword", "A test sword", 100, 5, 10);
@@ -62,7 +63,7 @@ public class DragDropTests
     public void Inventory_IsSlotEmpty_ReturnsCorrectState()
     {
         // Arrange
-        var worldMap = new WorldMap();
+        var worldMap = new WorldMap(new Random(12345));
         worldMap.Initialize();
         var character = new Character("Test Character", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         var sword = new Weapon("Test Sword", "A test sword", 100, 5, 10);
@@ -85,7 +86,7 @@ public class DragDropTests
     public void Inventory_RemoveItemAt_RemovesItemFromCoordinates()
     {
         // Arrange
-        var worldMap = new WorldMap();
+        var worldMap = new WorldMap(new Random(12345));
         worldMap.Initialize();
         var character = new Character("Test Character", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         var sword = new Weapon("Test Sword", "A test sword", 100, 5, 10);
