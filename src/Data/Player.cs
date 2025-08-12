@@ -5,6 +5,7 @@ namespace ThirdRun.Data
     using MonogameRPG.Map;
     using ThirdRun.Characters;
     using ThirdRun.Items;
+    using ThirdRun.Utils;
 
     /// <summary>
     /// Représente un joueur dans le jeu, avec des informations sur son personnage et son inventaire.
@@ -13,8 +14,14 @@ namespace ThirdRun.Data
     {
         public List<Character> Characters { get; set; }
 
-        public Player(WorldMap worldMap)
+        public Player(WorldMap worldMap, int? seed = null)
         {
+            // Set up seeded randomization if provided
+            if (seed.HasValue)
+            {
+                Helpers.SetRandomSeed(seed.Value + 1000); // Offset seed to avoid conflicts with WorldMap
+            }
+            
             Characters = new List<Character>();
             
             // Position de départ au centre de la carte

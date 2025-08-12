@@ -18,13 +18,24 @@ namespace ThirdRun.Tests
         [Fact]
         public void GameEngine_RunFor1000Frames_ShouldNotThrowExceptions()
         {
+            GameEngine_RunFor1000Frames_ShouldNotThrowExceptions_WithSeed(12345);
+        }
+
+        [Theory]
+        [InlineData(12345)]
+        [InlineData(54321)]
+        [InlineData(98765)]
+        [InlineData(11111)]
+        [InlineData(99999)]
+        public void GameEngine_RunFor1000Frames_ShouldNotThrowExceptions_WithSeed(int seed)
+        {
             // Arrange - Set up the game state similar to Game1.Initialize() and LoadContent()
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(seed);
             worldMap.Initialize();
             
             var gameState = new GameState
             {
-                Player = new Player(worldMap),
+                Player = new Player(worldMap, seed),
                 WorldMap = worldMap,
             };
             
@@ -67,7 +78,7 @@ namespace ThirdRun.Tests
                 }
                 catch (Exception ex)
                 {
-                    exceptions.Add(new Exception($"Exception on frame {frame}: {ex.Message}", ex));
+                    exceptions.Add(new Exception($"Exception on frame {frame} with seed {seed}: {ex.Message}", ex));
                 }
             }
             
@@ -75,7 +86,7 @@ namespace ThirdRun.Tests
             if (exceptions.Count > 0)
             {
                 var aggregateException = new AggregateException(
-                    $"Game engine threw {exceptions.Count} exception(s) during 10000 frame test",
+                    $"Game engine threw {exceptions.Count} exception(s) during 10000 frame test with seed {seed}",
                     exceptions
                 );
                 throw aggregateException;
@@ -86,11 +97,11 @@ namespace ThirdRun.Tests
             Assert.NotNull(gameState.WorldMap);
             Assert.NotEmpty(gameState.Player.Characters);
             Assert.True(gameState.Player.Characters.TrueForAll(c => c.CurrentHealth > 0), 
-                "All characters should still be alive after 10000 frames");
+                $"All characters should still be alive after 10000 frames (seed: {seed})");
             
             // Verify that at least one character moved during the simulation
             Assert.True(movementDetected, 
-                "At least one character should be moving during the 10000 frame simulation");
+                $"At least one character should be moving during the 10000 frame simulation (seed: {seed})");
         }
         
         /// <summary>
