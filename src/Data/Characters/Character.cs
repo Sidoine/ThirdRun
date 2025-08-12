@@ -24,7 +24,6 @@ public class Character : Unit
     public Inventory Inventory { get; private set; }
     public Equipment? Weapon { get; private set; }
     public Equipment? Armor { get; private set; }
-    public List<string> Techniques { get; private set; }
 
     public Character(string name, CharacterClass characterClass, int health, int attackPower, MonogameRPG.Map.Map map, MonogameRPG.Map.WorldMap worldMap) : base(map, worldMap)
     {
@@ -36,7 +35,6 @@ public class Character : Unit
         AttackPower = attackPower;
         Experience = 0;
         Inventory = new Inventory() { Owner = this };
-        Techniques = new List<string>();
         Position = new Vector2(0, 0); // Position initiale
         
         // Add class-specific abilities
@@ -148,8 +146,6 @@ public class Character : Unit
     public void GainExperience(Monster monster)
     {
         Experience += monster.GetExperienceValue();
-        // Débloquer des techniques selon la classe et le niveau
-        UnlockTechniques();
     }
 
     public bool Equip(Equipment equipment)
@@ -195,15 +191,5 @@ public class Character : Unit
     {
         // Ajouter d'autres règles selon les classes
         return true;
-    }
-
-    private void UnlockTechniques()
-    {
-        // Exemple : débloquer une technique au niveau 10
-        if (Experience >= 100 && !Techniques.Contains("Coup spécial"))
-        {
-            Techniques.Add("Coup spécial");
-        }
-        // Ajouter d'autres techniques selon la classe
     }
 }

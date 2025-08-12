@@ -153,19 +153,6 @@ namespace ThirdRun.UI.Panels
 
             currentY += SectionSpacing;
 
-            // Techniques section
-            if (_character.Techniques.Count > 0)
-            {
-                DrawText("=== TECHNIQUES ===", Bounds.X + PanelPadding, currentY, Color.Yellow, true);
-                currentY += LineSpacing;
-
-                foreach (var technique in _character.Techniques)
-                {
-                    DrawText($"• {technique}", Bounds.X + PanelPadding, currentY, Color.LightCyan);
-                    currentY += LineSpacing;
-                }
-            }
-
             // Inventory count
             currentY += SectionSpacing;
             DrawText($"Objets dans l'inventaire: {_character.Inventory.GetItems().Count}", Bounds.X + PanelPadding, currentY, Color.Orange);
