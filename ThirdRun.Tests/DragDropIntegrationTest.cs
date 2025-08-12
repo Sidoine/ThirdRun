@@ -1,3 +1,4 @@
+using System;
 using ThirdRun.Characters;
 using ThirdRun.Items;
 using MonogameRPG.Map;
@@ -14,7 +15,7 @@ public class DragDropIntegrationTest
     public void DragDropWorkflow_MoveItemInInventory_CompletesSuccessfully()
     {
         // Arrange - Simulate game setup with items
-        var worldMap = new WorldMap();
+        var worldMap = new WorldMap(new Random(12345));
         worldMap.Initialize();
         var character = new Character("Test Player", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         
@@ -64,7 +65,7 @@ public class DragDropIntegrationTest
     public void DragDropWorkflow_EquipItemByDrop_CompletesSuccessfully()
     {
         // Arrange - Character with items in inventory
-        var worldMap = new WorldMap();
+        var worldMap = new WorldMap(new Random(12345));
         worldMap.Initialize();
         var character = new Character("Test Player", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         

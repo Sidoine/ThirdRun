@@ -1,3 +1,4 @@
+using System;
 using MonogameRPG;
 using ThirdRun.Data.Abilities;
 using MonogameRPG.Map;
@@ -12,10 +13,11 @@ namespace ThirdRun.Tests
         public void CombatScenario_HunterVsMonster_ShouldUseRangedAttack()
         {
             // Arrange - Create a realistic combat scenario
-            var worldMap = new WorldMap();
+            var random = new Random(12345);
+            var worldMap = new WorldMap(random);
             worldMap.Initialize();
             var hunter = new Character("Archer", CharacterClass.Chasseur, 100, 15, worldMap.CurrentMap, worldMap);
-            var monster = new Monster(new MonsterType("Orc", 50, 12, "Monsters/orc", 1), worldMap.CurrentMap, worldMap);
+            var monster = new Monster(new MonsterType("Orc", 50, 12, "Monsters/orc", 1), worldMap.CurrentMap, worldMap, random);
             
             // Position them at range (hunter can use ranged attack)
             hunter.Position = new Vector2(0, 0);
@@ -36,7 +38,7 @@ namespace ThirdRun.Tests
         public void CombatScenario_PriestHealing_ShouldHealDamagedAlly()
         {
             // Arrange - Create healing scenario
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             var priest = new Character("Healer", CharacterClass.Prêtre, 80, 10, worldMap.CurrentMap, worldMap);
             var warrior = new Character("Tank", CharacterClass.Guerrier, 100, 20, worldMap.CurrentMap, worldMap);
@@ -63,10 +65,11 @@ namespace ThirdRun.Tests
         public void CombatScenario_AbilityCooldowns_ShouldPreventSpamming()
         {
             // Arrange - Test cooldown system using the proven ability system
-            var worldMap = new WorldMap();
+            var random = new Random(12345);
+            var worldMap = new WorldMap(random);
             worldMap.Initialize();
             var warrior = new Character("Fighter", CharacterClass.Guerrier, 100, 20, worldMap.CurrentMap, worldMap);
-            var monster = new Monster(new MonsterType("Goblin", 100, 8, "Monsters/goblin", 1), worldMap.CurrentMap, worldMap);
+            var monster = new Monster(new MonsterType("Goblin", 100, 8, "Monsters/goblin", 1), worldMap.CurrentMap, worldMap, random);
             
             warrior.Position = new Vector2(0, 0);
             monster.Position = new Vector2(20, 0); // Within melee range

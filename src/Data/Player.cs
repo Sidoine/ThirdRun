@@ -1,10 +1,12 @@
 namespace ThirdRun.Data
 {
+    using System;
     using System.Collections.Generic;
     using Microsoft.Xna.Framework;
     using MonogameRPG.Map;
     using ThirdRun.Characters;
     using ThirdRun.Items;
+    using ThirdRun.Utils;
 
     /// <summary>
     /// Représente un joueur dans le jeu, avec des informations sur son personnage et son inventaire.
@@ -12,9 +14,11 @@ namespace ThirdRun.Data
     public class Player
     {
         public List<Character> Characters { get; set; }
+        private readonly Random random;
 
-        public Player(WorldMap worldMap)
+        public Player(WorldMap worldMap, Random random)
         {
+            this.random = random;
             Characters = new List<Character>();
             
             // Position de départ au centre de la carte
@@ -46,7 +50,7 @@ namespace ThirdRun.Data
             // Ajout d'objets générés aléatoirement dans l'inventaire du guerrier (leader du groupe)
             for (int i = 0; i < 5; i++)
             {
-                var randomItem = RandomItemGenerator.GenerateRandomItem(5); // Niveau 5 pour les objets de départ
+                var randomItem = RandomItemGenerator.GenerateRandomItem(5, random); // Niveau 5 pour les objets de départ
                 warrior.Inventory.AddItem(randomItem);
             }
             

@@ -1,3 +1,4 @@
+using System;
 using ThirdRun.Characters;
 using ThirdRun.Items;
 using MonogameRPG.Map;
@@ -14,7 +15,7 @@ public class RightClickEquipIntegrationTest
     public void RightClickWorkflow_EquipFromInventory_CompletesSuccessfully()
     {
         // Arrange - Simulate game setup
-        var worldMap = new WorldMap();
+        var worldMap = new WorldMap(new Random(12345));
         worldMap.Initialize();
         var character = new Character("Test Player", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
         

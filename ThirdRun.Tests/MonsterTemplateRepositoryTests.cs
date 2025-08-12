@@ -1,3 +1,4 @@
+using System;
 using MonogameRPG.Monsters;
 using Xunit;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace ThirdRun.Tests
         public void GetRandomTemplate_ReturnsValidTemplate()
         {
             // Act
-            var template = MonsterTemplateRepository.GetRandomTemplate();
+            var template = MonsterTemplateRepository.GetRandomTemplate(new Random(12345));
 
             // Assert
             Assert.NotNull(template);
@@ -36,8 +37,9 @@ namespace ThirdRun.Tests
         public void GetRandomTemplateForLevel_ReturnsAppropriateLevel()
         {
             // Act
-            var template1 = MonsterTemplateRepository.GetRandomTemplateForLevel(1, 2);
-            var template5 = MonsterTemplateRepository.GetRandomTemplateForLevel(4, 5);
+            var random = new Random(12345);
+            var template1 = MonsterTemplateRepository.GetRandomTemplateForLevel(1, 2, random);
+            var template5 = MonsterTemplateRepository.GetRandomTemplateForLevel(4, 5, random);
 
             // Assert
             Assert.InRange(template1.Level, 1, 2);
@@ -83,7 +85,7 @@ namespace ThirdRun.Tests
         public void MonsterTemplate_ToMonsterType_CreatesValidMonsterType()
         {
             // Arrange
-            var template = MonsterTemplateRepository.GetRandomTemplate();
+            var template = MonsterTemplateRepository.GetRandomTemplate(new Random(12345));
 
             // Act
             var monsterType = template.ToMonsterType();
@@ -100,7 +102,8 @@ namespace ThirdRun.Tests
         public void CreateRandomMonsterType_ReturnsValidMonsterType()
         {
             // Act
-            var monsterType = MonsterTemplateRepository.CreateRandomMonsterType();
+            var random = new Random(12345);
+            var monsterType = MonsterTemplateRepository.CreateRandomMonsterType(random);
 
             // Assert
             Assert.NotNull(monsterType);
@@ -114,7 +117,8 @@ namespace ThirdRun.Tests
         public void CreateRandomMonsterTypeForLevel_ReturnsAppropriateLevel()
         {
             // Act
-            var monsterType = MonsterTemplateRepository.CreateRandomMonsterTypeForLevel(2, 4);
+            var random = new Random(12345);
+            var monsterType = MonsterTemplateRepository.CreateRandomMonsterTypeForLevel(2, 4, random);
 
             // Assert
             Assert.InRange(monsterType.Level, 2, 4);

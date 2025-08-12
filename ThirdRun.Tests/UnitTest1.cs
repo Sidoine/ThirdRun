@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using ThirdRun.Utils;
 
@@ -11,9 +12,10 @@ public class HelpersTests
         // Arrange
         int min = 5;
         int max = 10;
+        var random = new Random(12345);
         
         // Act
-        int result = Helpers.RandomNumber(min, max);
+        int result = random.Next(min, max);
         
         // Assert
         Assert.True(result >= min && result < max);

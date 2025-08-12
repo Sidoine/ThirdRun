@@ -10,7 +10,8 @@ namespace ThirdRun.Tests
     {
         private (MonogameRPG.Map.Map map, MonogameRPG.Map.WorldMap worldMap) CreateTestMapAndWorld()
         {
-            var worldMap = new MonogameRPG.Map.WorldMap();
+            var random = new Random(12345);
+            var worldMap = new MonogameRPG.Map.WorldMap(random);
             worldMap.Initialize();
             return (worldMap.CurrentMap, worldMap);
         }

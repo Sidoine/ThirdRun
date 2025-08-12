@@ -1,3 +1,4 @@
+using System;
 using MonogameRPG.Map;
 using System.Linq;
 using ThirdRun.Data;
@@ -10,11 +11,11 @@ namespace ThirdRun.Tests
         public void Player_ShouldStartWithExactlyFourCharacters()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             
             // Act
-            var player = new Player(worldMap);
+            var player = new Player(worldMap, new Random(12345));
             
             // Assert
             Assert.Equal(4, player.Characters.Count);
@@ -24,11 +25,11 @@ namespace ThirdRun.Tests
         public void Player_ShouldStartWithAllFourRequiredClasses()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             
             // Act
-            var player = new Player(worldMap);
+            var player = new Player(worldMap, new Random(12345));
             var characterClasses = player.Characters.Select(c => c.Class).ToList();
             
             // Assert
@@ -42,11 +43,11 @@ namespace ThirdRun.Tests
         public void Player_ShouldStartWithEachClassOnlyOnce()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             
             // Act
-            var player = new Player(worldMap);
+            var player = new Player(worldMap, new Random(12345));
             var characterClasses = player.Characters.Select(c => c.Class).ToList();
             
             // Assert
@@ -60,11 +61,11 @@ namespace ThirdRun.Tests
         public void Player_CharactersShouldHaveValidNames()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             
             // Act
-            var player = new Player(worldMap);
+            var player = new Player(worldMap, new Random(12345));
             
             // Assert
             Assert.All(player.Characters, character => 
@@ -78,11 +79,11 @@ namespace ThirdRun.Tests
         public void Player_WarriorShouldStartWithExactlyFiveRandomItems()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             
             // Act
-            var player = new Player(worldMap);
+            var player = new Player(worldMap, new Random(12345));
             var warrior = player.Characters.First(c => c.Class == CharacterClass.Guerrier);
             
             // Assert

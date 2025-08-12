@@ -73,16 +73,16 @@ namespace MonogameRPG.Monsters
         /// <summary>
         /// Get a random monster template of any type
         /// </summary>
-        public static MonsterTemplate GetRandomTemplate()
+        public static MonsterTemplate GetRandomTemplate(Random random)
         {
             var allTemplates = GetAllTemplates().ToArray();
-            return allTemplates[Helpers.RandomNumber(0, allTemplates.Length)];
+            return allTemplates[random.Next(0, allTemplates.Length)];
         }
 
         /// <summary>
         /// Get a random monster template for a specific level range
         /// </summary>
-        public static MonsterTemplate GetRandomTemplateForLevel(int minLevel, int maxLevel)
+        public static MonsterTemplate GetRandomTemplateForLevel(int minLevel, int maxLevel, Random random)
         {
             var suitableTemplates = GetAllTemplates()
                 .Where(t => t.Level >= minLevel && t.Level <= maxLevel)
@@ -91,10 +91,10 @@ namespace MonogameRPG.Monsters
             if (suitableTemplates.Length == 0)
             {
                 // Fallback to any template if none match the level range
-                return GetRandomTemplate();
+                return GetRandomTemplate(random);
             }
             
-            return suitableTemplates[Helpers.RandomNumber(0, suitableTemplates.Length)];
+            return suitableTemplates[random.Next(0, suitableTemplates.Length)];
         }
 
         /// <summary>
@@ -125,17 +125,17 @@ namespace MonogameRPG.Monsters
         /// <summary>
         /// Create a MonsterType from a random template
         /// </summary>
-        public static MonsterType CreateRandomMonsterType()
+        public static MonsterType CreateRandomMonsterType(Random random)
         {
-            return GetRandomTemplate().ToMonsterType();
+            return GetRandomTemplate(random).ToMonsterType();
         }
 
         /// <summary>
         /// Create a MonsterType from a random template for a specific level
         /// </summary>
-        public static MonsterType CreateRandomMonsterTypeForLevel(int minLevel, int maxLevel)
+        public static MonsterType CreateRandomMonsterTypeForLevel(int minLevel, int maxLevel, Random random)
         {
-            return GetRandomTemplateForLevel(minLevel, maxLevel).ToMonsterType();
+            return GetRandomTemplateForLevel(minLevel, maxLevel, random).ToMonsterType();
         }
     }
 }

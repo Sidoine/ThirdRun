@@ -7,7 +7,7 @@ using ThirdRun.Data.NPCs;
 
 namespace MonogameRPG.Map
 {
-    public class WorldMap()
+    public class WorldMap(Random random)
     {
         private readonly Dictionary<Point, Map> maps = new Dictionary<Point, Map>();
         private Point currentMapPosition = Point.Zero;
@@ -15,6 +15,7 @@ namespace MonogameRPG.Map
         private List<Character> characters = [];
         private Map? townMap = null; // Dedicated town map
         private bool isInTownMode = false; // Track if we're currently in town mode
+        private readonly Random random = random;
 
         public Map CurrentMap => isInTownMode && townMap != null ? townMap : 
             (maps.TryGetValue(currentMapPosition, out Map? value) ? value : throw new Exception("Current map not found at position: " + currentMapPosition));
@@ -24,14 +25,14 @@ namespace MonogameRPG.Map
         public void Initialize()
         {
             // Create the initial card at (0,0)
-            var initialMap = new Map(Point.Zero);
+            var initialMap = new Map(Point.Zero, random);
             initialMap.GenerateRandomMap();
             initialMap.SpawnMonsters(this);
             maps[Point.Zero] = initialMap;
             currentMapPosition = Point.Zero;
 
             // Create dedicated town map at a special position
-            townMap = new Map(new Point(-999, -999)); // Special position for town
+            townMap = new Map(new Point(-999, -999), random); // Special position for town
             townMap.GenerateRandomMap();
             townMap.IsTownZone = true;
             townMap.SpawnNPCs(this);
@@ -60,16 +61,14 @@ namespace MonogameRPG.Map
             if (availableDirections.Count > 0)
             {
                 // Generate a new card in a random available direction
-                var rand = new Random();
-                direction = availableDirections[rand.Next(availableDirections.Count)];
+                direction = availableDirections[random.Next(availableDirections.Count)];
             }
             else
             {
                 // If there are no available directions, generate one anyway by choosing a random direction
                 // This ensures the game always continues
-                var rand = new Random();
                 var directions = new Direction[] { Direction.North, Direction.South, Direction.East, Direction.West };
-                direction = directions[rand.Next(directions.Length)];
+                direction = directions[random.Next(directions.Length)];
             }
             return GenerateAdjacentMap(direction);
         }
@@ -115,7 +114,7 @@ namespace MonogameRPG.Map
 
             if (!maps.ContainsKey(newCardPos))
             {
-                var newCard = new Map(newCardPos);
+                var newCard = new Map(newCardPos, random);
                 newCard.GenerateRandomMap();
                 newCard.SpawnMonsters(this);
                 maps[newCardPos] = newCard;
@@ -229,6 +228,38 @@ namespace MonogameRPG.Map
             return maps.Values;
         }
 
+        /// <summary>
+        /// Converts absolute tile coordinates to relative coordinates within a specific map.
+        /// </summary>
+        /// <param name="absoluteX">Absolute X tile coordinate</param>
+        /// <param name="absoluteY">Absolute Y tile coordinate</param>
+        /// <returns>Tuple containing the Map (or null if not found) and relative coordinates</returns>
+        public (Map? map, int relativeX, int relativeY) GetRelativeTileCoordinate(int absoluteX, int absoluteY)
+        {
+            // Calculate which map this absolute coordinate belongs to
+            int mapX = absoluteX / Map.GridWidth;
+            int mapY = absoluteY / Map.GridHeight;
+            
+            // Handle negative coordinates correctly
+            if (absoluteX < 0 && absoluteX % Map.GridWidth != 0)
+            {
+                mapX--;
+            }
+            if (absoluteY < 0 && absoluteY % Map.GridHeight != 0)
+            {
+                mapY--;
+            }
+            
+            // Calculate relative coordinates within the map
+            int relativeX = absoluteX - mapX * Map.GridWidth;
+            int relativeY = absoluteY - mapY * Map.GridHeight;
+            
+            // Try to get the map
+            maps.TryGetValue(new Point(mapX, mapY), out Map? map);
+            
+            return (map, relativeX, relativeY);
+        }
+
         // Retourne la liste des cases accessibles (Herbe) autour d'une case
         public List<(Point point, int cost)> GetNeighbors(Point cell, Point? targetCell = null)
         {
@@ -238,20 +269,20 @@ namespace MonogameRPG.Map
             {
                 int nx = cell.X + directions[i, 0];
                 int ny = cell.Y + directions[i, 1];
-                int mapX = nx / Map.GridWidth;
-                if (nx < 0)
+                
+                // Use the new method to get map and relative coordinates
+                var (map, rx, ry) = GetRelativeTileCoordinate(nx, ny);
+                
+                if (map != null)
                 {
-                    mapX--;
-                }
-                int mapY = ny / Map.GridHeight;
-                if (ny < 0)
-                {
-                    mapY--;
-                }
-                if (maps.TryGetValue(new Point(mapX, mapY), out Map? map))
-                {
-                    var rx = nx - mapX * Map.GridWidth;
-                    var ry = ny - mapY * Map.GridHeight;
+                    // Verify that relative coordinates are within bounds
+                    if (rx < 0 || rx >= Map.GridWidth || ry < 0 || ry >= Map.GridHeight)
+                    {
+                        // This should not happen with correct coordinate conversion
+                        throw new InvalidOperationException(
+                            $"GetRelativeTileCoordinate returned out-of-bounds coordinates: " +
+                            $"absolute=({nx},{ny}), relative=({rx},{ry}), bounds=({Map.GridWidth},{Map.GridHeight})");
+                    }
                     
                     Point neighborPoint = new Point(nx, ny);
                     

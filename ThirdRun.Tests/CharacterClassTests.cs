@@ -1,3 +1,4 @@
+using System;
 namespace ThirdRun.Tests;
 
 public class CharacterClassTests

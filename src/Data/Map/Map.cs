@@ -1,6 +1,6 @@
+using System;
 using System.Collections.Generic;
 using MonogameRPG.Monsters;
-using System;
 using System.Linq;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework;
@@ -21,6 +21,7 @@ namespace MonogameRPG.Map
         public Vector2 Position => new Vector2(WorldPosition.X * GridWidth * TileWidth, WorldPosition.Y * GridHeight * TileHeight);
         private List<Vector2> monsterSpawnPoints;
         private int monsterSize = 20;
+        private readonly Random random;
         
         // Central list containing all units on this map
         private List<Unit> units = new List<Unit>();
@@ -35,8 +36,9 @@ namespace MonogameRPG.Map
 
 
 
-        public Map(Point worldPosition)
+        public Map(Point worldPosition, Random random)
         {
+            this.random = random;
             WorldPosition = worldPosition;
             monsterSpawnPoints = new List<Vector2>();
             tiles = new Tile[0, 0];
@@ -97,8 +99,8 @@ namespace MonogameRPG.Map
             foreach (var spawn in monsterSpawnPoints)
             {
                 // Use MonsterTemplateRepository to get appropriate monster for area level
-                var type = MonsterTemplateRepository.CreateRandomMonsterTypeForLevel(1, areaLevel + 1);
-                var monster = new Monster(type, this, worldMap);
+                var type = MonsterTemplateRepository.CreateRandomMonsterTypeForLevel(1, areaLevel + 1, random);
+                var monster = new Monster(type, this, worldMap, random);
                 monster.Position = new Vector2(
                     spawn.X * TileWidth + TileWidth / 2 - monsterSize / 2,
                     spawn.Y * TileHeight + TileHeight / 2 - monsterSize / 2) + Position;

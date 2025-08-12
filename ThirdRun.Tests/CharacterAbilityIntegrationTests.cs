@@ -1,3 +1,4 @@
+using System;
 using MonogameRPG;
 using ThirdRun.Data.Abilities;
 using MonogameRPG.Map;
@@ -10,7 +11,7 @@ namespace ThirdRun.Tests
         [Fact]
         public void Character_Guerrier_ShouldHaveMeleeAndSelfHeal()
         {
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             var character = new Character("Test Warrior", CharacterClass.Guerrier, 100, 20, worldMap.CurrentMap, worldMap);
             
@@ -22,7 +23,7 @@ namespace ThirdRun.Tests
         [Fact]
         public void Character_Chasseur_ShouldHaveMeleeAndRanged()
         {
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             var character = new Character("Test Hunter", CharacterClass.Chasseur, 100, 15, worldMap.CurrentMap, worldMap);
             
@@ -34,7 +35,7 @@ namespace ThirdRun.Tests
         [Fact]
         public void Character_Pretre_ShouldHaveMeleeAndHealing()
         {
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             var character = new Character("Test Priest", CharacterClass.Prêtre, 80, 10, worldMap.CurrentMap, worldMap);
             
@@ -47,7 +48,7 @@ namespace ThirdRun.Tests
         [Fact]
         public void Character_Mage_ShouldHaveMeleeAndRanged()
         {
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             var character = new Character("Test Mage", CharacterClass.Mage, 70, 12, worldMap.CurrentMap, worldMap);
             

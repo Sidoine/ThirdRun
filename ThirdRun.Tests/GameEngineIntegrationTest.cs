@@ -9,21 +9,34 @@ using Xunit;
 namespace ThirdRun.Tests
 {
     /// <summary>
-    /// Integration test for the game engine that runs the core game loop for 1000 frames
+    /// Integration test for the game engine that runs the core game loop for 10000 frames
     /// and verifies no exceptions are thrown during normal gameplay simulation.
+    /// Also verifies that at least one character is moving at any time.
     /// </summary>
     public class GameEngineIntegrationTest
     {
         [Fact]
         public void GameEngine_RunFor1000Frames_ShouldNotThrowExceptions()
         {
+            GameEngine_RunFor1000Frames_ShouldNotThrowExceptions_WithSeed(12345);
+        }
+
+        [Theory]
+        [InlineData(12345)]
+        [InlineData(54321)]
+        [InlineData(98765)]
+        [InlineData(11111)]
+        [InlineData(99999)]
+        public void GameEngine_RunFor1000Frames_ShouldNotThrowExceptions_WithSeed(int seed)
+        {
             // Arrange - Set up the game state similar to Game1.Initialize() and LoadContent()
-            var worldMap = new WorldMap();
+            var random = new Random(seed);
+            var worldMap = new WorldMap(random);
             worldMap.Initialize();
             
             var gameState = new GameState
             {
-                Player = new Player(worldMap),
+                Player = new Player(worldMap, random),
                 WorldMap = worldMap,
             };
             
@@ -33,8 +46,18 @@ namespace ThirdRun.Tests
             var frameTimeIncrement = TimeSpan.FromMilliseconds(16.67); // ~60 FPS
             var exceptions = new List<Exception>();
             
-            // Act - Simulate 1000 frames of game execution
-            for (int frame = 0; frame < 1000; frame++)
+            // Track character positions to verify movement occurs
+            var previousPositions = new Dictionary<Character, Vector2>();
+            bool movementDetected = false;
+            
+            // Initialize previous positions
+            foreach (var character in gameState.Player.Characters)
+            {
+                previousPositions[character] = character.Position;
+            }
+            
+            // Act - Simulate 10000 frames of game execution
+            for (int frame = 0; frame < 10000; frame++)
             {
                 try
                 {
@@ -43,18 +66,28 @@ namespace ThirdRun.Tests
                     
                     // Simulate the core game logic from Game1.Update()
                     SimulateGameFrame(worldMap, gameState, gameTime);
+                    
+                    // Check if any character has moved since the previous frame
+                    foreach (var character in gameState.Player.Characters)
+                    {
+                        if (character.Position != previousPositions[character])
+                        {
+                            movementDetected = true;
+                            previousPositions[character] = character.Position;
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
-                    exceptions.Add(new Exception($"Exception on frame {frame}: {ex.Message}", ex));
+                    exceptions.Add(new Exception($"Exception on frame {frame} with seed {seed}: {ex.Message}", ex));
                 }
             }
             
-            // Assert - Verify no exceptions occurred during the 1000 frame simulation
+            // Assert - Verify no exceptions occurred during the 10000 frame simulation
             if (exceptions.Count > 0)
             {
                 var aggregateException = new AggregateException(
-                    $"Game engine threw {exceptions.Count} exception(s) during 1000 frame test",
+                    $"Game engine threw {exceptions.Count} exception(s) during 10000 frame test with seed {seed}",
                     exceptions
                 );
                 throw aggregateException;
@@ -65,7 +98,11 @@ namespace ThirdRun.Tests
             Assert.NotNull(gameState.WorldMap);
             Assert.NotEmpty(gameState.Player.Characters);
             Assert.True(gameState.Player.Characters.TrueForAll(c => c.CurrentHealth > 0), 
-                "All characters should still be alive after 1000 frames");
+                $"All characters should still be alive after 10000 frames (seed: {seed})");
+            
+            // Verify that at least one character moved during the simulation
+            Assert.True(movementDetected, 
+                $"At least one character should be moving during the 10000 frame simulation (seed: {seed})");
         }
         
         /// <summary>
@@ -104,12 +141,12 @@ namespace ThirdRun.Tests
         public void GameEngine_RunFor100FramesWithCombat_ShouldHandleCombatCorrectly()
         {
             // Arrange - Set up a game state with characters positioned near monsters
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             
             var gameState = new GameState
             {
-                Player = new Player(worldMap),
+                Player = new Player(worldMap, new Random(12345)),
                 WorldMap = worldMap,
             };
             
@@ -166,12 +203,12 @@ namespace ThirdRun.Tests
         public void GameEngine_RunFor50FramesWithMapTransitions_ShouldHandleTransitionsCorrectly()
         {
             // Arrange - Set up game state and force map transitions
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             
             var gameState = new GameState
             {
-                Player = new Player(worldMap),
+                Player = new Player(worldMap, new Random(12345)),
                 WorldMap = worldMap,
             };
             
@@ -217,6 +254,74 @@ namespace ThirdRun.Tests
             // Verify the world map is still in a valid state
             Assert.NotNull(worldMap.CurrentMap);
             Assert.NotEmpty(gameState.Player.Characters);
+        }
+        
+        [Fact]
+        public void GameEngine_PathfindingBoundsCheck_ShouldNotThrowIndexOutOfRangeException()
+        {
+            // This test specifically targets the pathfinding bounds issue
+            // that could cause IndexOutOfRangeException during long runs
+            
+            var worldMap = new WorldMap(new Random(12345));
+            worldMap.Initialize();
+            
+            var gameState = new GameState
+            {
+                Player = new Player(worldMap, new Random(12345)),
+                WorldMap = worldMap,
+            };
+            
+            worldMap.SetCharacters(gameState.Player.Characters);
+            
+            var exceptions = new List<Exception>();
+            
+            // Test edge cases that could trigger bounds issues
+            var testCells = new[]
+            {
+                new Point(-1, -1),         // Negative coordinates
+                new Point(0, -1),          // Edge case at Y boundary
+                new Point(-1, 0),          // Edge case at X boundary
+                new Point(Map.GridWidth, 0),     // At X boundary
+                new Point(0, Map.GridHeight),    // At Y boundary
+                new Point(Map.GridWidth, Map.GridHeight), // At both boundaries
+                new Point(1000, 1000),     // Very large coordinates
+                new Point(Map.GridWidth - 1, Map.GridHeight - 1), // Valid edge case
+            };
+            
+            foreach (var cell in testCells)
+            {
+                try
+                {
+                    // This should not throw IndexOutOfRangeException
+                    var neighbors = worldMap.GetNeighbors(cell);
+                    Assert.NotNull(neighbors);
+                }
+                catch (Exception ex)
+                {
+                    exceptions.Add(new Exception($"GetNeighbors failed for cell {cell}: {ex.Message}", ex));
+                }
+            }
+            
+            // Also test pathfinding which uses GetNeighbors internally
+            try
+            {
+                var path = worldMap.FindPathAStar(Vector2.Zero, new Vector2(-100, -100));
+                Assert.NotNull(path);
+            }
+            catch (Exception ex)
+            {
+                exceptions.Add(new Exception($"FindPathAStar failed: {ex.Message}", ex));
+            }
+            
+            // Assert no exceptions occurred
+            if (exceptions.Count > 0)
+            {
+                var aggregateException = new AggregateException(
+                    $"Pathfinding bounds check threw {exceptions.Count} exception(s)",
+                    exceptions
+                );
+                throw aggregateException;
+            }
         }
     }
 }

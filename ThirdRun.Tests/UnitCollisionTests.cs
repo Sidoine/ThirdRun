@@ -1,3 +1,4 @@
+using System;
 using Xunit;
 using Microsoft.Xna.Framework;
 using MonogameRPG.Map;
@@ -16,7 +17,8 @@ namespace ThirdRun.Tests
         public void Map_Tiles_InitializedWithMapGeneration()
         {
             // Arrange
-            var map = new Map(Point.Zero);
+            var random = new Random(12345);
+            var map = new Map(Point.Zero, random);
             
             // Act
             map.GenerateRandomMap();
@@ -41,7 +43,8 @@ namespace ThirdRun.Tests
         public void Map_WorldPositionToTileCoordinates_ConvertsCorrectly()
         {
             // Arrange
-            var map = new Map(Point.Zero);
+            var random = new Random(12345);
+            var map = new Map(Point.Zero, random);
             map.GenerateRandomMap();
             
             // Act & Assert
@@ -76,7 +79,8 @@ namespace ThirdRun.Tests
         public void Map_UpdateUnitPosition_TracksUnitCorrectly()
         {
             // Arrange
-            var map = new Map(Point.Zero);
+            var random = new Random(12345);
+            var map = new Map(Point.Zero, random);
             map.GenerateRandomMap();
             
             var mockUnit = new MockUnit();
@@ -97,7 +101,8 @@ namespace ThirdRun.Tests
         public void Map_UpdateUnitPosition_ClearsOldPosition()
         {
             // Arrange
-            var map = new Map(Point.Zero);
+            var random = new Random(12345);
+            var map = new Map(Point.Zero, random);
             map.GenerateRandomMap();
             
             var mockUnit = new MockUnit();
@@ -120,8 +125,9 @@ namespace ThirdRun.Tests
         public void Map_SpawnMonsters_UpdatesUnitGrid()
         {
             // Arrange
-            var worldMap = new WorldMap();
-            var map = new Map(Point.Zero);
+            var random = new Random(12345);
+            var worldMap = new WorldMap(random);
+            var map = new Map(Point.Zero, random);
             map.GenerateRandomMap();
             
             // Act
@@ -142,10 +148,11 @@ namespace ThirdRun.Tests
         public void Map_UpdateUnitPosition_HandlesMoveCorrectly()
         {
             // Arrange
-            var map = new Map(Point.Zero);
+            var random = new Random(12345);
+            var map = new Map(Point.Zero, random);
             map.GenerateRandomMap();
             
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(random);
             worldMap.Initialize();
             
             var character = new Character("TestChar", CharacterClass.Guerrier, 100, 10, map, worldMap);
@@ -169,7 +176,8 @@ namespace ThirdRun.Tests
         public void WorldMap_FindPathAStar_AvoidsOccupiedTiles()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var random = new Random(12345);
+            var worldMap = new WorldMap(random);
             worldMap.Initialize();
             
             var character1 = new Character("Char1", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
@@ -197,7 +205,8 @@ namespace ThirdRun.Tests
         public void WorldMap_FindPathAStar_AllowsMovementToTarget()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var random = new Random(12345);
+            var worldMap = new WorldMap(random);
             worldMap.Initialize();
             
             var character = new Character("Attacker", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
@@ -220,10 +229,11 @@ namespace ThirdRun.Tests
         public void Map_CentralUnitsList_FiltersCorrectly()
         {
             // Arrange
-            var map = new Map(Point.Zero);
+            var random = new Random(12345);
+            var map = new Map(Point.Zero, random);
             map.GenerateRandomMap();
             
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(random);
             worldMap.Initialize();
             
             var character = new Character("TestChar", CharacterClass.Guerrier, 100, 10, map, worldMap);
@@ -254,7 +264,7 @@ namespace ThirdRun.Tests
     // Mock Unit class for testing
     public class MockUnit : Unit
     {
-        public MockUnit() : base(new Map(Point.Zero), new WorldMap())
+        public MockUnit() : base(new Map(Point.Zero, new Random(12345)), new WorldMap(new Random(12345)))
         {
             Position = Vector2.Zero;
             CurrentHealth = 100;

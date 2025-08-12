@@ -35,7 +35,8 @@ namespace ThirdRun.Tests
         
         private void GenerateAndDisplayMap(Point worldPosition)
         {
-            var map = new MonogameRPG.Map.Map(worldPosition);
+            var random = new Random(12345);
+            var map = new MonogameRPG.Map.Map(worldPosition, random);
             map.GenerateRandomMap(3);
             
             var spawnPoints = map.GetMonsterSpawnPoints();

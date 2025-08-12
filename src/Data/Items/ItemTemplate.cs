@@ -21,7 +21,7 @@ namespace ThirdRun.Items
         /// <summary>
         /// Create an actual item instance from this template
         /// </summary>
-        public abstract Item CreateItem(int itemLevel, string? prefix = null);
+        public abstract Item CreateItem(int itemLevel, Random random, string? prefix = null);
     }
 
     /// <summary>
@@ -37,12 +37,12 @@ namespace ThirdRun.Items
             BaseDamage = baseDamage;
         }
 
-        public override Item CreateItem(int itemLevel, string? prefix = null)
+        public override Item CreateItem(int itemLevel, Random random, string? prefix = null)
         {
             string name = prefix != null ? $"{prefix} {BaseName}" : BaseName;
-            int baseValue = itemLevel * Utils.Helpers.RandomNumber(15, 25);
-            int bonusStats = itemLevel + Utils.Helpers.RandomNumber(0, 3);
-            int damage = BaseDamage * itemLevel + Utils.Helpers.RandomNumber(1, 6);
+            int baseValue = itemLevel * random.Next(15, 25);
+            int bonusStats = itemLevel + random.Next(0, 3);
+            int damage = BaseDamage * itemLevel + random.Next(1, 6);
             
             string description = $"Une {BaseName.ToLower()} {(prefix?.ToLower() ?? "")} de niveau {itemLevel}".Trim();
 
@@ -66,12 +66,12 @@ namespace ThirdRun.Items
             BaseDefense = baseDefense;
         }
 
-        public override Item CreateItem(int itemLevel, string? prefix = null)
+        public override Item CreateItem(int itemLevel, Random random, string? prefix = null)
         {
             string name = prefix != null ? $"{prefix} {BaseName}" : BaseName;
-            int baseValue = itemLevel * Utils.Helpers.RandomNumber(12, 20);
-            int bonusStats = itemLevel + Utils.Helpers.RandomNumber(0, 2);
-            int defense = BaseDefense * itemLevel + Utils.Helpers.RandomNumber(1, 5);
+            int baseValue = itemLevel * random.Next(12, 20);
+            int bonusStats = itemLevel + random.Next(0, 2);
+            int defense = BaseDefense * itemLevel + random.Next(1, 5);
             
             string description = $"Un {BaseName.ToLower()} {(prefix?.ToLower() ?? "")} de niveau {itemLevel}".Trim();
 
@@ -95,11 +95,11 @@ namespace ThirdRun.Items
             BaseHealAmount = baseHealAmount;
         }
 
-        public override Item CreateItem(int itemLevel, string? prefix = null)
+        public override Item CreateItem(int itemLevel, Random random, string? prefix = null)
         {
             string name = $"{BaseName} (Niv. {itemLevel})";
-            int baseValue = itemLevel * Utils.Helpers.RandomNumber(8, 15);
-            int healAmount = BaseHealAmount * itemLevel + Utils.Helpers.RandomNumber(5, 15);
+            int baseValue = itemLevel * random.Next(8, 15);
+            int healAmount = BaseHealAmount * itemLevel + random.Next(5, 15);
             
             string description = $"Une potion magique de niveau {itemLevel} qui restaure la santé";
 

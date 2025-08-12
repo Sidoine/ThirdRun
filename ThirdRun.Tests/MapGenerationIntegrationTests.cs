@@ -1,3 +1,4 @@
+using System;
 using Xunit;
 using Microsoft.Xna.Framework;
 using MonogameRPG.Map;
@@ -11,7 +12,7 @@ namespace ThirdRun.Tests
         public void Map_GenerateRandomMap_UsesAdvancedGenerator()
         {
             // Arrange
-            var map = new Map(Point.Zero);
+            var map = new Map(Point.Zero, new Random(12345));
             
             // Act
             map.GenerateRandomMap(3);
@@ -36,7 +37,7 @@ namespace ThirdRun.Tests
         public void Map_GenerateRandomMap_ProducesVarietyOfTileTypes()
         {
             // Arrange
-            var map = new Map(Point.Zero);
+            var map = new Map(Point.Zero, new Random(12345));
             
             // Act
             map.GenerateRandomMap(2);
@@ -60,7 +61,7 @@ namespace ThirdRun.Tests
         public void Map_GenerateRandomMap_HasWalkableTiles()
         {
             // Arrange
-            var map = new Map(Point.Zero);
+            var map = new Map(Point.Zero, new Random(12345));
             
             // Act
             map.GenerateRandomMap(2);
@@ -87,7 +88,7 @@ namespace ThirdRun.Tests
         public void Map_GenerateRandomMap_CreatesMonsterSpawnPoints()
         {
             // Arrange
-            var map = new Map(Point.Zero);
+            var map = new Map(Point.Zero, new Random(12345));
             int requestedSpawnCount = 4;
             
             // Act
@@ -114,8 +115,9 @@ namespace ThirdRun.Tests
         public void Map_WithDifferentWorldPositions_GeneratesDifferentMaps()
         {
             // Arrange
-            var map1 = new Map(new Point(0, 0));
-            var map2 = new Map(new Point(1, 0));
+            var random = new Random(12345);
+            var map1 = new Map(new Point(0, 0), random);
+            var map2 = new Map(new Point(1, 0), random);
             
             // Act
             map1.GenerateRandomMap(2);
@@ -141,8 +143,10 @@ namespace ThirdRun.Tests
         public void Map_SameWorldPosition_GeneratesSameMap()
         {
             // Arrange
-            var map1 = new Map(new Point(2, 3));
-            var map2 = new Map(new Point(2, 3));
+            var random1 = new Random(12345);
+            var random2 = new Random(12345);
+            var map1 = new Map(new Point(2, 3), random1);
+            var map2 = new Map(new Point(2, 3), random2);
             
             // Act
             map1.GenerateRandomMap(3);
@@ -171,7 +175,8 @@ namespace ThirdRun.Tests
             // Generate multiple maps to increase chances of finding the expected tile type
             for (int mapAttempt = 0; mapAttempt < 10 && !foundExpectedTile; mapAttempt++)
             {
-                var map = new Map(new Point(mapAttempt, mapAttempt));
+                var random = new Random(12345 + mapAttempt);
+                var map = new Map(new Point(mapAttempt, mapAttempt), random);
                 map.GenerateRandomMap(2);
                 
                 for (int x = 0; x < Map.GridWidth && !foundExpectedTile; x++)

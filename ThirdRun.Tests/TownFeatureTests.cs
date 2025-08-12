@@ -1,3 +1,4 @@
+using System;
 using Xunit;
 using ThirdRun.UI;
 using ThirdRun.Data.NPCs;
@@ -27,8 +28,8 @@ namespace ThirdRun.Tests
         public void NPC_ShouldHavePropertiesAndGreeting()
         {
             // Arrange
-            var worldMap = new WorldMap();
-            var map = new Map(Point.Zero);
+            var worldMap = new WorldMap(new Random(12345));
+            var map = new Map(Point.Zero, new Random(12345));
             var npc = new NPC("Marcus", NPCType.Merchant, Vector2.Zero, map, worldMap);
             
             // Assert
@@ -42,8 +43,8 @@ namespace ThirdRun.Tests
         public void Map_ShouldSupportTownZone()
         {
             // Arrange
-            var worldMap = new WorldMap();
-            var map = new Map(Point.Zero);
+            var worldMap = new WorldMap(new Random(12345));
+            var map = new Map(Point.Zero, new Random(12345));
             map.GenerateRandomMap();
             map.SpawnMonsters(worldMap);
             
@@ -53,7 +54,8 @@ namespace ThirdRun.Tests
             Assert.Empty(map.NPCs);
             
             // Act - Create a town map
-            var townMap = new Map(new Point(-999, -999));
+            var random = new Random(12345);
+            var townMap = new Map(new Point(-999, -999), random);
             townMap.GenerateRandomMap();
             townMap.IsTownZone = true;
             townMap.SpawnNPCs(worldMap);
@@ -68,7 +70,7 @@ namespace ThirdRun.Tests
         public void WorldMap_ShouldToggleTownMode()
         {
             // Arrange
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             
             // Initially should not be in town
@@ -93,10 +95,10 @@ namespace ThirdRun.Tests
         public void Map_TeleportCharacters_ShouldUpdateCharacterPositions()
         {
             // Arrange
-            var map = new Map(Point.Zero);
+            var map = new Map(Point.Zero, new Random(12345));
             map.GenerateRandomMap();
             
-            var worldMap = new WorldMap();
+            var worldMap = new WorldMap(new Random(12345));
             worldMap.Initialize();
             
             var characters = new List<Character>
