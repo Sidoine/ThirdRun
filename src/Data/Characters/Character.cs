@@ -106,10 +106,10 @@ public class Character : Unit
 
         MoveTo(closest.Position);
 
-        // Si le personnage est assez proche, attaque
+        // Si le personnage est assez proche, utilise les abilities
         if (Vector2.Distance(Position, closest.Position) < Map.TileHeight)
         {
-            Attack(closest);
+            UseAbilities();
         }
     }
     
@@ -131,15 +131,25 @@ public class Character : Unit
         }
     }
 
-    public void Attack(Monster monster)
+    /// <summary>
+    /// Handles post-combat effects when a monster is defeated by this character
+    /// </summary>
+    public void OnMonsterDefeated(Monster monster)
     {
-        monster.CurrentHealth -= AttackPower;
-        if (monster.CurrentHealth <= 0)
+        GainExperience(monster);
+        // Ramasser automatiquement le loot du monstre vaincu
+        var loot = monster.DropLoot();
+        Inventory.AddItem(loot);
+    }
+
+    /// <summary>
+    /// Called when this character defeats another unit
+    /// </summary>
+    protected override void OnTargetDefeated(Unit target)
+    {
+        if (target is Monster monster)
         {
-            GainExperience(monster);
-            // Ramasser automatiquement le loot du monstre vaincu
-            var loot = monster.DropLoot();
-            Inventory.AddItem(loot);
+            OnMonsterDefeated(monster);
         }
     }
 

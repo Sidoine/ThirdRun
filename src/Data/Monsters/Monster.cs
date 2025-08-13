@@ -142,8 +142,8 @@ namespace MonogameRPG.Monsters
             
             if (attackRange > 0 && distanceToTarget <= attackRange)
             {
-                // In range of an available ability, attack
-                AttackTarget();
+                // In range of an available ability, use abilities
+                UseAbilities();
             }
             else
             {
@@ -203,30 +203,6 @@ namespace MonogameRPG.Monsters
 
             // Use the sophisticated pathfinding from the base class
             MoveTo(Target.Position);
-        }
-
-        /// <summary>
-        /// Attacks the current target using the first available ability that targets enemies
-        /// </summary>
-        private void AttackTarget()
-        {
-            if (Target == null) return;
-
-            // Find the first ability that is not on cooldown and targets enemies
-            var availableAbility = Abilities.FirstOrDefault(ability => 
-                ability.TargetType == ThirdRun.Data.Abilities.TargetType.Enemy && 
-                !ability.IsOnCooldown(CurrentGameTime));
-
-            if (availableAbility != null)
-            {
-                UseAbility(availableAbility, Target);
-            }
-        }
-
-        public void Attack(Character target)
-        {
-            // Use the inherited Attack method from Unit which uses the default ability
-            Attack((Unit)target);
         }
 
         public Item DropLoot()
