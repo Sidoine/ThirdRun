@@ -2,6 +2,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ThirdRun.Items;
 using ThirdRun.Characters;
+using ThirdRun.Data;
+using ThirdRun.Utils;
 using System.Linq;
 
 namespace ThirdRun.UI.Components
@@ -12,6 +14,18 @@ namespace ThirdRun.UI.Components
     public class CharacterPortrait : SquareImageButton, IDropTarget
     {
         private Character character;
+        
+        // Resource bar display constants
+        private const int BarHeight = 4;
+        private const int BarWidth = 50;
+        private const int BarSpacing = 2;
+        private const int BarOffset = 8;
+        
+        // Resource colors
+        private static readonly Color HealthBarColor = Color.LimeGreen;
+        private static readonly Color HealthBarBackground = Color.DarkRed;
+        private static readonly Color EnergyBarColor = Color.Green;
+        private static readonly Color EnergyBarBackground = Color.DarkGray;
 
         public Character Character => character;
 
@@ -62,5 +76,58 @@ namespace ThirdRun.UI.Components
         }
 
         #endregion
+
+        public override void Draw()
+        {
+            // Draw the base portrait (button and icon)
+            base.Draw();
+            
+            // Draw health and resource bars
+            DrawResourceBars();
+        }
+
+        private void DrawResourceBars()
+        {
+            if (!Visible) return;
+            
+            // Calculate bar positions (below the portrait)
+            int barStartY = Bounds.Bottom - BarOffset;
+            int barX = Bounds.X + (Bounds.Width - BarWidth) / 2; // Center horizontally
+            
+            // Draw health bar
+            DrawBar(barX, barStartY - BarHeight - BarSpacing, 
+                   character.CurrentHealth, character.GetEffectiveMaxHealth(), 
+                   HealthBarColor, HealthBarBackground);
+            
+            // Draw energy bar
+            var energyResource = character.Resources.GetResource(ResourceType.Energy);
+            if (energyResource != null)
+            {
+                DrawBar(barX, barStartY, 
+                       energyResource.CurrentValue, energyResource.MaxValue, 
+                       EnergyBarColor, EnergyBarBackground);
+            }
+        }
+
+        private void DrawBar(int x, int y, float currentValue, float maxValue, Color foregroundColor, Color backgroundColor)
+        {
+            if (maxValue <= 0) return;
+            
+            var pixel = Helpers.GetPixel(UiManager.GraphicsDevice);
+            
+            // Background rectangle (full bar)
+            Rectangle bgRect = new Rectangle(x, y, BarWidth, BarHeight);
+            
+            // Foreground rectangle (filled portion)
+            float percent = MathHelper.Clamp(currentValue / maxValue, 0f, 1f);
+            Rectangle fgRect = new Rectangle(x, y, (int)(BarWidth * percent), BarHeight);
+            
+            // Draw background first, then foreground
+            UiManager.SpriteBatch.Draw(pixel, bgRect, backgroundColor);
+            if (percent > 0)
+            {
+                UiManager.SpriteBatch.Draw(pixel, fgRect, foregroundColor);
+            }
+        }
     }
 }
