@@ -48,21 +48,24 @@ public class Character : Unit
         switch (Class)
         {
             case CharacterClass.Chasseur:
-                // Hunters get ranged attack
+                // Hunters get ranged attack and regeneration abilities
                 Abilities.Add(new RangedAttackAbility());
+                Abilities.Add(new RegenerationBuffAbility()); // Single target buff
                 Characteristics.SetValue(ThirdRun.Data.Characteristic.RangedAttackPower, AttackPower);
                 break;
                 
             case CharacterClass.Prêtre:
-                // Priests get healing abilities
+                // Priests get healing abilities and group buffs
                 Abilities.Add(new HealAbility());
                 Abilities.Add(new SelfHealAbility());
+                Abilities.Add(new AttackPowerBuffAbility()); // Group buff
                 Characteristics.SetValue(ThirdRun.Data.Characteristic.HealingPower, AttackPower / 2);
                 break;
                 
             case CharacterClass.Mage:
-                // Mages could get spell abilities (ranged magic attacks)
+                // Mages get spell abilities and debuffs
                 Abilities.Add(new RangedAttackAbility()); // Use as magic attack for now
+                Abilities.Add(new WeaknessDebuffAbility()); // Single target debuff
                 Characteristics.SetValue(ThirdRun.Data.Characteristic.RangedAttackPower, AttackPower);
                 break;
                 

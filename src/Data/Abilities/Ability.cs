@@ -104,7 +104,7 @@ namespace ThirdRun.Data.Abilities
         /// <summary>
         /// Gets all valid targets for group targeting
         /// </summary>
-        internal List<Unit> GetGroupTargets(Unit caster)
+        public List<Unit> GetGroupTargets(Unit caster)
         {
             var targets = new List<Unit>();
             if (caster.Map == null) return targets;

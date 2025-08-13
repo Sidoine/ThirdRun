@@ -58,7 +58,14 @@ namespace MonogameRPG
         
         public void UpdateGameTime(float gameTime)
         {
+            var deltaTime = gameTime - CurrentGameTime;
             CurrentGameTime = gameTime;
+            
+            // Update auras (remove expired ones)
+            if (deltaTime > 0)
+            {
+                UpdateAuras(deltaTime);
+            }
         }
         
         public bool CanUseAbility(Ability ability, Unit? target)
