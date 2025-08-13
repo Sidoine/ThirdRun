@@ -4,19 +4,23 @@ using FontStashSharp;
 using ThirdRun.UI.Components;
 using ThirdRun.Items;
 using System;
+using System.Collections.Generic;
+using ThirdRun.Data.Abilities;
 
 namespace ThirdRun.UI.Panels
 {
     public class CharacterDetailsPanel : Container
     {
         private const int PanelWidth = 400;
-        private const int PanelHeight = 500;
+        private const int PanelHeight = 600; // Increased height for abilities section
         private const int PanelPadding = 20;
         private const int LineSpacing = 25;
         private const int SectionSpacing = 15;
+        private const int AbilityIconSize = 40;
 
         private Character? _character;
         private DynamicSpriteFont _font;
+        private List<AbilityIcon> _abilityIcons = new List<AbilityIcon>();
 
         public CharacterDetailsPanel(UiManager uiManager, Rectangle screenBounds) 
             : base(uiManager, CalculateCenteredBounds(screenBounds))
@@ -43,6 +47,7 @@ namespace ThirdRun.UI.Panels
         public void SetCharacter(Character character)
         {
             _character = character;
+            CreateAbilityIcons();
         }
 
         private void ClosePanel()
@@ -153,6 +158,13 @@ namespace ThirdRun.UI.Panels
 
             currentY += SectionSpacing;
 
+            // Abilities section  
+            DrawText("=== COMPÉTENCES ===", Bounds.X + PanelPadding, currentY, Color.Yellow, true);
+            currentY += LineSpacing;
+            
+            DrawAbilities(currentY);
+            currentY += AbilityIconSize + SectionSpacing;
+
             // Inventory count
             currentY += SectionSpacing;
             DrawText($"Objets dans l'inventaire: {_character.Inventory.GetItems().Count}", Bounds.X + PanelPadding, currentY, Color.Orange);
@@ -164,6 +176,65 @@ namespace ThirdRun.UI.Panels
             UiManager.SpriteBatch.DrawString(font, text, new Vector2(x, y), color);
         }
 
+        private void DrawAbilities(int startY)
+        {
+            // Update game time for all ability icons
+            float currentTime = (float)DateTime.Now.TimeOfDay.TotalSeconds; // Simplified game time
+            foreach (var abilityIcon in _abilityIcons)
+            {
+                abilityIcon.UpdateGameTime(currentTime);
+            }
+        }
+
+        private void CreateAbilityIcons()
+        {
+            // Clear existing ability icons
+            foreach (var icon in _abilityIcons)
+            {
+                RemoveChild(icon);
+                icon.Dispose();
+            }
+            _abilityIcons.Clear();
+
+            if (_character == null) return;
+
+            // Create ability icons in a horizontal row
+            int startX = Bounds.X + PanelPadding;
+            int startY = Bounds.Y + PanelPadding + 280; // Position after equipment section
+            int currentX = startX;
+            
+            for (int i = 0; i < _character.Abilities.Count; i++)
+            {
+                var ability = _character.Abilities[i];
+                var iconBounds = new Rectangle(currentX, startY, AbilityIconSize, AbilityIconSize);
+                var abilityIcon = new AbilityIcon(UiManager, iconBounds, ability, _character);
+                
+                _abilityIcons.Add(abilityIcon);
+                AddChild(abilityIcon);
+                
+                currentX += AbilityIconSize + 5; // 5 pixel spacing between icons
+                
+                // Wrap to next line if we run out of horizontal space
+                if (currentX + AbilityIconSize > Bounds.Right - PanelPadding)
+                {
+                    currentX = startX;
+                    startY += AbilityIconSize + 5;
+                }
+            }
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+            
+            // Update ability icons with current game time
+            float currentTime = (float)gameTime.TotalGameTime.TotalSeconds;
+            foreach (var abilityIcon in _abilityIcons)
+            {
+                abilityIcon.UpdateGameTime(currentTime);
+            }
+        }
+        
         private string GetClassDisplayName(CharacterClass characterClass)
         {
             return characterClass switch

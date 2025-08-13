@@ -107,7 +107,8 @@ namespace ThirdRun.UI.Components
             {
                 if (disposing)
                 {
-                    UiManager.SpriteBatch.Dispose();
+                    // UIElement should not dispose shared resources from UiManager
+                    // The UiManager is responsible for disposing its own resources
                 }
 
                 _disposed = true;

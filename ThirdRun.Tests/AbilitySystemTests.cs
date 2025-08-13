@@ -35,7 +35,7 @@ namespace ThirdRun.Tests
             public Unit? LastTarget { get; private set; }
             
             public TestAbility(float range = 50f, float castTime = 0f, TargetType targetType = TargetType.Enemy, float cooldown = 1f)
-                : base("Test Ability", range, castTime, targetType, cooldown)
+                : base("Test Ability", "test_icon", range, castTime, targetType, cooldown)
             {
             }
             

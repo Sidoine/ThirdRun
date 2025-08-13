@@ -6,7 +6,7 @@ namespace ThirdRun.Data.Abilities
     public class HealAbility : Ability
     {
         public HealAbility() 
-            : base("Heal", 64f, 2f, TargetType.Friendly, 3f) // Range of ~2 tiles, 2 second cast time, 3 second cooldown
+            : base("Heal", "Abilities/heal", 64f, 2f, TargetType.Friendly, 3f) // Range of ~2 tiles, 2 second cast time, 3 second cooldown
         {
         }
         
