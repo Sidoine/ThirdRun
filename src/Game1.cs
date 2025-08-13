@@ -34,6 +34,7 @@ namespace MonogameRPG
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
+            _graphics.PreferredBackBufferHeight = 600; // Set window height to 600px so character details panel fits properly
             Content.RootDirectory = "Content";
             worldMap = null!;
             _spriteBatch = null!;
