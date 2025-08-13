@@ -15,6 +15,14 @@ namespace ThirdRun.Tests
             var random = new Random(12345);
             var worldMap = new MonogameRPG.Map.WorldMap(random);
             worldMap.Initialize();
+            
+            // Clear any pre-existing monsters that might be spawned by default
+            var existingMonsters = worldMap.CurrentMap.Monsters.ToList();
+            foreach (var monster in existingMonsters)
+            {
+                worldMap.CurrentMap.RemoveUnit(monster);
+            }
+            
             return (worldMap.CurrentMap, worldMap);
         }
 
@@ -61,21 +69,22 @@ namespace ThirdRun.Tests
         public void UseAbilities_ShouldRespectGlobalCooldown()
         {
             var (map, worldMap) = CreateTestMapAndWorld();
-            var unit = new TestUnit(map, worldMap);
-            var target = new TestUnit(map, worldMap);
+            var character = new Character("Test", CharacterClass.Guerrier, 100, 10, map, worldMap);
+            var monsterType = MonogameRPG.Monsters.MonsterTemplateRepository.CreateRandomMonsterType(new Random());
+            var target = new MonogameRPG.Monsters.Monster(monsterType, map, worldMap, new Random());
             target.Position = new Vector2(30, 0); // Within range
             
             var ability1 = new TestAbility("First", cooldown: 0.1f);
             var ability2 = new TestAbility("Second", cooldown: 0.1f);
-            unit.Abilities.Clear();
-            unit.Abilities.Add(ability1);
-            unit.Abilities.Add(ability2);
+            character.Abilities.Clear();
+            character.Abilities.Add(ability1);
+            character.Abilities.Add(ability2);
             
-            map.AddUnit(unit);
+            map.AddUnit(character);
             map.AddUnit(target);
             
-            unit.UpdateGameTime(0f);
-            unit.UseAbilities();
+            character.UpdateGameTime(0f);
+            character.UseAbilities();
             
             // First ability should be used
             Assert.True(ability1.WasExecuted);
@@ -84,15 +93,15 @@ namespace ThirdRun.Tests
             // Reset and try again immediately - should be on global cooldown
             ability1.WasExecuted = false;
             ability2.WasExecuted = false;
-            unit.UpdateGameTime(0.5f); // Less than 1.5s global cooldown
-            unit.UseAbilities();
+            character.UpdateGameTime(0.5f); // Less than 1.5s global cooldown
+            character.UseAbilities();
             
             Assert.False(ability1.WasExecuted);
             Assert.False(ability2.WasExecuted);
             
             // After global cooldown expires
-            unit.UpdateGameTime(2f); // More than 1.5s global cooldown
-            unit.UseAbilities();
+            character.UpdateGameTime(2f); // More than 1.5s global cooldown
+            character.UseAbilities();
             
             Assert.True(ability1.WasExecuted);
         }
@@ -101,27 +110,30 @@ namespace ThirdRun.Tests
         public void UseAbilities_ShouldUseAbilitiesInOrder()
         {
             var (map, worldMap) = CreateTestMapAndWorld();
-            var unit = new TestUnit(map, worldMap);
-            var target = new TestUnit(map, worldMap);
+            var character = new Character("Test", CharacterClass.Guerrier, 100, 10, map, worldMap);
+            var monsterType = MonogameRPG.Monsters.MonsterTemplateRepository.CreateRandomMonsterType(new Random());
+            var target = new MonogameRPG.Monsters.Monster(monsterType, map, worldMap, new Random());
             target.Position = new Vector2(30, 0); // Within range
             
             var ability1 = new TestAbility("First");
             var ability2 = new TestAbility("Second");
             var ability3 = new TestAbility("Third");
             
+            character.Abilities.Clear();
+            character.Abilities.Add(ability1);
+            character.Abilities.Add(ability2);
+            character.Abilities.Add(ability3);
+            
             // Put ability2 on cooldown so it should be skipped
-            ability2.Use(unit, target, 0f);
+            character.UpdateGameTime(0f);
+            character.UseAbility(ability2, target);
+            ability2.WasExecuted = false; // Reset the flag for the test
             
-            unit.Abilities.Clear();
-            unit.Abilities.Add(ability1);
-            unit.Abilities.Add(ability2); // This is on cooldown, should be skipped
-            unit.Abilities.Add(ability3);
-            
-            map.AddUnit(unit);
+            map.AddUnit(character);
             map.AddUnit(target);
             
-            unit.UpdateGameTime(0f);
-            unit.UseAbilities();
+            character.UpdateGameTime(0.5f); // Move time forward, but ability2 still on cooldown (1s default)
+            character.UseAbilities();
             
             // ability1 should be used since it's first and available
             Assert.True(ability1.WasExecuted);
@@ -133,28 +145,29 @@ namespace ThirdRun.Tests
         public void UseAbilities_ShouldSkipAbilitiesOnCooldown()
         {
             var (map, worldMap) = CreateTestMapAndWorld();
-            var unit = new TestUnit(map, worldMap);
-            var target = new TestUnit(map, worldMap);
+            var character = new Character("Test", CharacterClass.Guerrier, 100, 10, map, worldMap);
+            var monsterType = MonogameRPG.Monsters.MonsterTemplateRepository.CreateRandomMonsterType(new Random());
+            var target = new MonogameRPG.Monsters.Monster(monsterType, map, worldMap, new Random());
             target.Position = new Vector2(30, 0); // Within range
             
             var ability1 = new TestAbility("First", cooldown: 5f);
             var ability2 = new TestAbility("Second", cooldown: 1f);
             
             // Put ability1 on cooldown
-            unit.UpdateGameTime(0f);
-            unit.UseAbility(ability1, target);
+            character.UpdateGameTime(0f);
+            character.UseAbility(ability1, target);
             ability1.WasExecuted = false; // Reset for test
             
-            unit.Abilities.Clear();
-            unit.Abilities.Add(ability1); // On cooldown
-            unit.Abilities.Add(ability2); // Available
+            character.Abilities.Clear();
+            character.Abilities.Add(ability1); // On cooldown
+            character.Abilities.Add(ability2); // Available
             
-            map.AddUnit(unit);
+            map.AddUnit(character);
             map.AddUnit(target);
             
             // Wait for global cooldown but not ability1 cooldown
-            unit.UpdateGameTime(2f);
-            unit.UseAbilities();
+            character.UpdateGameTime(2f);
+            character.UseAbilities();
             
             Assert.False(ability1.WasExecuted); // Should be skipped due to cooldown
             Assert.True(ability2.WasExecuted);  // Should be used
@@ -235,25 +248,26 @@ namespace ThirdRun.Tests
         public void IsOnGlobalCooldown_ShouldReturnCorrectStatus()
         {
             var (map, worldMap) = CreateTestMapAndWorld();
-            var unit = new TestUnit(map, worldMap);
+            var character = new Character("Test", CharacterClass.Guerrier, 100, 10, map, worldMap);
             
-            unit.UpdateGameTime(0f);
-            Assert.False(unit.IsOnGlobalCooldown());
+            character.UpdateGameTime(0f);
+            Assert.False(character.IsOnGlobalCooldown());
             
             // Use an ability to trigger global cooldown
-            var target = new TestUnit(map, worldMap);
+            var monsterType = MonogameRPG.Monsters.MonsterTemplateRepository.CreateRandomMonsterType(new Random());
+            var target = new MonogameRPG.Monsters.Monster(monsterType, map, worldMap, new Random());
             target.Position = new Vector2(10, 0);
-            map.AddUnit(unit);
+            map.AddUnit(character);
             map.AddUnit(target);
             
-            unit.UseAbilities();
+            character.UseAbilities();
             
             // Should be on global cooldown
-            Assert.True(unit.IsOnGlobalCooldown());
+            Assert.True(character.IsOnGlobalCooldown());
             
             // After global cooldown expires
-            unit.UpdateGameTime(2f);
-            Assert.False(unit.IsOnGlobalCooldown());
+            character.UpdateGameTime(2f);
+            Assert.False(character.IsOnGlobalCooldown());
         }
     }
 }
