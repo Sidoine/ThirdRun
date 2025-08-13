@@ -22,6 +22,9 @@ namespace MonogameRPG
         public List<Ability> Abilities { get; private set; }
         public Ability DefaultAbility { get; protected set; }
         
+        // Aura system
+        public List<AuraEffect> ActiveAuras { get; private set; }
+        
         // Global cooldown system
         private float LastAbilityUsedTime { get; set; } = -2f; // Allow immediate first use
         private const float GlobalCooldownDuration = 1.5f;
@@ -45,6 +48,7 @@ namespace MonogameRPG
             Abilities = new List<Ability>();
             DefaultAbility = new MeleeAttackAbility();
             Abilities.Add(DefaultAbility);
+            ActiveAuras = new List<AuraEffect>();
             Map = map;
             WorldMap = worldMap;
         }
@@ -54,7 +58,14 @@ namespace MonogameRPG
         
         public void UpdateGameTime(float gameTime)
         {
+            var deltaTime = gameTime - CurrentGameTime;
             CurrentGameTime = gameTime;
+            
+            // Update auras (remove expired ones)
+            if (deltaTime > 0)
+            {
+                UpdateAuras(deltaTime);
+            }
         }
         
         public bool CanUseAbility(Ability ability, Unit? target)
@@ -118,6 +129,14 @@ namespace MonogameRPG
                     LastAbilityUsedTime = CurrentGameTime;
                     return; // Only use one ability per call
                 }
+                
+                // For group-targeting abilities, use without a specific target
+                if (ability.TargetType == ThirdRun.Data.Abilities.TargetType.Group && CanUseAbility(ability, null))
+                {
+                    UseAbility(ability, null);
+                    LastAbilityUsedTime = CurrentGameTime;
+                    return; // Only use one ability per call
+                }
             }
         }
         
@@ -178,6 +197,9 @@ namespace MonogameRPG
                     
                 case ThirdRun.Data.Abilities.TargetType.Self:
                     return this; // Self-targeting handled separately
+                    
+                case ThirdRun.Data.Abilities.TargetType.Group:
+                    return null; // Group targeting doesn't need a specific target
             }
             
             // Find the nearest target within range
@@ -209,6 +231,78 @@ namespace MonogameRPG
         protected virtual void OnTargetDefeated(Unit target)
         {
             // Default implementation does nothing. Derived classes can override for specific behavior.
+        }
+        
+        /// <summary>
+        /// Applies an aura to this unit. If the aura already exists, adds stacks and refreshes duration.
+        /// </summary>
+        public void ApplyAura(Aura aura, int stacks = 1)
+        {
+            var existingAura = ActiveAuras.FirstOrDefault(ae => ae.Aura.Name == aura.Name);
+            if (existingAura != null)
+            {
+                existingAura.AddStacks(stacks);
+            }
+            else
+            {
+                ActiveAuras.Add(new AuraEffect(aura, CurrentGameTime, stacks));
+            }
+        }
+        
+        /// <summary>
+        /// Removes an aura from this unit by name
+        /// </summary>
+        public void RemoveAura(string auraName)
+        {
+            ActiveAuras.RemoveAll(ae => ae.Aura.Name == auraName);
+        }
+        
+        /// <summary>
+        /// Updates all active auras, removing expired ones
+        /// Call this regularly to manage aura durations
+        /// </summary>
+        public void UpdateAuras(float deltaTime)
+        {
+            // Update all auras and remove expired ones
+            for (int i = ActiveAuras.Count - 1; i >= 0; i--)
+            {
+                if (!ActiveAuras[i].Update(CurrentGameTime, deltaTime))
+                {
+                    ActiveAuras.RemoveAt(i);
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Gets the total modifier for a characteristic including base characteristics and aura bonuses
+        /// </summary>
+        public int GetTotalCharacteristic(Characteristic characteristic)
+        {
+            int baseValue = Characteristics.GetValue(characteristic);
+            int auraBonus = 0;
+            
+            foreach (var auraEffect in ActiveAuras)
+            {
+                auraBonus += auraEffect.GetCharacteristicModifier(characteristic);
+            }
+            
+            return baseValue + auraBonus;
+        }
+        
+        /// <summary>
+        /// Gets the effective max health including aura bonuses
+        /// </summary>
+        public int GetEffectiveMaxHealth()
+        {
+            return GetTotalCharacteristic(Characteristic.Health);
+        }
+        
+        /// <summary>
+        /// Gets the effective attack power including aura bonuses
+        /// </summary>
+        public int GetEffectiveAttackPower()
+        {
+            return GetTotalCharacteristic(Characteristic.MeleeAttackPower);
         }
         
         /// <summary>

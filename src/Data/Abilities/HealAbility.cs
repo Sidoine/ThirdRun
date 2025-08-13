@@ -10,6 +10,19 @@ namespace ThirdRun.Data.Abilities
         {
         }
         
+        public override bool CanUse(Unit caster, Unit? target, float currentTime)
+        {
+            // First check the base conditions (cooldown, range, etc.)
+            if (!base.CanUse(caster, target, currentTime))
+                return false;
+                
+            // Only allow healing if the target actually needs healing
+            if (target != null && target.CurrentHealth >= target.MaxHealth)
+                return false;
+                
+            return true;
+        }
+        
         protected override void Execute(Unit caster, Unit? target)
         {
             if (target == null)

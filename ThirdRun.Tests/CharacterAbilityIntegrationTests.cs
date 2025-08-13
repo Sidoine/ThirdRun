@@ -27,9 +27,10 @@ namespace ThirdRun.Tests
             worldMap.Initialize();
             var character = new Character("Test Hunter", CharacterClass.Chasseur, 100, 15, worldMap.CurrentMap, worldMap);
             
-            Assert.Equal(2, character.Abilities.Count);
+            Assert.Equal(3, character.Abilities.Count); // Melee Attack + Ranged Attack + Regeneration buff
             Assert.True(character.Abilities.Any(a => a.Name == "Melee Attack"));
             Assert.True(character.Abilities.Any(a => a.Name == "Ranged Attack"));
+            Assert.True(character.Abilities.Any(a => a.Name == "Regeneration"));
         }
         
         [Fact]
@@ -39,9 +40,10 @@ namespace ThirdRun.Tests
             worldMap.Initialize();
             var character = new Character("Test Priest", CharacterClass.Prêtre, 80, 10, worldMap.CurrentMap, worldMap);
             
-            Assert.Equal(3, character.Abilities.Count);
+            Assert.Equal(4, character.Abilities.Count); // Melee Attack + Heal + Attack Power buff + Self Heal
             Assert.True(character.Abilities.Any(a => a.Name == "Melee Attack"));
             Assert.True(character.Abilities.Any(a => a.Name == "Heal"));
+            Assert.True(character.Abilities.Any(a => a.Name == "Blessing of Strength"));
             Assert.True(character.Abilities.Any(a => a.Name == "Self Heal"));
         }
         
@@ -52,9 +54,10 @@ namespace ThirdRun.Tests
             worldMap.Initialize();
             var character = new Character("Test Mage", CharacterClass.Mage, 70, 12, worldMap.CurrentMap, worldMap);
             
-            Assert.Equal(2, character.Abilities.Count);
+            Assert.Equal(3, character.Abilities.Count); // Melee Attack + Ranged Attack + Weakness debuff
             Assert.True(character.Abilities.Any(a => a.Name == "Melee Attack"));
             Assert.True(character.Abilities.Any(a => a.Name == "Ranged Attack"));
+            Assert.True(character.Abilities.Any(a => a.Name == "Curse of Weakness"));
         }
     }
 }
