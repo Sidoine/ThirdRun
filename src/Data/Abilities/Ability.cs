@@ -38,7 +38,7 @@ namespace ThirdRun.Data.Abilities
             return remaining > 0 ? remaining : 0;
         }
         
-        public bool CanUse(Unit caster, Unit? target, float currentTime)
+        public virtual bool CanUse(Unit caster, Unit? target, float currentTime)
         {
             // Check cooldown
             if (IsOnCooldown(currentTime))

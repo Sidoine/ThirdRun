@@ -126,7 +126,7 @@ namespace ThirdRun.Tests
             var characters = new List<Character> { caster, ally };
             map.SetCharacters(characters);
             
-            caster.Abilities.Add(new AttackPowerBuffAbility());
+            // Note: Priest now automatically gets AttackPowerBuffAbility from InitializeClassAbilities()
             caster.UpdateGameTime(10f);
 
             // Act
@@ -144,22 +144,40 @@ namespace ThirdRun.Tests
         {
             // Arrange
             var (map, worldMap) = CreateTestMapAndWorld();
-            var caster = new TestUnit(map, worldMap);
-            var target = new TestUnit(map, worldMap, 100, 10);
+            var caster = new Character("Caster", CharacterClass.Prêtre, 100, 10, map, worldMap);
+            var target = new Character("Target", CharacterClass.Guerrier, 100, 10, map, worldMap);
+            
+            // Position them within group buff range (96)
+            caster.Position = new Vector2(0, 0);
+            target.Position = new Vector2(50, 0); 
+            
+            // Set characters on map so group targeting can find them
+            var characters = new List<Character> { caster, target };
+            map.SetCharacters(characters);
+            
             var ability = new AttackPowerBuffAbility();
 
             // Act
-            ability.Use(caster, target, 10f);
+            ability.Use(caster, null, 10f); // Group abilities use null target
 
-            // Assert
-            var auraEffect = target.ActiveAuras[0];
-            Assert.Equal("Blessing of Strength", auraEffect.Aura.Name);
-            Assert.Equal(30f, auraEffect.RemainingDuration);
-            Assert.Equal(1, auraEffect.Stacks);
-            Assert.False(auraEffect.Aura.IsDebuff);
+            // Assert - Both caster and target should have the aura
+            Assert.Single(caster.ActiveAuras);
+            Assert.Single(target.ActiveAuras);
+            
+            var casterAura = caster.ActiveAuras[0];
+            var targetAura = target.ActiveAuras[0];
+            
+            Assert.Equal("Blessing of Strength", casterAura.Aura.Name);
+            Assert.Equal("Blessing of Strength", targetAura.Aura.Name);
+            Assert.Equal(30f, casterAura.RemainingDuration);
+            Assert.Equal(30f, targetAura.RemainingDuration);
+            Assert.Equal(1, casterAura.Stacks);
+            Assert.Equal(1, targetAura.Stacks);
+            Assert.False(casterAura.Aura.IsDebuff);
+            Assert.False(targetAura.Aura.IsDebuff);
             
             // Check characteristic modification
-            var attackBonus = auraEffect.GetCharacteristicModifier(Characteristic.MeleeAttackPower);
+            var attackBonus = targetAura.GetCharacteristicModifier(Characteristic.MeleeAttackPower);
             Assert.Equal(5, attackBonus); // 5 per stack, 1 stack
         }
 

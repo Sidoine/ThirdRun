@@ -57,8 +57,8 @@ public class Character : Unit
             case CharacterClass.Prêtre:
                 // Priests get healing abilities and group buffs
                 Abilities.Add(new HealAbility());
-                Abilities.Add(new SelfHealAbility());
                 Abilities.Add(new AttackPowerBuffAbility()); // Group buff
+                Abilities.Add(new SelfHealAbility());
                 Characteristics.SetValue(ThirdRun.Data.Characteristic.HealingPower, AttackPower / 2);
                 break;
                 
