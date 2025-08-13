@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ThirdRun.Data;
 using ThirdRun.Data.Abilities;
 using System.Linq;
+using MonogameRPG.Monsters;
 
 namespace MonogameRPG
 {
@@ -20,6 +21,10 @@ namespace MonogameRPG
         // Ability system
         public List<Ability> Abilities { get; private set; }
         public Ability DefaultAbility { get; protected set; }
+        
+        // Global cooldown system
+        private float LastAbilityUsedTime { get; set; } = -2f; // Allow immediate first use
+        private const float GlobalCooldownDuration = 1.5f;
 
         // Properties that delegate to characteristics
         public int MaxHealth 
@@ -60,12 +65,150 @@ namespace MonogameRPG
         public void UseAbility(Ability ability, Unit? target)
         {
             ability.Use(this, target, CurrentGameTime);
+            
+            // Check if target was defeated and handle post-combat effects
+            if (target != null && target.IsDead)
+            {
+                OnTargetDefeated(target);
+            }
+        }
+        
+        /// <summary>
+        /// Checks if unit is on global cooldown
+        /// </summary>
+        public bool IsOnGlobalCooldown()
+        {
+            return CurrentGameTime < LastAbilityUsedTime + GlobalCooldownDuration;
+        }
+        
+        /// <summary>
+        /// Uses abilities in order on the nearest relevant target.
+        /// Checks range, cooldown, and global cooldown before using an ability.
+        /// Using an ability triggers a 1.5s global cooldown.
+        /// </summary>
+        public void UseAbilities()
+        {
+            // Check global cooldown first
+            if (IsOnGlobalCooldown())
+                return;
+                
+            // Try each ability in order
+            foreach (var ability in Abilities)
+            {
+                // Check if ability is on cooldown
+                if (ability.IsOnCooldown(CurrentGameTime))
+                    continue;
+                    
+                // Find nearest relevant target for this ability
+                Unit? target = FindNearestTargetForAbility(ability);
+                
+                // Check if we can use this ability on the target
+                if (target != null && CanUseAbility(ability, target))
+                {
+                    // Use the ability and set global cooldown
+                    UseAbility(ability, target);
+                    LastAbilityUsedTime = CurrentGameTime;
+                    return; // Only use one ability per call
+                }
+                
+                // For self-targeting abilities, try using on self
+                if (ability.TargetType == ThirdRun.Data.Abilities.TargetType.Self && CanUseAbility(ability, this))
+                {
+                    UseAbility(ability, this);
+                    LastAbilityUsedTime = CurrentGameTime;
+                    return; // Only use one ability per call
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Finds the nearest target relevant for the specified ability
+        /// </summary>
+        private Unit? FindNearestTargetForAbility(Ability ability)
+        {
+            if (Map == null) return null;
+            
+            List<Unit> potentialTargets = new List<Unit>();
+            
+            // Collect potential targets based on ability target type
+            switch (ability.TargetType)
+            {
+                case ThirdRun.Data.Abilities.TargetType.Enemy:
+                    // If this is a Character, target Monsters
+                    if (this is Character)
+                    {
+                        potentialTargets.AddRange(Map.Monsters.Where(m => !m.IsDead));
+                    }
+                    // If this is a Monster, target Characters  
+                    else if (this is MonogameRPG.Monsters.Monster)
+                    {
+                        potentialTargets.AddRange(Map.Characters.Where(c => !c.IsDead));
+                    }
+                    // For testing purposes, if neither Character nor Monster, target all other units
+                    else
+                    {
+                        // Combine all unit types for tests
+                        potentialTargets.AddRange(Map.Characters.Cast<Unit>().Where(u => u != this && !u.IsDead));
+                        potentialTargets.AddRange(Map.Monsters.Cast<Unit>().Where(u => u != this && !u.IsDead));
+                        potentialTargets.AddRange(Map.NPCs.Cast<Unit>().Where(u => u != this && !u.IsDead));
+                    }
+                    break;
+                    
+                case ThirdRun.Data.Abilities.TargetType.Friendly:
+                    // If this is a Character, target other Characters
+                    if (this is Character)
+                    {
+                        potentialTargets.AddRange(Map.Characters.Where(c => !c.IsDead && c != this));
+                    }
+                    // If this is a Monster, target other Monsters
+                    else if (this is MonogameRPG.Monsters.Monster)
+                    {
+                        potentialTargets.AddRange(Map.Monsters.Where(m => !m.IsDead && m != this));
+                    }
+                    // For testing purposes, consider same type as friendly
+                    else
+                    {
+                        // Find units of the same type
+                        var allUnits = Map.Characters.Cast<Unit>()
+                            .Concat(Map.Monsters.Cast<Unit>())
+                            .Concat(Map.NPCs.Cast<Unit>());
+                        potentialTargets.AddRange(allUnits.Where(u => u != this && !u.IsDead && u.GetType() == this.GetType()));
+                    }
+                    break;
+                    
+                case ThirdRun.Data.Abilities.TargetType.Self:
+                    return this; // Self-targeting handled separately
+            }
+            
+            // Find the nearest target within range
+            Unit? nearestTarget = null;
+            float nearestDistance = float.MaxValue;
+            
+            foreach (var target in potentialTargets)
+            {
+                float distance = Vector2.Distance(Position, target.Position);
+                if (distance <= ability.Range && distance < nearestDistance)
+                {
+                    nearestDistance = distance;
+                    nearestTarget = target;
+                }
+            }
+            
+            return nearestTarget;
         }
         
         // Convenience method for default attack behavior
         public void Attack(Unit target)
         {
             UseAbility(DefaultAbility, target);
+        }
+        
+        /// <summary>
+        /// Called when this unit defeats another unit. Override in derived classes for specific behavior.
+        /// </summary>
+        protected virtual void OnTargetDefeated(Unit target)
+        {
+            // Default implementation does nothing. Derived classes can override for specific behavior.
         }
         
         /// <summary>
