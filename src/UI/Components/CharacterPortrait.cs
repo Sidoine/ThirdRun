@@ -21,11 +21,9 @@ namespace ThirdRun.UI.Components
         private const int BarSpacing = 2;
         private const int BarOffset = 8;
         
-        // Resource colors
+        // Resource colors - using colors defined in ResourceType
         private static readonly Color HealthBarColor = Color.LimeGreen;
         private static readonly Color HealthBarBackground = Color.DarkRed;
-        private static readonly Color EnergyBarColor = Color.Green;
-        private static readonly Color EnergyBarBackground = Color.DarkGray;
 
         public Character Character => character;
 
@@ -105,7 +103,7 @@ namespace ThirdRun.UI.Components
             {
                 DrawBar(barX, barStartY, 
                        energyResource.CurrentValue, energyResource.MaxValue, 
-                       EnergyBarColor, EnergyBarBackground);
+                       ResourceType.Energy.Color, Color.DarkGray); // Use ResourceType color, keep dark gray background
             }
         }
 

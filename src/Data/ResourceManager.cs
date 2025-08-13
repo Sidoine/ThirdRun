@@ -19,11 +19,11 @@ namespace ThirdRun.Data
         }
 
         /// <summary>
-        /// Initializes the default resources (Energy with max 100 and replenish rate 10/second)
+        /// Initializes the default resources using the ResourceType configuration
         /// </summary>
         private void InitializeDefaultResources()
         {
-            _resources[ResourceType.Energy] = new Resource(ResourceType.Energy, 100f, 10f);
+            _resources[ResourceType.Energy] = new Resource(ResourceType.Energy, ResourceType.Energy.MaxValue, ResourceType.Energy.ReplenishRate);
         }
 
         /// <summary>
