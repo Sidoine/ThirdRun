@@ -25,6 +25,9 @@ namespace MonogameRPG
         // Aura system
         public List<AuraEffect> ActiveAuras { get; private set; }
         
+        // Resource system
+        public ResourceManager Resources { get; private set; }
+        
         // Global cooldown system
         private float LastAbilityUsedTime { get; set; } = -2f; // Allow immediate first use
         private const float GlobalCooldownDuration = 1.5f;
@@ -49,6 +52,7 @@ namespace MonogameRPG
             DefaultAbility = new MeleeAttackAbility();
             Abilities.Add(DefaultAbility);
             ActiveAuras = new List<AuraEffect>();
+            Resources = new ResourceManager();
             Map = map;
             WorldMap = worldMap;
         }
@@ -65,6 +69,9 @@ namespace MonogameRPG
             if (deltaTime > 0)
             {
                 UpdateAuras(deltaTime);
+                
+                // Update resources (replenish over time)
+                Resources.UpdateResources(deltaTime);
             }
         }
         

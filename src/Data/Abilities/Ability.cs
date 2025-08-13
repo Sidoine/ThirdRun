@@ -1,6 +1,7 @@
 using MonogameRPG;
 using System.Collections.Generic;
 using System.Linq;
+using ThirdRun.Data;
 
 namespace ThirdRun.Data.Abilities
 {
@@ -12,11 +13,12 @@ namespace ThirdRun.Data.Abilities
         public float CastTime { get; protected set; }
         public TargetType TargetType { get; protected set; }
         public float Cooldown { get; protected set; }
+        public ResourceCost? ResourceCost { get; protected set; }
         
         // Track when the ability was last used for cooldown calculation
         public float LastUsedTime { get; private set; }
         
-        protected Ability(string name, string iconPath, float range, float castTime, TargetType targetType, float cooldown)
+        protected Ability(string name, string iconPath, float range, float castTime, TargetType targetType, float cooldown, ResourceCost? resourceCost = null)
         {
             Name = name;
             IconPath = iconPath;
@@ -24,6 +26,7 @@ namespace ThirdRun.Data.Abilities
             CastTime = castTime;
             TargetType = targetType;
             Cooldown = cooldown;
+            ResourceCost = resourceCost;
             LastUsedTime = -cooldown; // Allow immediate first use
         }
         
@@ -43,6 +46,23 @@ namespace ThirdRun.Data.Abilities
             // Check cooldown
             if (IsOnCooldown(currentTime))
                 return false;
+            
+            // Check resource requirements
+            if (ResourceCost != null)
+            {
+                if (ResourceCost.IsCost)
+                {
+                    // For resource costs, check if we have enough
+                    if (!caster.Resources.HasEnoughResource(ResourceCost.ResourceType, ResourceCost.AbsoluteAmount))
+                        return false;
+                }
+                else if (ResourceCost.IsGeneration)
+                {
+                    // For resource generation, check if it would exceed maximum
+                    if (caster.Resources.WouldExceedMaxResource(ResourceCost.ResourceType, ResourceCost.AbsoluteAmount))
+                        return false;
+                }
+            }
                 
             // Check if we have a valid target based on target type
             if (TargetType == TargetType.Self && target != caster)
@@ -72,6 +92,21 @@ namespace ThirdRun.Data.Abilities
                 return;
                 
             LastUsedTime = currentTime;
+            
+            // Handle resource cost/generation
+            if (ResourceCost != null)
+            {
+                if (ResourceCost.IsCost)
+                {
+                    // Consume the resource
+                    caster.Resources.TryConsumeResource(ResourceCost.ResourceType, ResourceCost.AbsoluteAmount);
+                }
+                else if (ResourceCost.IsGeneration)
+                {
+                    // Generate the resource
+                    caster.Resources.TryGenerateResource(ResourceCost.ResourceType, ResourceCost.AbsoluteAmount);
+                }
+            }
             
             if (TargetType == TargetType.Group)
             {
