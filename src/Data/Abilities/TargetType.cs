@@ -4,6 +4,7 @@ namespace ThirdRun.Data.Abilities
     {
         Self,
         Enemy,
-        Friendly
+        Friendly,
+        Group
     }
 }

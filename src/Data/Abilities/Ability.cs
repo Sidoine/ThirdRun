@@ -1,4 +1,6 @@
 using MonogameRPG;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ThirdRun.Data.Abilities
 {
@@ -49,6 +51,10 @@ namespace ThirdRun.Data.Abilities
             if ((TargetType == TargetType.Enemy || TargetType == TargetType.Friendly) && target == null)
                 return false;
                 
+            // Group targeting doesn't require a specific target
+            if (TargetType == TargetType.Group)
+                return true;
+                
             // Check range if we have a target
             if (target != null && target != caster)
             {
@@ -66,9 +72,66 @@ namespace ThirdRun.Data.Abilities
                 return;
                 
             LastUsedTime = currentTime;
-            Execute(caster, target);
+            
+            if (TargetType == TargetType.Group)
+            {
+                ExecuteGroup(caster);
+            }
+            else
+            {
+                Execute(caster, target);
+            }
         }
         
         protected abstract void Execute(Unit caster, Unit? target);
+        
+        /// <summary>
+        /// Executes the ability on all valid targets in range for group-targeted abilities.
+        /// Override this for abilities that use Group targeting.
+        /// </summary>
+        protected virtual void ExecuteGroup(Unit caster)
+        {
+            // Default implementation - find all friendly units in range and execute on each
+            if (caster.Map == null) return;
+            
+            var targets = GetGroupTargets(caster);
+            foreach (var target in targets)
+            {
+                Execute(caster, target);
+            }
+        }
+        
+        /// <summary>
+        /// Gets all valid targets for group targeting
+        /// </summary>
+        internal List<Unit> GetGroupTargets(Unit caster)
+        {
+            var targets = new List<Unit>();
+            if (caster.Map == null) return targets;
+            
+            // For group targeting, find all friendly units within range
+            var potentialTargets = new List<Unit>();
+            
+            if (caster is Character)
+            {
+                potentialTargets.AddRange(caster.Map.Characters.Where(c => !c.IsDead));
+            }
+            else if (caster is MonogameRPG.Monsters.Monster)
+            {
+                potentialTargets.AddRange(caster.Map.Monsters.Where(m => !m.IsDead));
+            }
+            
+            // Filter by range
+            foreach (var target in potentialTargets)
+            {
+                float distance = Microsoft.Xna.Framework.Vector2.Distance(caster.Position, target.Position);
+                if (distance <= Range)
+                {
+                    targets.Add(target);
+                }
+            }
+            
+            return targets;
+        }
     }
 }
