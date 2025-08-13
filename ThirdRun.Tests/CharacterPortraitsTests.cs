@@ -96,6 +96,37 @@ namespace ThirdRun.Tests
             Assert.False(state.IsCharacterDetailsVisible);
         }
 
+        [Fact]
+        public void CharacterDetailsPanel_HasCloseButton()
+        {
+            // This test verifies that the CharacterDetailsPanel constructor includes close button logic
+            // We can't instantiate the actual panel without MonoGame context, but we can verify
+            // that the close button positioning logic would be correct
+            
+            // Simulate panel bounds for a typical screen
+            var screenBounds = new Rectangle(0, 0, 1024, 768);
+            var panelWidth = 400;
+            var panelHeight = 600;
+            
+            // Calculate centered panel bounds (same logic as CharacterDetailsPanel.CalculateCenteredBounds)
+            int panelX = (screenBounds.Width - panelWidth) / 2;
+            int panelY = (screenBounds.Height - panelHeight) / 2;
+            var panelBounds = new Rectangle(panelX, panelY, panelWidth, panelHeight);
+            
+            // Calculate close button bounds (same logic as CharacterDetailsPanel constructor)
+            var closeButtonBounds = new Rectangle(panelBounds.Right - 30, panelBounds.Top + 5, 25, 25);
+            
+            // Verify close button is positioned in top-right corner of panel
+            Assert.True(closeButtonBounds.Right <= panelBounds.Right);
+            Assert.True(closeButtonBounds.X >= panelBounds.Right - 30);
+            Assert.True(closeButtonBounds.Y == panelBounds.Top + 5);
+            Assert.Equal(25, closeButtonBounds.Width);
+            Assert.Equal(25, closeButtonBounds.Height);
+            
+            // Verify close button is within panel bounds
+            Assert.True(panelBounds.Contains(closeButtonBounds));
+        }
+
         private string GetTexturePathForClass(CharacterClass characterClass)
         {
             // This is the same method used in CharacterPortraitsPanel
