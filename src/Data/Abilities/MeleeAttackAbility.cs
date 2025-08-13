@@ -6,7 +6,8 @@ namespace ThirdRun.Data.Abilities
     public class MeleeAttackAbility : Ability
     {
         public MeleeAttackAbility() 
-            : base("Melee Attack", "Abilities/melee_attack", 32f, 0f, TargetType.Enemy, 1f) // Range of ~1 tile, instant cast, 1 second cooldown
+            : base("Melee Attack", "Abilities/melee_attack", 32f, 0f, TargetType.Enemy, 1f, 
+                  new ResourceCost(ResourceType.Energy, 10f)) // Range of ~1 tile, instant cast, 1 second cooldown, 10 energy cost
         {
         }
         

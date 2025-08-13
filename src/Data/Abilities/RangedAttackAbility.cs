@@ -6,7 +6,8 @@ namespace ThirdRun.Data.Abilities
     public class RangedAttackAbility : Ability
     {
         public RangedAttackAbility() 
-            : base("Ranged Attack", "Abilities/ranged_attack", 128f, 0f, TargetType.Enemy, 1.5f) // Range of ~4 tiles, instant cast, 1.5 second cooldown
+            : base("Ranged Attack", "Abilities/ranged_attack", 128f, 0f, TargetType.Enemy, 1.5f,
+                  new ResourceCost(ResourceType.Energy, 15f)) // Range of ~4 tiles, instant cast, 1.5 second cooldown, 15 energy cost
         {
         }
         
