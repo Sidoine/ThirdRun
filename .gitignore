@@ -6,3 +6,6 @@ Content/obj/
 TestResults/
 *.trx
 /tmp
+
+# Documentation files that should not be committed
+ABILITY_UI_IMPLEMENTATION.md
