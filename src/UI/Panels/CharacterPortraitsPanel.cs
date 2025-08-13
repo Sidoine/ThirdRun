@@ -95,8 +95,18 @@ namespace ThirdRun.UI.Panels
 
         private void ShowCharacterDetails(Character character)
         {
-            UiManager.CurrentState.SelectedCharacter = character;
-            UiManager.CurrentState.IsCharacterDetailsVisible = true;
+            // If the same character is already selected, deselect it and close the panel
+            if (UiManager.CurrentState.SelectedCharacter == character && UiManager.CurrentState.IsCharacterDetailsVisible)
+            {
+                UiManager.CurrentState.SelectedCharacter = null;
+                UiManager.CurrentState.IsCharacterDetailsVisible = false;
+            }
+            else
+            {
+                // Select the character and show the panel
+                UiManager.CurrentState.SelectedCharacter = character;
+                UiManager.CurrentState.IsCharacterDetailsVisible = true;
+            }
         }
 
         public override void Draw()

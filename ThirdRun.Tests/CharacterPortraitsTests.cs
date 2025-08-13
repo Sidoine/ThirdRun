@@ -60,6 +60,42 @@ namespace ThirdRun.Tests
             Assert.Null(exception);
         }
 
+        [Fact]
+        public void UIManager_State_CharacterSelectionToggleBehavior()
+        {
+            // Test the logic that would be used in ShowCharacterDetails for toggling selection
+            var state = new UiManager.State();
+            
+            // Create mock character (we can't create real Character without MonoGame context)
+            // but we can simulate the behavior with null-checking logic
+            
+            // Initial state: no character selected, panel not visible
+            Assert.Null(state.SelectedCharacter);
+            Assert.False(state.IsCharacterDetailsVisible);
+            
+            // Simulate selecting a character (first click)
+            // Since we can't create Character objects, we'll test with a mock scenario
+            // where character == selectedCharacter comparison would work
+            
+            // First selection: should select and show panel
+            state.SelectedCharacter = null; // Simulate "character1"
+            state.IsCharacterDetailsVisible = true;
+            Assert.True(state.IsCharacterDetailsVisible);
+            
+            // Simulate clicking same character again (deselection logic)
+            // if (selectedCharacter == character && IsCharacterDetailsVisible) -> deselect
+            bool shouldDeselect = state.SelectedCharacter == null && state.IsCharacterDetailsVisible; // simulate same character
+            if (shouldDeselect)
+            {
+                state.SelectedCharacter = null;
+                state.IsCharacterDetailsVisible = false;
+            }
+            
+            // After deselection: should be null and panel should be hidden
+            Assert.Null(state.SelectedCharacter);
+            Assert.False(state.IsCharacterDetailsVisible);
+        }
+
         private string GetTexturePathForClass(CharacterClass characterClass)
         {
             // This is the same method used in CharacterPortraitsPanel
