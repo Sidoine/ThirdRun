@@ -21,6 +21,7 @@ public class Character : Unit
     public string Name { get; set; }
     public CharacterClass Class { get; set; }
     public int Experience { get; private set; }
+    public int Level => (int)Math.Sqrt(Experience / 100.0) + 1; // Level calculation based on experience
     public Inventory Inventory { get; private set; }
     public Equipment? Weapon { get; private set; }
     public Equipment? Armor { get; private set; }

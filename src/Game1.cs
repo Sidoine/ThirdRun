@@ -30,6 +30,7 @@ namespace MonogameRPG
         private MouseState _previousMouseState;
         private KeyboardState _previousKeyboardState;
         private bool _previousTownState = false;
+        private bool _previousDungeonState = false;
 
         public Game1()
         {
@@ -123,6 +124,15 @@ namespace MonogameRPG
             {
                 worldMap.ToggleTownMode();
                 _previousTownState = _uiManager.CurrentState.IsInTown;
+            }
+            
+            // Sync UI dungeon state with world map state
+            _uiManager.CurrentState.IsInDungeon = worldMap.IsInDungeon;
+            
+            // Handle dungeon progression if all monsters are defeated
+            if (worldMap.IsInDungeon && worldMap.CanProgressInDungeon())
+            {
+                worldMap.ProgressDungeon();
             }
             MouseState mouse = Mouse.GetState();
             _rootPanel.Update(gameTime);

@@ -4,6 +4,7 @@ using MonogameRPG.Monsters;
 using System;
 using Microsoft.Xna.Framework;
 using ThirdRun.Data.NPCs;
+using ThirdRun.Data.Dungeons;
 
 namespace MonogameRPG.Map
 {
@@ -15,12 +16,23 @@ namespace MonogameRPG.Map
         private List<Character> characters = [];
         private Map? townMap = null; // Dedicated town map
         private bool isInTownMode = false; // Track if we're currently in town mode
+        
+        // Dungeon system
+        private List<Map>? dungeonMaps = null; // Current dungeon maps
+        private int currentDungeonMapIndex = 0;
+        private bool isInDungeonMode = false; // Track if we're currently in dungeon mode
+        private Dungeon? currentDungeon = null;
+        
         private readonly Random random = random;
 
-        public Map CurrentMap => isInTownMode && townMap != null ? townMap : 
+        public Map CurrentMap => 
+            isInDungeonMode && dungeonMaps != null && currentDungeonMapIndex < dungeonMaps.Count ? dungeonMaps[currentDungeonMapIndex] :
+            isInTownMode && townMap != null ? townMap : 
             (maps.TryGetValue(currentMapPosition, out Map? value) ? value : throw new Exception("Current map not found at position: " + currentMapPosition));
         public Point CurrentMapPosition => currentMapPosition;
         public bool IsInTown => isInTownMode;
+        public bool IsInDungeon => isInDungeonMode;
+        public Dungeon? CurrentDungeon => currentDungeon;
 
         public void Initialize()
         {
@@ -51,6 +63,12 @@ namespace MonogameRPG.Map
 
         public void Update()
         {
+            // Handle dungeon progression
+            if (isInDungeonMode && CanProgressInDungeon())
+            {
+                // Check if we should automatically progress (e.g., after a short delay)
+                // For now, progression will be manual or triggered by game logic
+            }
         }
 
         private Map GenerateNewAdjacentMap()
@@ -384,6 +402,131 @@ namespace MonogameRPG.Map
                 {
                     townMap.TeleportCharacters(characters);
                 }
+            }
+        }
+
+        public void EnterDungeon()
+        {
+            if (isInDungeonMode || isInTownMode) return; // Can't enter dungeon from town or another dungeon
+            
+            // Calculate mean character level
+            int meanLevel = CalculateMeanCharacterLevel();
+            
+            // Find appropriate dungeon
+            var dungeon = DungeonRepository.GetDungeonForLevel(meanLevel);
+            if (dungeon == null) return; // No appropriate dungeon found
+            
+            // Remember current position before entering dungeon
+            lastHostileMapPosition = currentMapPosition;
+            
+            // Enter dungeon mode
+            isInDungeonMode = true;
+            currentDungeon = dungeon;
+            currentDungeonMapIndex = 0;
+            
+            // Generate dungeon maps
+            dungeonMaps = GenerateDungeonMaps(dungeon);
+            
+            // Teleport characters to first dungeon map
+            if (dungeonMaps.Count > 0)
+            {
+                dungeonMaps[0].TeleportCharacters(characters);
+            }
+        }
+
+        public void ExitDungeon()
+        {
+            if (!isInDungeonMode) return;
+            
+            // Switch back to hostile zone
+            isInDungeonMode = false;
+            currentDungeon = null;
+            dungeonMaps = null;
+            currentDungeonMapIndex = 0;
+            
+            // Teleport characters back to the hostile map
+            if (maps.ContainsKey(lastHostileMapPosition))
+            {
+                currentMapPosition = lastHostileMapPosition;
+                CurrentMap.TeleportCharacters(characters);
+            }
+        }
+
+        public bool CanProgressInDungeon()
+        {
+            if (!isInDungeonMode || dungeonMaps == null) return false;
+            
+            // Can progress if current map has no living monsters
+            return !CurrentMap.HasLivingMonsters();
+        }
+
+        public bool ProgressDungeon()
+        {
+            if (!CanProgressInDungeon() || dungeonMaps == null) return false;
+            
+            currentDungeonMapIndex++;
+            
+            // Check if dungeon is completed
+            if (currentDungeonMapIndex >= dungeonMaps.Count)
+            {
+                ExitDungeon(); // Auto-exit when dungeon is complete
+                return true;
+            }
+            
+            // Teleport to next map
+            dungeonMaps[currentDungeonMapIndex].TeleportCharacters(characters);
+            return true;
+        }
+
+        private int CalculateMeanCharacterLevel()
+        {
+            if (characters.Count == 0) return 1;
+            
+            int totalLevel = characters.Sum(character => character.Level);
+            return Math.Max(1, totalLevel / characters.Count);
+        }
+
+        private List<Map> GenerateDungeonMaps(Dungeon dungeon)
+        {
+            var dungeonMaps = new List<Map>();
+            
+            for (int i = 0; i < dungeon.Maps.Count; i++)
+            {
+                var mapDef = dungeon.Maps[i];
+                var map = new Map(new Point(-1000 - i, -1000), random); // Special positions for dungeon maps
+                map.GenerateRandomMap(mapDef.MonsterCount);
+                
+                // Spawn monsters based on map definition
+                SpawnDungeonMonsters(map, mapDef);
+                
+                dungeonMaps.Add(map);
+            }
+            
+            return dungeonMaps;
+        }
+
+        private void SpawnDungeonMonsters(Map map, DungeonMapDefinition mapDef)
+        {
+            var spawnPoints = map.GetMonsterSpawnPoints();
+            int monstersToSpawn = Math.Min(mapDef.MonsterCount, spawnPoints.Count);
+            
+            for (int i = 0; i < monstersToSpawn; i++)
+            {
+                var spawnPoint = spawnPoints[i];
+                var monsterLevel = random.Next(mapDef.MinMonsterLevel, mapDef.MaxMonsterLevel + 1);
+                var monsterType = MonsterTemplateRepository.CreateRandomMonsterTypeForLevel(monsterLevel, monsterLevel, random);
+                
+                // Make boss monsters stronger if this map has a boss and it's the last monster
+                if (mapDef.HasBoss && i == monstersToSpawn - 1)
+                {
+                    // Boost boss stats
+                    monsterType.BaseHealth = (int)(monsterType.BaseHealth * 1.5f);
+                    monsterType.BaseAttack = (int)(monsterType.BaseAttack * 1.3f);
+                }
+                
+                var monster = new Monster(monsterType, map, this, random);
+                monster.Position = spawnPoint;
+                map.AddUnit(monster);
             }
         }
 
