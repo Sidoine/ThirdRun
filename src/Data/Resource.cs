@@ -10,12 +10,12 @@ namespace ThirdRun.Data
         public float MaxValue { get; }
         public float ReplenishRate { get; } // Units per second
 
-        public Resource(ResourceType type, float maxValue, float replenishRate, float? startingValue = null)
+        public Resource(ResourceType type, float? startingValue = null)
         {
             Type = type;
-            MaxValue = maxValue;
-            ReplenishRate = replenishRate;
-            CurrentValue = startingValue ?? maxValue; // Start at full by default
+            MaxValue = type.MaxValue;
+            ReplenishRate = type.ReplenishRate;
+            CurrentValue = startingValue ?? MaxValue; // Start at full by default
         }
 
         /// <summary>

@@ -92,18 +92,25 @@ namespace ThirdRun.UI.Components
             int barStartY = Bounds.Bottom - BarOffset;
             int barX = Bounds.X + (Bounds.Width - BarWidth) / 2; // Center horizontally
             
-            // Draw health bar
-            DrawBar(barX, barStartY - BarHeight - BarSpacing, 
+            int barIndex = 0;
+            
+            // Draw health bar first
+            DrawBar(barX, barStartY - ((barIndex + 1) * (BarHeight + BarSpacing)), 
                    character.CurrentHealth, character.GetEffectiveMaxHealth(), 
                    HealthBarColor, HealthBarBackground);
+            barIndex++;
             
-            // Draw energy bar
-            var energyResource = character.Resources.GetResource(ResourceType.Energy);
-            if (energyResource != null)
+            // Draw bars for all resources
+            foreach (var resourceType in character.Resources.GetAllResourceTypes())
             {
-                DrawBar(barX, barStartY, 
-                       energyResource.CurrentValue, energyResource.MaxValue, 
-                       ResourceType.Energy.Color, Color.DarkGray); // Use ResourceType color, keep dark gray background
+                var resource = character.Resources.GetResource(resourceType);
+                if (resource != null)
+                {
+                    DrawBar(barX, barStartY - ((barIndex + 1) * (BarHeight + BarSpacing)), 
+                           resource.CurrentValue, resource.MaxValue, 
+                           resourceType.Color, Color.DarkGray);
+                    barIndex++;
+                }
             }
         }
 

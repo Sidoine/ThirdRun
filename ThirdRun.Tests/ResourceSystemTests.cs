@@ -22,20 +22,20 @@ namespace ThirdRun.Tests
         public void Resource_InitializesCorrectly()
         {
             // Arrange & Act
-            var energy = new Resource(ResourceType.Energy, 100f, 10f);
+            var energy = new Resource(ResourceType.Energy);
 
             // Assert
             Assert.Equal(ResourceType.Energy, energy.Type);
-            Assert.Equal(100f, energy.MaxValue);
-            Assert.Equal(100f, energy.CurrentValue); // Starts at max by default
-            Assert.Equal(10f, energy.ReplenishRate);
+            Assert.Equal(ResourceType.Energy.MaxValue, energy.MaxValue);
+            Assert.Equal(ResourceType.Energy.MaxValue, energy.CurrentValue); // Starts at max by default
+            Assert.Equal(ResourceType.Energy.ReplenishRate, energy.ReplenishRate);
         }
 
         [Fact]
         public void Resource_ReplenishesOverTime()
         {
             // Arrange
-            var energy = new Resource(ResourceType.Energy, 100f, 10f, 50f); // Start with 50 energy
+            var energy = new Resource(ResourceType.Energy, 50f); // Start with 50 energy
 
             // Act - 2 seconds elapsed, should replenish 20 energy (10 per second)
             energy.Replenish(2f);
@@ -48,7 +48,7 @@ namespace ThirdRun.Tests
         public void Resource_ReplenishDoesNotExceedMax()
         {
             // Arrange
-            var energy = new Resource(ResourceType.Energy, 100f, 10f, 95f); // Start with 95 energy
+            var energy = new Resource(ResourceType.Energy, 95f); // Start with 95 energy
 
             // Act - 2 seconds elapsed, would add 20 but max is 100
             energy.Replenish(2f);
@@ -61,7 +61,7 @@ namespace ThirdRun.Tests
         public void Resource_TryConsume_Success()
         {
             // Arrange
-            var energy = new Resource(ResourceType.Energy, 100f, 10f, 50f); // Start with 50 energy
+            var energy = new Resource(ResourceType.Energy, 50f); // Start with 50 energy
 
             // Act
             var result = energy.TryConsume(30f);
@@ -75,7 +75,7 @@ namespace ThirdRun.Tests
         public void Resource_TryConsume_InsufficientResource()
         {
             // Arrange
-            var energy = new Resource(ResourceType.Energy, 100f, 10f, 20f); // Start with 20 energy
+            var energy = new Resource(ResourceType.Energy, 20f); // Start with 20 energy
 
             // Act
             var result = energy.TryConsume(30f); // Try to consume more than available
@@ -89,7 +89,7 @@ namespace ThirdRun.Tests
         public void Resource_TryGenerate_Success()
         {
             // Arrange
-            var energy = new Resource(ResourceType.Energy, 100f, 10f, 70f); // Start with 70 energy
+            var energy = new Resource(ResourceType.Energy, 70f); // Start with 70 energy
 
             // Act
             var result = energy.TryGenerate(20f);
@@ -103,7 +103,7 @@ namespace ThirdRun.Tests
         public void Resource_TryGenerate_WouldExceedMax()
         {
             // Arrange
-            var energy = new Resource(ResourceType.Energy, 100f, 10f, 90f); // Start with 90 energy
+            var energy = new Resource(ResourceType.Energy, 90f); // Start with 90 energy
 
             // Act
             var result = energy.TryGenerate(20f); // Would exceed max of 100

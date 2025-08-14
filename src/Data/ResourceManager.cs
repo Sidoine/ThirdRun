@@ -23,7 +23,8 @@ namespace ThirdRun.Data
         /// </summary>
         private void InitializeDefaultResources()
         {
-            _resources[ResourceType.Energy] = new Resource(ResourceType.Energy, ResourceType.Energy.MaxValue, ResourceType.Energy.ReplenishRate);
+            _resources[ResourceType.Energy] = new Resource(ResourceType.Energy);
+            _resources[ResourceType.Mana] = new Resource(ResourceType.Mana);
         }
 
         /// <summary>
@@ -110,11 +111,11 @@ namespace ThirdRun.Data
         }
 
         /// <summary>
-        /// Adds or updates a resource type with specified parameters
+        /// Adds or updates a resource type with specified starting value
         /// </summary>
-        public void AddResource(ResourceType resourceType, float maxValue, float replenishRate, float? startingValue = null)
+        public void AddResource(ResourceType resourceType, float? startingValue = null)
         {
-            _resources[resourceType] = new Resource(resourceType, maxValue, replenishRate, startingValue);
+            _resources[resourceType] = new Resource(resourceType, startingValue);
         }
     }
 }

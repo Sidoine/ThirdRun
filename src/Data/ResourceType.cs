@@ -22,9 +22,10 @@ namespace ThirdRun.Data
 
         // Static instances for each resource type
         public static readonly ResourceType Energy = new ResourceType("Energy", Color.Green, 100f, 10f);
+        public static readonly ResourceType Mana = new ResourceType("Mana", Color.Blue, 100f, 5f);
         
-        // Future resource types can be added here (e.g. Mana, Rage, Focus, etc.)
-        // public static readonly ResourceType Mana = new ResourceType("Mana", Color.Blue, 100f, 5f);
+        // Future resource types can be added here (e.g. Rage, Focus, etc.)
+        // public static readonly ResourceType Rage = new ResourceType("Rage", Color.Red, 100f, 2f);
         
         public override bool Equals(object? obj)
         {
