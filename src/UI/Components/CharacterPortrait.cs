@@ -2,6 +2,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ThirdRun.Items;
 using ThirdRun.Characters;
+using ThirdRun.Data;
+using ThirdRun.Utils;
 using System.Linq;
 
 namespace ThirdRun.UI.Components
@@ -12,6 +14,16 @@ namespace ThirdRun.UI.Components
     public class CharacterPortrait : SquareImageButton, IDropTarget
     {
         private Character character;
+        
+        // Resource bar display constants
+        private const int BarHeight = 4;
+        private const int BarWidth = 50;
+        private const int BarSpacing = 2;
+        private const int BarOffset = 8;
+        
+        // Resource colors - using colors defined in ResourceType
+        private static readonly Color HealthBarColor = Color.Red;
+        private static readonly Color HealthBarBackground = Color.DarkRed;
 
         public Character Character => character;
 
@@ -62,5 +74,65 @@ namespace ThirdRun.UI.Components
         }
 
         #endregion
+
+        public override void Draw()
+        {
+            // Draw the base portrait (button and icon)
+            base.Draw();
+            
+            // Draw health and resource bars
+            DrawResourceBars();
+        }
+
+        private void DrawResourceBars()
+        {
+            if (!Visible) return;
+            
+            // Calculate bar positions (below the portrait)
+            int barStartY = Bounds.Bottom - BarOffset;
+            int barX = Bounds.X + (Bounds.Width - BarWidth) / 2; // Center horizontally
+            
+            int barIndex = 0;
+            
+            // Draw health bar first
+            DrawBar(barX, barStartY - ((barIndex + 1) * (BarHeight + BarSpacing)), 
+                   character.CurrentHealth, character.GetEffectiveMaxHealth(), 
+                   HealthBarColor, HealthBarBackground);
+            barIndex++;
+            
+            // Draw bars for all resources
+            foreach (var resourceType in character.Resources.GetAllResourceTypes())
+            {
+                var resource = character.Resources.GetResource(resourceType);
+                if (resource != null)
+                {
+                    DrawBar(barX, barStartY - ((barIndex + 1) * (BarHeight + BarSpacing)), 
+                           resource.CurrentValue, resource.MaxValue, 
+                           resourceType.Color, Color.DarkGray);
+                    barIndex++;
+                }
+            }
+        }
+
+        private void DrawBar(int x, int y, float currentValue, float maxValue, Color foregroundColor, Color backgroundColor)
+        {
+            if (maxValue <= 0) return;
+            
+            var pixel = Helpers.GetPixel(UiManager.GraphicsDevice);
+            
+            // Background rectangle (full bar)
+            Rectangle bgRect = new Rectangle(x, y, BarWidth, BarHeight);
+            
+            // Foreground rectangle (filled portion)
+            float percent = MathHelper.Clamp(currentValue / maxValue, 0f, 1f);
+            Rectangle fgRect = new Rectangle(x, y, (int)(BarWidth * percent), BarHeight);
+            
+            // Draw background first, then foreground
+            UiManager.SpriteBatch.Draw(pixel, bgRect, backgroundColor);
+            if (percent > 0)
+            {
+                UiManager.SpriteBatch.Draw(pixel, fgRect, foregroundColor);
+            }
+        }
     }
 }
