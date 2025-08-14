@@ -235,5 +235,70 @@ namespace ThirdRun.Tests
             // Level 3: needs 300 XP to reach level 4 (total 600 XP)
             Assert.Equal(300, character.GetExperienceRequiredForNextLevel());
         }
+        
+        [Fact]
+        public void LevelingSystem_IntegrationDemo()
+        {
+            // This test demonstrates the full leveling system in action
+            // It runs a simulation similar to actual gameplay
+            
+            // Arrange
+            var (map, worldMap) = CreateTestMapAndWorld();
+            
+            // Create a party of characters with different classes
+            var warrior = CreateTestCharacter("Warrior", CharacterClass.Guerrier, map, worldMap);
+            var mage = CreateTestCharacter("Mage", CharacterClass.Mage, map, worldMap);
+            var priest = CreateTestCharacter("Priest", CharacterClass.Prêtre, map, worldMap);
+            var hunter = CreateTestCharacter("Hunter", CharacterClass.Chasseur, map, worldMap);
+            
+            var party = new List<Character> { warrior, mage, priest, hunter };
+            worldMap.SetCharacters(party);
+            
+            // Store initial stats
+            var initialWarriorHealth = warrior.MaxHealth;
+            var initialWarriorAttack = warrior.AttackPower;
+            var initialMageHealth = mage.MaxHealth;
+            var initialMageAttack = mage.AttackPower;
+            
+            // Act - Defeat exactly enough monsters to reach level 2
+            // Each character needs 100 XP to reach level 2
+            // We'll use level 10 monsters (100 XP each) split 4 ways = 25 XP per character per monster
+            // So we need 4 monsters to give each character exactly 100 XP
+            
+            for (int i = 0; i < 4; i++)
+            {
+                var monster = CreateTestMonster(10, map, worldMap); // 100 XP each
+                warrior.OnMonsterDefeated(monster);
+            }
+            
+            // Assert - All characters should have leveled up to level 2
+            Assert.All(party, character =>
+            {
+                Assert.Equal(2, character.Level);
+                Assert.Equal(100, character.Experience); // Exactly 100 XP
+            });
+            
+            // Check that different classes have different stat growth
+            Assert.Equal(initialWarriorHealth + 8, warrior.MaxHealth); // Warrior gets +8 HP
+            Assert.Equal(initialWarriorAttack + 3, warrior.AttackPower); // Warrior gets +3 ATK
+            
+            // Mage should have different stat growth
+            Assert.Equal(initialMageHealth + 4, mage.MaxHealth); // Mage gets +4 HP
+            Assert.Equal(initialMageAttack + 2, mage.AttackPower); // Mage gets +2 ATK
+            
+            // Verify experience requirements scale correctly
+            Assert.Equal(200, warrior.GetExperienceRequiredForNextLevel()); // Level 2→3 needs 200 XP
+            
+            // Demonstrate that dead characters don't get XP
+            priest.CurrentHealth = 0; // Kill the priest
+            var finalMonster = CreateTestMonster(3, map, worldMap); // 30 XP
+            warrior.OnMonsterDefeated(finalMonster);
+            
+            // Living characters should get 30/3 = 10 XP each (priest excluded)
+            Assert.Equal(110, warrior.Experience); // 100 + 10 = 110
+            Assert.Equal(110, mage.Experience);
+            Assert.Equal(110, hunter.Experience);
+            Assert.Equal(100, priest.Experience); // Priest still at 100 (got no XP from final monster)
+        }
     }
 }
