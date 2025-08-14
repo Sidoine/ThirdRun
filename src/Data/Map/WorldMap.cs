@@ -48,6 +48,11 @@ namespace MonogameRPG.Map
                 CurrentMap.SetCharacters(chars);
             }
         }
+        
+        public List<Character> GetAllCharacters()
+        {
+            return characters.ToList(); // Return a copy to prevent external modification
+        }
 
         public void Update()
         {
