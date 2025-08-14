@@ -266,6 +266,22 @@ namespace MonogameRPG
         }
         
         /// <summary>
+        /// Checks if this unit has an aura with the specified name
+        /// </summary>
+        public bool HasAura(string auraName)
+        {
+            return ActiveAuras.Any(ae => ae.Aura.Name == auraName);
+        }
+        
+        /// <summary>
+        /// Checks if this unit has any debuff auras
+        /// </summary>
+        public bool HasAnyDebuff()
+        {
+            return ActiveAuras.Any(ae => ae.Aura.IsDebuff);
+        }
+        
+        /// <summary>
         /// Updates all active auras, removing expired ones
         /// Call this regularly to manage aura durations
         /// </summary>
