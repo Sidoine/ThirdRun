@@ -24,7 +24,6 @@ namespace ThirdRun.Data
         private void InitializeDefaultResources()
         {
             _resources[ResourceType.Energy] = new Resource(ResourceType.Energy);
-            _resources[ResourceType.Mana] = new Resource(ResourceType.Mana);
         }
 
         /// <summary>

@@ -22,7 +22,7 @@ namespace ThirdRun.UI.Components
         private const int BarOffset = 8;
         
         // Resource colors - using colors defined in ResourceType
-        private static readonly Color HealthBarColor = Color.LimeGreen;
+        private static readonly Color HealthBarColor = Color.Red;
         private static readonly Color HealthBarBackground = Color.DarkRed;
 
         public Character Character => character;
