@@ -13,6 +13,7 @@ namespace MonogameRPG
         public int CurrentHealth { get; set; }
         public CharacteristicValues Characteristics { get; private set; }
         public bool IsDead => CurrentHealth <= 0;
+        public int Level { get; protected set; } = 1;
         
         // Map properties for movement and pathfinding
         public MonogameRPG.Map.Map? Map { get; set; }
