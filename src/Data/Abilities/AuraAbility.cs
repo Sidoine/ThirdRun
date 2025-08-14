@@ -19,6 +19,19 @@ namespace ThirdRun.Data.Abilities
             StacksToApply = stacksToApply;
         }
 
+        public override bool CanUse(Unit caster, Unit? target, float currentTime)
+        {
+            // First check the base conditions (cooldown, range, etc.)
+            if (!base.CanUse(caster, target, currentTime))
+                return false;
+                
+            // Only allow applying aura if the target doesn't already have it
+            if (target != null && target.HasAura(Aura.Name))
+                return false;
+                
+            return true;
+        }
+
         protected override void Execute(Unit caster, Unit? target)
         {
             if (target != null)
