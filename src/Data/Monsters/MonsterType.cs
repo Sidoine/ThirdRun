@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using ThirdRun.Data;
+using ThirdRun.Items;
 
 namespace MonogameRPG.Monsters
 {
@@ -9,6 +10,7 @@ namespace MonogameRPG.Monsters
         public string TexturePath { get; set; }
         public int Level { get; set; }
         public CharacteristicValues Characteristics { get; private set; }
+        public LootTable? LootTable { get; set; }
 
         // Properties that delegate to characteristics for backward compatibility
         public int BaseHealth 
@@ -33,6 +35,9 @@ namespace MonogameRPG.Monsters
             // Set the values using characteristics
             BaseHealth = baseHealth;
             BaseAttack = baseAttack;
+            
+            // Initialize with a default loot table that generates common random items
+            LootTable = new LootTable(new RandomLootEntry(100, ItemRarity.Common));
         }
     }
 }

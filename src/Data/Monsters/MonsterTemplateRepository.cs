@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThirdRun.Utils;
+using ThirdRun.Items;
 
 namespace MonogameRPG.Monsters
 {
@@ -127,7 +128,9 @@ namespace MonogameRPG.Monsters
         /// </summary>
         public static MonsterType CreateRandomMonsterType(Random random)
         {
-            return GetRandomTemplate(random).ToMonsterType();
+            var monsterType = GetRandomTemplate(random).ToMonsterType();
+            ConfigureLootTable(monsterType);
+            return monsterType;
         }
 
         /// <summary>
@@ -135,7 +138,65 @@ namespace MonogameRPG.Monsters
         /// </summary>
         public static MonsterType CreateRandomMonsterTypeForLevel(int minLevel, int maxLevel, Random random)
         {
-            return GetRandomTemplateForLevel(minLevel, maxLevel, random).ToMonsterType();
+            var monsterType = GetRandomTemplateForLevel(minLevel, maxLevel, random).ToMonsterType();
+            ConfigureLootTable(monsterType);
+            return monsterType;
+        }
+
+        /// <summary>
+        /// Configure specialized loot tables for specific monster types
+        /// </summary>
+        private static void ConfigureLootTable(MonsterType monsterType)
+        {
+            // Configure loot tables based on monster type and level
+            var lootEntries = new List<LootTableEntry>();
+
+            // Base loot based on monster level
+            if (monsterType.Level <= 2)
+            {
+                // Low level monsters - mostly common items
+                lootEntries.Add(new RandomLootEntry(80, ItemRarity.Common));
+                lootEntries.Add(new RandomLootEntry(20, ItemRarity.Rare));
+            }
+            else if (monsterType.Level <= 4)
+            {
+                // Mid level monsters - more rare items
+                lootEntries.Add(new RandomLootEntry(60, ItemRarity.Common));
+                lootEntries.Add(new RandomLootEntry(35, ItemRarity.Rare));
+                lootEntries.Add(new RandomLootEntry(5, ItemRarity.Epic));
+            }
+            else
+            {
+                // High level monsters - good chance of rare/epic
+                lootEntries.Add(new RandomLootEntry(40, ItemRarity.Common));
+                lootEntries.Add(new RandomLootEntry(45, ItemRarity.Rare));
+                lootEntries.Add(new RandomLootEntry(15, ItemRarity.Epic));
+            }
+
+            // Add unique items for specific monsters
+            switch (monsterType.Name.ToLowerInvariant())
+            {
+                case var name when name.Contains("dragon"):
+                    lootEntries.Add(new UniqueLootEntry(2, UniqueItemRepository.DragonSlayerAxe));
+                    break;
+                case var name when name.Contains("lich") || name.Contains("sorcière"):
+                    lootEntries.Add(new UniqueLootEntry(3, UniqueItemRepository.HelmetOfWisdom));
+                    lootEntries.Add(new UniqueLootEntry(1, UniqueItemRepository.PhoenixTears));
+                    break;
+                case var name when name.Contains("boss") || name.Contains("élite"):
+                    lootEntries.Add(new UniqueLootEntry(5, UniqueItemRepository.ExcaliburSword));
+                    lootEntries.Add(new UniqueLootEntry(3, UniqueItemRepository.PlateOfLegends));
+                    break;
+                case var name when name.Contains("voleur") || name.Contains("assassin"):
+                    lootEntries.Add(new UniqueLootEntry(4, UniqueItemRepository.ShadowBlade));
+                    lootEntries.Add(new UniqueLootEntry(2, UniqueItemRepository.BootsOfSwiftness));
+                    break;
+                case var name when name.Contains("troll") || name.Contains("ours"):
+                    lootEntries.Add(new UniqueLootEntry(1, UniqueItemRepository.ElixirOfLife));
+                    break;
+            }
+
+            monsterType.LootTable = new LootTable(lootEntries.ToArray());
         }
     }
 }
