@@ -18,7 +18,6 @@ namespace MonogameRPG.Monsters
     public class Monster : Unit
     {
         public MonsterType Type { get; set; }
-        public int Level => Type.Level;
         public MonsterState State { get; private set; } = MonsterState.Sleeping;
         public float AggroRadius { get; set; } = 100f; // Default aggro radius in pixels
         private readonly Random random;
@@ -29,6 +28,7 @@ namespace MonogameRPG.Monsters
         {
             this.random = random;
             Type = type;
+            Level = type.Level; // Set level from monster type
 
             // Copy all characteristics from monster type
             var typeCharacteristics = type.Characteristics.GetAllValues();

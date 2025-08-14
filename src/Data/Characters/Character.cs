@@ -21,7 +21,6 @@ public class Character : Unit
 {
     public string Name { get; set; }
     public CharacterClass Class { get; set; }
-    public int Level { get; private set; }
     public int Experience { get; private set; }
     public Inventory Inventory { get; private set; }
     public Equipment? Weapon { get; private set; }
