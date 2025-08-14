@@ -213,8 +213,8 @@ namespace MonogameRPG.Monsters
 
         public int GetExperienceValue()
         {
-            // Valeur d'expérience par défaut, à adapter selon le type de monstre
-            return 10;
+            // Experience is proportional to monster level
+            return 10 * Level; // Base 10 XP per monster level
         }
     }
 }

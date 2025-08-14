@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using ThirdRun.Characters;
 using ThirdRun.Items;
 using MonogameRPG.Monsters;
@@ -20,6 +21,7 @@ public class Character : Unit
 {
     public string Name { get; set; }
     public CharacterClass Class { get; set; }
+    public int Level { get; private set; }
     public int Experience { get; private set; }
     public Inventory Inventory { get; private set; }
     public Equipment? Weapon { get; private set; }
@@ -29,6 +31,7 @@ public class Character : Unit
     {
         Name = name;
         Class = characterClass;
+        Level = 1; // All characters start at level 1
 
         CurrentHealth = health;
         MaxHealth = health;
@@ -139,10 +142,47 @@ public class Character : Unit
     /// </summary>
     public void OnMonsterDefeated(Monster monster)
     {
-        GainExperience(monster);
+        // Distribute experience equally among all living party members
+        DistributeExperienceToParty(monster);
+        
         // Ramasser automatiquement le loot du monstre vaincu
         var loot = monster.DropLoot();
         Inventory.AddItem(loot);
+    }
+    
+    /// <summary>
+    /// Distributes experience equally among all living party members
+    /// </summary>
+    private void DistributeExperienceToParty(Monster monster)
+    {
+        if (WorldMap == null) return;
+        
+        var allCharacters = WorldMap.GetAllCharacters();
+        var livingCharacters = allCharacters.Where(c => !c.IsDead).ToList();
+        
+        if (livingCharacters.Count == 0) return;
+        
+        int totalXp = monster.GetExperienceValue();
+        int xpPerCharacter = totalXp / livingCharacters.Count;
+        
+        foreach (var character in livingCharacters)
+        {
+            character.GainExperienceDirectly(xpPerCharacter);
+        }
+    }
+    
+    /// <summary>
+    /// Gains experience directly (used for party XP distribution)
+    /// </summary>
+    private void GainExperienceDirectly(int xp)
+    {
+        Experience += xp;
+        
+        // Check for level up
+        while (Experience >= GetTotalExperienceRequiredForLevel(Level + 1))
+        {
+            LevelUp();
+        }
     }
 
     /// <summary>
@@ -158,7 +198,86 @@ public class Character : Unit
 
     public void GainExperience(Monster monster)
     {
-        Experience += monster.GetExperienceValue();
+        int xpGained = monster.GetExperienceValue();
+        Experience += xpGained;
+        
+        // Check for level up
+        while (Experience >= GetTotalExperienceRequiredForLevel(Level + 1))
+        {
+            LevelUp();
+        }
+    }
+    
+    /// <summary>
+    /// Calculates the total experience required to reach a specific level
+    /// </summary>
+    private int GetTotalExperienceRequiredForLevel(int level)
+    {
+        int totalXp = 0;
+        for (int i = 1; i < level; i++)
+        {
+            totalXp += 10 * 10 * i; // 100 XP * level
+        }
+        return totalXp;
+    }
+    
+    /// <summary>
+    /// Calculates the experience required to reach the next level from current level
+    /// Formula: 10 * monster XP worth * current level
+    /// </summary>
+    public int GetExperienceRequiredForNextLevel()
+    {
+        // Base monster XP is 10, so 10 monsters worth of XP per level
+        return 10 * 10 * Level; // 100 XP * current level
+    }
+    
+    /// <summary>
+    /// Levels up the character and increases base characteristics
+    /// </summary>
+    private void LevelUp()
+    {
+        Level++;
+        
+        // Increase base characteristics based on class
+        int healthIncrease = GetHealthIncreasePerLevel();
+        int attackIncrease = GetAttackIncreasePerLevel();
+        
+        // Increase max health and current health
+        MaxHealth += healthIncrease;
+        CurrentHealth += healthIncrease; // Heal when leveling up
+        
+        // Increase attack power
+        AttackPower += attackIncrease;
+    }
+    
+    /// <summary>
+    /// Gets the health increase per level based on character class
+    /// </summary>
+    private int GetHealthIncreasePerLevel()
+    {
+        return Class switch
+        {
+            CharacterClass.Guerrier => 8,  // Warriors are tanky
+            CharacterClass.Chasseur => 6,  // Hunters are moderately sturdy
+            CharacterClass.Prêtre => 5,    // Priests are support
+            CharacterClass.Mage => 4,      // Mages are fragile
+            _ => 5
+        };
+    }
+    
+    /// <summary>
+    /// Gets the attack power increase per level based on character class
+    /// </summary>
+    private int GetAttackIncreasePerLevel()
+    {
+        return Class switch
+        {
+            CharacterClass.Guerrier => 3,  // Warriors have good attack growth
+            CharacterClass.Chasseur => 3,  // Hunters have good attack growth
+            CharacterClass.Mage => 2,      // Mages focus on spells
+            CharacterClass.Prêtre => 2,    // Priests focus on healing
+            _ => 2
+        };
     }
 
     public bool Equip(Equipment equipment)
