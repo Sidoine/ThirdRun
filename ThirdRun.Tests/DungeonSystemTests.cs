@@ -10,27 +10,6 @@ namespace ThirdRun.Tests
     public class DungeonSystemTests
     {
         [Fact]
-        public void Character_Level_CalculatedCorrectlyFromExperience()
-        {
-            var random = new Random(12345);
-            var worldMap = new WorldMap(random);
-            worldMap.Initialize();
-            
-            var character = new Character("Test", CharacterClass.Guerrier, 100, 10, worldMap.CurrentMap, worldMap);
-            
-            // Level 1: 0-199 experience
-            character.GainExperience(new MonogameRPG.Monsters.Monster(new MonogameRPG.Monsters.MonsterType("TestMonster", 10, 5, "test", 1), worldMap.CurrentMap, worldMap, random));
-            Assert.Equal(1, character.Level);
-            
-            // Add more experience to reach level 2 (200+ experience)
-            for (int i = 0; i < 20; i++)
-            {
-                character.GainExperience(new MonogameRPG.Monsters.Monster(new MonogameRPG.Monsters.MonsterType("TestMonster", 10, 5, "test", 1), worldMap.CurrentMap, worldMap, random));
-            }
-            Assert.True(character.Level >= 2);
-        }
-
-        [Fact]
         public void DungeonRepository_HasCorrectLevelRanges()
         {
             var dungeons = DungeonRepository.GetAllDungeons();

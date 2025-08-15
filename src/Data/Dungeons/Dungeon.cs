@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ThirdRun.Data.Dungeons
 {
@@ -23,21 +24,32 @@ namespace ThirdRun.Data.Dungeons
         }
     }
 
+    public class MonsterSpawn
+    {
+        public string MonsterName { get; set; }
+        public int Count { get; set; }
+        public bool IsBoss { get; set; }
+
+        public MonsterSpawn(string monsterName, int count, bool isBoss = false)
+        {
+            MonsterName = monsterName;
+            Count = count;
+            IsBoss = isBoss;
+        }
+    }
+
     public class DungeonMapDefinition
     {
         public string Description { get; set; }
-        public bool HasBoss { get; set; }
-        public int MonsterCount { get; set; }
-        public int MinMonsterLevel { get; set; }
-        public int MaxMonsterLevel { get; set; }
+        public List<MonsterSpawn> MonsterSpawns { get; set; }
 
-        public DungeonMapDefinition(string description, bool hasBoss, int monsterCount, int minMonsterLevel, int maxMonsterLevel)
+        public DungeonMapDefinition(string description, List<MonsterSpawn> monsterSpawns)
         {
             Description = description;
-            HasBoss = hasBoss;
-            MonsterCount = monsterCount;
-            MinMonsterLevel = minMonsterLevel;
-            MaxMonsterLevel = maxMonsterLevel;
+            MonsterSpawns = monsterSpawns;
         }
+
+        // Helper property to check if this map has any boss monsters
+        public bool HasBoss => MonsterSpawns.Any(spawn => spawn.IsBoss);
     }
 }

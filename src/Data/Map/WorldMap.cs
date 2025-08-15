@@ -503,7 +503,8 @@ namespace MonogameRPG.Map
             {
                 var mapDef = dungeon.Maps[i];
                 var map = new Map(new Point(-1000 - i, -1000), random); // Special positions for dungeon maps
-                map.GenerateRandomMap(mapDef.MonsterCount);
+                var totalMonsterCount = mapDef.MonsterSpawns.Sum(spawn => spawn.Count);
+                map.GenerateRandomMap(totalMonsterCount);
                 
                 // Spawn monsters based on map definition
                 SpawnDungeonMonsters(map, mapDef);
@@ -517,20 +518,38 @@ namespace MonogameRPG.Map
         private void SpawnDungeonMonsters(Map map, DungeonMapDefinition mapDef)
         {
             var spawnPoints = map.GetMonsterSpawnPoints();
-            int monstersToSpawn = Math.Min(mapDef.MonsterCount, spawnPoints.Count);
+            var allSpawns = new List<(string monsterName, bool isBoss)>();
+            
+            // Collect all monsters to spawn from the map definition
+            foreach (var spawn in mapDef.MonsterSpawns)
+            {
+                for (int i = 0; i < spawn.Count; i++)
+                {
+                    allSpawns.Add((spawn.MonsterName, spawn.IsBoss));
+                }
+            }
+            
+            // Limit spawns to available spawn points
+            int monstersToSpawn = Math.Min(allSpawns.Count, spawnPoints.Count);
             
             for (int i = 0; i < monstersToSpawn; i++)
             {
                 var spawnPoint = spawnPoints[i];
-                var monsterLevel = random.Next(mapDef.MinMonsterLevel, mapDef.MaxMonsterLevel + 1);
-                var monsterType = MonsterTemplateRepository.CreateRandomMonsterTypeForLevel(monsterLevel, monsterLevel, random);
+                var (monsterName, isBoss) = allSpawns[i];
                 
-                // Make boss monsters stronger if this map has a boss and it's the last monster
-                if (mapDef.HasBoss && i == monstersToSpawn - 1)
+                // Create monster type - first try to find exact match, then fallback
+                MonsterType monsterType;
+                var template = MonsterTemplateRepository.GetAllMonsterTemplates()
+                    .FirstOrDefault(t => t.Name == monsterName);
+                
+                if (template != null)
                 {
-                    // Boost boss stats
-                    monsterType.BaseHealth = (int)(monsterType.BaseHealth * 1.5f);
-                    monsterType.BaseAttack = (int)(monsterType.BaseAttack * 1.3f);
+                    monsterType = template.ToMonsterType();
+                }
+                else
+                {
+                    // Fallback to random monster if exact name not found
+                    monsterType = MonsterTemplateRepository.CreateRandomMonsterType(random);
                 }
                 
                 var monster = new Monster(monsterType, map, this, random);
