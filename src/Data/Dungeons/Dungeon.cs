@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using MonogameRPG.Monsters;
 
 namespace ThirdRun.Data.Dungeons
 {
@@ -26,13 +27,13 @@ namespace ThirdRun.Data.Dungeons
 
     public class MonsterSpawn
     {
-        public string MonsterName { get; set; }
+        public MonsterType MonsterType { get; set; }
         public int Count { get; set; }
         public bool IsBoss { get; set; }
 
-        public MonsterSpawn(string monsterName, int count, bool isBoss = false)
+        public MonsterSpawn(MonsterType monsterType, int count, bool isBoss = false)
         {
-            MonsterName = monsterName;
+            MonsterType = monsterType;
             Count = count;
             IsBoss = isBoss;
         }

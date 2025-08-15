@@ -518,14 +518,14 @@ namespace MonogameRPG.Map
         private void SpawnDungeonMonsters(Map map, DungeonMapDefinition mapDef)
         {
             var spawnPoints = map.GetMonsterSpawnPoints();
-            var allSpawns = new List<(string monsterName, bool isBoss)>();
+            var allSpawns = new List<(MonsterType monsterType, bool isBoss)>();
             
             // Collect all monsters to spawn from the map definition
             foreach (var spawn in mapDef.MonsterSpawns)
             {
                 for (int i = 0; i < spawn.Count; i++)
                 {
-                    allSpawns.Add((spawn.MonsterName, spawn.IsBoss));
+                    allSpawns.Add((spawn.MonsterType, spawn.IsBoss));
                 }
             }
             
@@ -535,22 +535,7 @@ namespace MonogameRPG.Map
             for (int i = 0; i < monstersToSpawn; i++)
             {
                 var spawnPoint = spawnPoints[i];
-                var (monsterName, isBoss) = allSpawns[i];
-                
-                // Create monster type - first try to find exact match, then fallback
-                MonsterType monsterType;
-                var template = MonsterTemplateRepository.GetAllMonsterTemplates()
-                    .FirstOrDefault(t => t.Name == monsterName);
-                
-                if (template != null)
-                {
-                    monsterType = template.ToMonsterType();
-                }
-                else
-                {
-                    // Fallback to random monster if exact name not found
-                    monsterType = MonsterTemplateRepository.CreateRandomMonsterType(random);
-                }
+                var (monsterType, isBoss) = allSpawns[i];
                 
                 var monster = new Monster(monsterType, map, this, random);
                 monster.Position = spawnPoint;

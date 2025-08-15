@@ -157,5 +157,14 @@ namespace MonogameRPG.Monsters
         {
             return GetRandomTemplateForLevel(minLevel, maxLevel, random).ToMonsterType();
         }
+
+        /// <summary>
+        /// Get a MonsterType by its name
+        /// </summary>
+        public static MonsterType? GetMonsterTypeByName(string name)
+        {
+            var template = GetAllTemplates().FirstOrDefault(t => t.Name == name);
+            return template?.ToMonsterType();
+        }
     }
 }
