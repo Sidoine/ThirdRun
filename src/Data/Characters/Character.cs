@@ -22,7 +22,27 @@ public class Character : Unit
     public string Name { get; set; }
     public CharacterClass Class { get; set; }
     public int Experience { get; private set; }
-    public int Level => (int)Math.Sqrt(Experience / 100.0) + 1; // Level calculation based on experience
+    public new int Level 
+    { 
+        get 
+        {
+            // Calculate level based on cumulative experience requirements
+            // Level 1: 0 XP, Level 2: 100 XP, Level 3: 300 XP, Level 4: 600 XP, etc.
+            int currentLevel = 1;
+            int totalXp = 0;
+            
+            while (totalXp <= Experience)
+            {
+                totalXp += 100 * currentLevel; // 100 XP * current level
+                if (totalXp <= Experience)
+                {
+                    currentLevel++;
+                }
+            }
+            
+            return currentLevel;
+        }
+    }
     public Inventory Inventory { get; private set; }
     public Equipment? Weapon { get; private set; }
     public Equipment? Armor { get; private set; }
@@ -31,7 +51,7 @@ public class Character : Unit
     {
         Name = name;
         Class = characterClass;
-        Level = 1; // All characters start at level 1
+        // Level is automatically calculated from Experience, starting at 1 when Experience = 0
 
         CurrentHealth = health;
         MaxHealth = health;
@@ -84,7 +104,7 @@ public class Character : Unit
     public void Move(List<Monster> monsters)
     {
         // Check if in town - if so, use town behavior instead
-        if (WorldMap.IsInTown)
+        if (WorldMap?.IsInTown == true)
         {
             MoveInTown(WorldMap.GetNPCsOnCurrentMap());
             return;
@@ -105,8 +125,11 @@ public class Character : Unit
         }
         if (closest == null)
         {
-            var nextMap = WorldMap.GetAdjacentCardWithMonsters();
-            MoveTo(nextMap.Position + new Vector2(Map.GridWidth / 2 * Map.TileWidth, Map.GridHeight / 2 * Map.TileHeight));
+            var nextMap = WorldMap?.GetAdjacentCardWithMonsters();
+            if (nextMap != null)
+            {
+                MoveTo(nextMap.Position + new Vector2(Map.GridWidth / 2 * Map.TileWidth, Map.GridHeight / 2 * Map.TileHeight));
+            }
             return;
         }
 
@@ -176,12 +199,13 @@ public class Character : Unit
     /// </summary>
     private void GainExperienceDirectly(int xp)
     {
+        int oldLevel = Level;
         Experience += xp;
         
         // Check for level up
-        while (Experience >= GetTotalExperienceRequiredForLevel(Level + 1))
+        if (Level > oldLevel)
         {
-            LevelUp();
+            ProcessLevelUp(oldLevel, Level);
         }
     }
 
@@ -198,13 +222,14 @@ public class Character : Unit
 
     public void GainExperience(Monster monster)
     {
+        int oldLevel = Level;
         int xpGained = monster.GetExperienceValue();
         Experience += xpGained;
         
         // Check for level up
-        while (Experience >= GetTotalExperienceRequiredForLevel(Level + 1))
+        if (Level > oldLevel)
         {
-            LevelUp();
+            ProcessLevelUp(oldLevel, Level);
         }
     }
     
@@ -232,22 +257,24 @@ public class Character : Unit
     }
     
     /// <summary>
-    /// Levels up the character and increases base characteristics
+    /// Processes level up and increases base characteristics for each level gained
     /// </summary>
-    private void LevelUp()
+    private void ProcessLevelUp(int oldLevel, int newLevel)
     {
-        Level++;
-        
-        // Increase base characteristics based on class
-        int healthIncrease = GetHealthIncreasePerLevel();
-        int attackIncrease = GetAttackIncreasePerLevel();
-        
-        // Increase max health and current health
-        MaxHealth += healthIncrease;
-        CurrentHealth += healthIncrease; // Heal when leveling up
-        
-        // Increase attack power
-        AttackPower += attackIncrease;
+        // Apply level up bonuses for each level gained
+        for (int level = oldLevel + 1; level <= newLevel; level++)
+        {
+            // Increase base characteristics based on class
+            int healthIncrease = GetHealthIncreasePerLevel();
+            int attackIncrease = GetAttackIncreasePerLevel();
+            
+            // Increase max health and current health
+            MaxHealth += healthIncrease;
+            CurrentHealth += healthIncrease; // Heal when leveling up
+            
+            // Increase attack power
+            AttackPower += attackIncrease;
+        }
     }
     
     /// <summary>

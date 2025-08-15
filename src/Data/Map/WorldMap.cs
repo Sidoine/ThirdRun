@@ -184,8 +184,12 @@ namespace MonogameRPG.Map
         {
             if (characters.All(x => x.Map != CurrentMap))
             {
-                currentMapPosition = characters.First().Map.WorldPosition;
-                CleanupEmptyCards();
+                var firstCharacter = characters.FirstOrDefault();
+                if (firstCharacter?.Map != null)
+                {
+                    currentMapPosition = firstCharacter.Map.WorldPosition;
+                    CleanupEmptyCards();
+                }
             }
         }
 

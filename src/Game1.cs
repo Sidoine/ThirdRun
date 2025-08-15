@@ -30,7 +30,6 @@ namespace MonogameRPG
         private MouseState _previousMouseState;
         private KeyboardState _previousKeyboardState;
         private bool _previousTownState = false;
-        private bool _previousDungeonState = false;
 
         public Game1()
         {
