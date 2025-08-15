@@ -51,10 +51,11 @@ public class MonsterLootTests
     {
         // Arrange
         var monsterType = new MonsterType("Boss Orc", 100, 15, "Monsters/orc", 5);
+        var axeTemplate = ItemTemplateRepository.GetAllWeaponTemplates().First(t => t.BaseName == "Hache");
         var customLootTable = new LootTable(
-            new RandomLootEntry(50, ItemRarity.Rare),
+            new RandomLootEntry(50, axeTemplate, ItemRarity.Rare),
             new UniqueLootEntry(10, UniqueItemRepository.ExcaliburSword),
-            new RandomLootEntry(40, ItemRarity.Common)
+            new RandomLootEntry(40, axeTemplate, ItemRarity.Common)
         );
 
         // Act

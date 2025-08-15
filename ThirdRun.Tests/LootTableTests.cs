@@ -26,17 +26,18 @@ public class LootTableTests
         Assert.IsType<Weapon>(item2);
         Assert.Equal("Excalibur", item1.Name);
         Assert.Equal("Excalibur", item2.Name);
-        Assert.Equal(1000, item1.Value);
-        Assert.Equal(1000, item2.Value);
+        Assert.Equal(500, item1.Value); // Level 5 * 100 = 500
+        Assert.Equal(500, item2.Value); // Level 5 * 100 = 500
     }
 
     [Fact]
     public void LootTable_WithMultipleEntries_ShouldRespectWeights()
     {
         // Arrange
-        var commonEntry = new RandomLootEntry(70, ItemRarity.Common);  // 70% chance
-        var rareEntry = new RandomLootEntry(25, ItemRarity.Rare);      // 25% chance
-        var epicEntry = new RandomLootEntry(5, ItemRarity.Epic);       // 5% chance
+        var swordTemplate = ItemTemplateRepository.GetAllWeaponTemplates().First(t => t.BaseName == "Épée");
+        var commonEntry = new RandomLootEntry(70, swordTemplate, ItemRarity.Common);  // 70% chance
+        var rareEntry = new RandomLootEntry(25, swordTemplate, ItemRarity.Rare);      // 25% chance
+        var epicEntry = new RandomLootEntry(5, swordTemplate, ItemRarity.Epic);       // 5% chance
         var lootTable = new LootTable(commonEntry, rareEntry, epicEntry);
         var random = new Random(12345);
 
@@ -61,8 +62,9 @@ public class LootTableTests
     public void LootTable_GetTotalWeight_ShouldReturnSumOfAllWeights()
     {
         // Arrange
-        var entry1 = new RandomLootEntry(30, ItemRarity.Common);
-        var entry2 = new RandomLootEntry(50, ItemRarity.Rare);
+        var hammerTemplate = ItemTemplateRepository.GetAllWeaponTemplates().First(t => t.BaseName == "Marteau");
+        var entry1 = new RandomLootEntry(30, hammerTemplate, ItemRarity.Common);
+        var entry2 = new RandomLootEntry(50, hammerTemplate, ItemRarity.Rare);
         var entry3 = new UniqueLootEntry(20, UniqueItemRepository.ExcaliburSword);
         var lootTable = new LootTable(entry1, entry2, entry3);
 
@@ -84,9 +86,10 @@ public class LootTableTests
     public void RandomLootEntry_WithDifferentRarities_ShouldGenerateAppropriateItems()
     {
         // Arrange
-        var commonEntry = new RandomLootEntry(100, ItemRarity.Common);
-        var rareEntry = new RandomLootEntry(100, ItemRarity.Rare);
-        var epicEntry = new RandomLootEntry(100, ItemRarity.Epic);
+        var daggerTemplate = ItemTemplateRepository.GetAllWeaponTemplates().First(t => t.BaseName == "Dague");
+        var commonEntry = new RandomLootEntry(100, daggerTemplate, ItemRarity.Common);
+        var rareEntry = new RandomLootEntry(100, daggerTemplate, ItemRarity.Rare);
+        var epicEntry = new RandomLootEntry(100, daggerTemplate, ItemRarity.Epic);
         var random = new Random(12345);
         int monsterLevel = 3;
 
@@ -152,21 +155,26 @@ public class LootTableTests
     }
 
     [Fact]
-    public void RandomLootEntry_WithoutTemplate_ShouldUseRandomGeneration()
+    public void RandomLootEntry_WithDifferentTemplates_ShouldGenerateAppropriateItemTypes()
     {
         // Arrange
-        var entry = new RandomLootEntry(100, ItemRarity.Common);
+        var weaponTemplate = ItemTemplateRepository.GetAllWeaponTemplates().First();
+        var armorTemplate = ItemTemplateRepository.GetAllArmorTemplates().First();
+        var potionTemplate = ItemTemplateRepository.GetAllPotionTemplates().First();
+        
+        var weaponEntry = new RandomLootEntry(100, weaponTemplate, ItemRarity.Common);
+        var armorEntry = new RandomLootEntry(100, armorTemplate, ItemRarity.Common);
+        var potionEntry = new RandomLootEntry(100, potionTemplate, ItemRarity.Common);
         var random = new Random(12345);
 
-        // Act - Generate multiple items
-        var items = new List<Item>();
-        for (int i = 0; i < 20; i++)
-        {
-            items.Add(entry.GenerateItem(3, random));
-        }
+        // Act
+        var weaponItem = weaponEntry.GenerateItem(3, random);
+        var armorItem = armorEntry.GenerateItem(3, random);
+        var potionItem = potionEntry.GenerateItem(3, random);
 
-        // Assert - Should generate different types of items (weapons, armor, potions)
-        var itemTypes = items.Select(item => item.GetType()).Distinct().ToList();
-        Assert.True(itemTypes.Count > 1, "Should generate different item types when no specific template is provided");
+        // Assert - Should generate correct types of items based on templates
+        Assert.IsType<Weapon>(weaponItem);
+        Assert.IsType<Armor>(armorItem);
+        Assert.IsType<Potion>(potionItem);
     }
 }

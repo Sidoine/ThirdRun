@@ -25,7 +25,7 @@ namespace ThirdRun.Items
     /// </summary>
     public class RandomLootEntry : LootTableEntry
     {
-        public ItemTemplate? Template { get; }
+        public ItemTemplate Template { get; }
         public ItemRarity Rarity { get; }
 
         /// <summary>
@@ -37,38 +37,11 @@ namespace ThirdRun.Items
             Rarity = rarity;
         }
 
-        /// <summary>
-        /// Creates a RandomLootEntry that randomly selects from all available templates
-        /// </summary>
-        public RandomLootEntry(int weight, ItemRarity rarity) : base(weight)
-        {
-            Template = null; // Will randomly select template during generation
-            Rarity = rarity;
-        }
-
         public override Item GenerateItem(int monsterLevel, Random random)
         {
-            if (Template != null)
-            {
-                // Use specific template
-                int itemLevel = CalculateItemLevel(monsterLevel, random, Rarity);
-                
-                // Generate prefix based on template type
-                string? prefix = Template switch
-                {
-                    WeaponTemplate => ItemTemplateRepository.GetRandomWeaponPrefix(random),
-                    ArmorTemplate => ItemTemplateRepository.GetRandomArmorPrefix(random),
-                    PotionTemplate => null, // Potions don't use prefixes
-                    _ => null
-                };
-                
-                return Template.CreateItem(itemLevel, random, prefix);
-            }
-            else
-            {
-                // Use RandomItemGenerator for backward compatibility
-                return RandomItemGenerator.GenerateRandomItem(monsterLevel, random, Rarity);
-            }
+            // Use specific template to create item
+            int itemLevel = CalculateItemLevel(monsterLevel, random, Rarity);
+            return Template.CreateItem(itemLevel, random);
         }
 
         private static int CalculateItemLevel(int monsterLevel, Random random, ItemRarity rarity)

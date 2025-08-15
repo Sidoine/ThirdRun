@@ -155,22 +155,22 @@ namespace MonogameRPG.Monsters
             if (monsterType.Level <= 2)
             {
                 // Low level monsters - mostly common items
-                lootEntries.Add(new RandomLootEntry(80, ItemRarity.Common));
-                lootEntries.Add(new RandomLootEntry(20, ItemRarity.Rare));
+                lootEntries.AddRange(CreateRandomLootEntries(80, ItemRarity.Common));
+                lootEntries.AddRange(CreateRandomLootEntries(20, ItemRarity.Rare));
             }
             else if (monsterType.Level <= 4)
             {
                 // Mid level monsters - more rare items
-                lootEntries.Add(new RandomLootEntry(60, ItemRarity.Common));
-                lootEntries.Add(new RandomLootEntry(35, ItemRarity.Rare));
-                lootEntries.Add(new RandomLootEntry(5, ItemRarity.Epic));
+                lootEntries.AddRange(CreateRandomLootEntries(60, ItemRarity.Common));
+                lootEntries.AddRange(CreateRandomLootEntries(35, ItemRarity.Rare));
+                lootEntries.AddRange(CreateRandomLootEntries(5, ItemRarity.Epic));
             }
             else
             {
                 // High level monsters - good chance of rare/epic
-                lootEntries.Add(new RandomLootEntry(40, ItemRarity.Common));
-                lootEntries.Add(new RandomLootEntry(45, ItemRarity.Rare));
-                lootEntries.Add(new RandomLootEntry(15, ItemRarity.Epic));
+                lootEntries.AddRange(CreateRandomLootEntries(40, ItemRarity.Common));
+                lootEntries.AddRange(CreateRandomLootEntries(45, ItemRarity.Rare));
+                lootEntries.AddRange(CreateRandomLootEntries(15, ItemRarity.Epic));
             }
 
             // Add unique items for specific monsters
@@ -197,6 +197,54 @@ namespace MonogameRPG.Monsters
             }
 
             monsterType.LootTable = new LootTable(lootEntries.ToArray());
+        }
+
+        /// <summary>
+        /// Create RandomLootEntry instances for all available templates with proportional weight distribution
+        /// </summary>
+        private static List<RandomLootEntry> CreateRandomLootEntries(int totalWeight, ItemRarity rarity)
+        {
+            var entries = new List<RandomLootEntry>();
+            
+            // Get all templates
+            var weaponTemplates = ItemTemplateRepository.GetAllWeaponTemplates().ToArray();
+            var armorTemplates = ItemTemplateRepository.GetAllArmorTemplates().ToArray();
+            var potionTemplates = ItemTemplateRepository.GetAllPotionTemplates().ToArray();
+            
+            // Distribute weight equally among item types (weapons, armor, potions)
+            int weaponWeight = totalWeight / 3;
+            int armorWeight = totalWeight / 3;
+            int potionWeight = totalWeight - weaponWeight - armorWeight; // Handle remainder
+            
+            // Distribute weight equally among templates within each type
+            foreach (var template in weaponTemplates)
+            {
+                int weight = weaponWeight / weaponTemplates.Length;
+                if (weight > 0)
+                {
+                    entries.Add(new RandomLootEntry(weight, template, rarity));
+                }
+            }
+            
+            foreach (var template in armorTemplates)
+            {
+                int weight = armorWeight / armorTemplates.Length;
+                if (weight > 0)
+                {
+                    entries.Add(new RandomLootEntry(weight, template, rarity));
+                }
+            }
+            
+            foreach (var template in potionTemplates)
+            {
+                int weight = potionWeight / potionTemplates.Length;
+                if (weight > 0)
+                {
+                    entries.Add(new RandomLootEntry(weight, template, rarity));
+                }
+            }
+            
+            return entries;
         }
     }
 }

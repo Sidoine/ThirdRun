@@ -10,17 +10,15 @@ namespace ThirdRun.Items
     {
         public string Name { get; }
         public string Description { get; }
-        public int Value { get; }
         public int ItemLevel { get; }
         public string? ImagePath { get; }
         public ItemSlot ItemSlot { get; }
         public CharacteristicValues Characteristics { get; }
 
-        public UniqueItem(string name, string description, int value, int itemLevel, ItemSlot itemSlot, CharacteristicValues characteristics, string? imagePath = null)
+        public UniqueItem(string name, string description, int itemLevel, ItemSlot itemSlot, CharacteristicValues characteristics, string? imagePath = null)
         {
             Name = name;
             Description = description;
-            Value = value;
             ItemLevel = itemLevel;
             ItemSlot = itemSlot;
             Characteristics = new CharacteristicValues();
@@ -37,10 +35,13 @@ namespace ThirdRun.Items
         /// </summary>
         public Item CreateItem()
         {
+            // Calculate value based on item level (unique items are more valuable)
+            int baseValue = ItemLevel * 100; // Base value significantly higher for unique items
+
             switch (ItemSlot)
             {
                 case ItemSlot.Weapon:
-                    var weapon = new Weapon(Name, Description, Value, 0, 0, ItemLevel)
+                    var weapon = new Weapon(Name, Description, baseValue, 0, 0, ItemLevel)
                     {
                         ImagePath = ImagePath
                     };
@@ -55,7 +56,7 @@ namespace ThirdRun.Items
                     return weapon;
 
                 case ItemSlot.Armor:
-                    var armor = new Armor(Name, Description, Value, 0, 0, ItemLevel)
+                    var armor = new Armor(Name, Description, baseValue, 0, 0, ItemLevel)
                     {
                         ImagePath = ImagePath
                     };
@@ -70,7 +71,7 @@ namespace ThirdRun.Items
                     return armor;
 
                 case ItemSlot.Potion:
-                    return new Potion(Name, Description, Value, Characteristics.GetValue(Characteristic.HealingPower), ItemLevel)
+                    return new Potion(Name, Description, baseValue, Characteristics.GetValue(Characteristic.HealingPower), ItemLevel)
                     {
                         ImagePath = ImagePath
                     };

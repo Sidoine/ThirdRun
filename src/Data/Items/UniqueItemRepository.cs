@@ -17,7 +17,6 @@ namespace ThirdRun.Items
         public static readonly UniqueItem ExcaliburSword = new(
             "Excalibur", 
             "Une épée légendaire aux pouvoirs magiques", 
-            1000,
             5, 
             ItemSlot.Weapon,
             CreateExcaliburCharacteristics(),
@@ -26,7 +25,6 @@ namespace ThirdRun.Items
         public static readonly UniqueItem DragonSlayerAxe = new(
             "Hache du Tueur de Dragons", 
             "Une hache forgée pour terrasser les dragons", 
-            800,
             4, 
             ItemSlot.Weapon,
             CreateDragonSlayerCharacteristics(),
@@ -35,7 +33,6 @@ namespace ThirdRun.Items
         public static readonly UniqueItem ShadowBlade = new(
             "Lame de l'Ombre", 
             "Une dague maudite qui frappe depuis l'obscurité", 
-            600,
             3, 
             ItemSlot.Weapon,
             CreateShadowBladeCharacteristics(),
@@ -45,7 +42,6 @@ namespace ThirdRun.Items
         public static readonly UniqueItem PlateOfLegends = new(
             "Plastron des Légendes", 
             "Un plastron porté par les héros d'antan", 
-            750,
             4, 
             ItemSlot.Armor,
             CreatePlateOfLegendsCharacteristics(),
@@ -54,7 +50,6 @@ namespace ThirdRun.Items
         public static readonly UniqueItem HelmetOfWisdom = new(
             "Casque de la Sagesse", 
             "Augmente la sagesse et la protection", 
-            500,
             3, 
             ItemSlot.Armor,
             CreateHelmetOfWisdomCharacteristics(),
@@ -63,7 +58,6 @@ namespace ThirdRun.Items
         public static readonly UniqueItem BootsOfSwiftness = new(
             "Bottes de Célérité", 
             "Permettent de se déplacer plus rapidement", 
-            400,
             2, 
             ItemSlot.Armor,
             CreateBootsOfSwiftnessCharacteristics(),
@@ -73,7 +67,6 @@ namespace ThirdRun.Items
         public static readonly UniqueItem ElixirOfLife = new(
             "Élixir de Vie", 
             "Restaure complètement la santé et plus encore", 
-            300,
             3, 
             ItemSlot.Potion,
             CreateElixirOfLifeCharacteristics(),
@@ -82,7 +75,6 @@ namespace ThirdRun.Items
         public static readonly UniqueItem PhoenixTears = new(
             "Larmes de Phénix", 
             "Une potion rare aux propriétés de régénération", 
-            500,
             4, 
             ItemSlot.Potion,
             CreatePhoenixTearsCharacteristics(),

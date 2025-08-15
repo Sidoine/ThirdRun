@@ -1,3 +1,4 @@
+using System.Linq;
 using Microsoft.Xna.Framework;
 using ThirdRun.Data;
 using ThirdRun.Items;
@@ -36,8 +37,10 @@ namespace MonogameRPG.Monsters
             BaseHealth = baseHealth;
             BaseAttack = baseAttack;
             
-            // Initialize with a default loot table that generates common random items
-            LootTable = new LootTable(new RandomLootEntry(100, ItemRarity.Common));
+            // Initialize with a default loot table that generates random common items
+            // Use the first weapon template as a placeholder - this will be replaced by ConfigureLootTable if used through MonsterTemplateRepository
+            var defaultTemplate = ItemTemplateRepository.GetAllWeaponTemplates().First();
+            LootTable = new LootTable(new RandomLootEntry(100, defaultTemplate, ItemRarity.Common));
         }
     }
 }
