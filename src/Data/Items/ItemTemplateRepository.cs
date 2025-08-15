@@ -123,5 +123,21 @@ namespace ThirdRun.Items
         /// Get all potion templates
         /// </summary>
         public static IReadOnlyCollection<PotionTemplate> GetAllPotionTemplates() => PotionTemplates;
+
+        /// <summary>
+        /// Get a random template of any type (weapon, armor, or potion)
+        /// </summary>
+        public static ItemTemplate GetRandomTemplate(Random random)
+        {
+            int itemType = random.Next(0, 3); // 0: weapon, 1: armor, 2: potion
+
+            return itemType switch
+            {
+                0 => GetRandomWeaponTemplate(random),
+                1 => GetRandomArmorTemplate(random),
+                2 => GetRandomPotionTemplate(random),
+                _ => GetRandomWeaponTemplate(random)
+            };
+        }
     }
 }

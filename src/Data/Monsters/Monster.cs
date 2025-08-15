@@ -207,8 +207,16 @@ namespace MonogameRPG.Monsters
 
         public Item DropLoot()
         {
-            // Generate a random item based on monster level
-            return RandomItemGenerator.GenerateRandomItem(Level, random);
+            // Use the monster type's loot table if available, otherwise fall back to random generation
+            if (Type.LootTable != null)
+            {
+                return Type.LootTable.GenerateItem(Level, random);
+            }
+            else
+            {
+                // Fallback to random generation for backward compatibility
+                return RandomItemGenerator.GenerateRandomItem(Level, random);
+            }
         }
 
         public int GetExperienceValue()
