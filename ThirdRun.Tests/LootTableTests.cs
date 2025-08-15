@@ -126,4 +126,47 @@ public class LootTableTests
         var potion2 = (Potion)item2;
         Assert.Equal(potion1.HealAmount, potion2.HealAmount);
     }
+
+    [Fact]
+    public void RandomLootEntry_WithSpecificTemplate_ShouldUseOnlyThatTemplate()
+    {
+        // Arrange
+        var swordTemplate = ItemTemplateRepository.GetAllWeaponTemplates().First(t => t.BaseName == "Épée");
+        var entry = new RandomLootEntry(100, swordTemplate, ItemRarity.Common);
+        var random = new Random(12345);
+
+        // Act - Generate multiple items to ensure consistency
+        var items = new List<Item>();
+        for (int i = 0; i < 10; i++)
+        {
+            items.Add(entry.GenerateItem(3, random));
+        }
+
+        // Assert - All items should be swords (based on the template)
+        Assert.All(items, item =>
+        {
+            Assert.IsType<Weapon>(item);
+            var weapon = (Weapon)item;
+            Assert.Contains("Épée", weapon.Name); // Should contain "Épée" from the template
+        });
+    }
+
+    [Fact]
+    public void RandomLootEntry_WithoutTemplate_ShouldUseRandomGeneration()
+    {
+        // Arrange
+        var entry = new RandomLootEntry(100, ItemRarity.Common);
+        var random = new Random(12345);
+
+        // Act - Generate multiple items
+        var items = new List<Item>();
+        for (int i = 0; i < 20; i++)
+        {
+            items.Add(entry.GenerateItem(3, random));
+        }
+
+        // Assert - Should generate different types of items (weapons, armor, potions)
+        var itemTypes = items.Select(item => item.GetType()).Distinct().ToList();
+        Assert.True(itemTypes.Count > 1, "Should generate different item types when no specific template is provided");
+    }
 }
