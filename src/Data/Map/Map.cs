@@ -184,7 +184,7 @@ namespace MonogameRPG.Map
         public void TeleportCharacters(List<Character> chars)
         {
             // Clear existing characters from units list
-            var existingCharacters = Characters;
+            var existingCharacters = Characters.ToList(); // Create a copy to avoid collection modification error
             foreach (var character in existingCharacters)
             {
                 RemoveUnit(character);

@@ -38,6 +38,7 @@
 
 /ThirdRun.Tests/    # Unit and integration tests
 /Content/           # Game assets (textures, fonts, sounds)
+/doc/               # Documentation files (implementation guides, design docs)
 ```
 
 ## Game Description
@@ -79,3 +80,7 @@ Ce projet est un jeu de rôle en 2D où le groupe de personnages joue de manièr
 - Implement proper dispose patterns for MonoGame resources
 - Handle content loading asynchronously when possible
 - Maintain clean separation between UI logic and game logic
+
+## Documentation
+- All implementation documentation and design documents should be placed in the `/doc/` directory
+- This includes feature implementation guides, architecture decisions, and technical specifications
