@@ -11,7 +11,7 @@ namespace MonogameRPG.Monsters
         public string TexturePath { get; set; }
         public int Level { get; set; }
         public CharacteristicValues Characteristics { get; private set; }
-        public LootTable? LootTable { get; set; }
+        public LootTable LootTable { get; set; }
 
         // Properties that delegate to characteristics for backward compatibility
         public int BaseHealth 
