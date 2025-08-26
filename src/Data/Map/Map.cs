@@ -19,7 +19,7 @@ namespace MonogameRPG.Map
         public const int GridHeight = 18;
         public Point WorldPosition { get; set; }
         public Vector2 Position => new Vector2(WorldPosition.X * GridWidth * TileWidth, WorldPosition.Y * GridHeight * TileHeight);
-        private List<Vector2> monsterSpawnPoints;
+        private List<Point> monsterSpawnPoints;
         private int monsterSize = 20;
         private readonly Random random;
         
@@ -40,7 +40,7 @@ namespace MonogameRPG.Map
         {
             this.random = random;
             WorldPosition = worldPosition;
-            monsterSpawnPoints = new List<Vector2>();
+            monsterSpawnPoints = new List<Point>();
             tiles = new Tile[0, 0];
             
             // Create map generator with seed based on world position for consistency
@@ -65,17 +65,16 @@ namespace MonogameRPG.Map
             // Find suitable spawn points for monsters on walkable terrain
             monsterSpawnPoints.Clear();
             int placed = 0;
-            var rand = new System.Random(WorldPosition.X * 1000 + WorldPosition.Y + 100);
             
             while (placed < spawnCount)
             {
-                int x = rand.Next(GridWidth);
-                int y = rand.Next(GridHeight);
+                int x = random.Next(GridWidth);
+                int y = random.Next(GridHeight);
                 
                 // Spawn on walkable tiles (grass, road, hill, door)
                 if (tiles[x, y].IsWalkable)
                 {
-                    monsterSpawnPoints.Add(new Vector2(x, y));
+                    monsterSpawnPoints.Add(new Point(x, y));
                     placed++;
                 }
             }
@@ -89,8 +88,6 @@ namespace MonogameRPG.Map
             {
                 RemoveUnit(monster);
             }
-            
-            var rand = new System.Random();
             
             // Calculate area difficulty based on distance from origin (0,0)
             int distanceFromOrigin = Math.Abs(WorldPosition.X) + Math.Abs(WorldPosition.Y);
@@ -184,7 +181,7 @@ namespace MonogameRPG.Map
         public void TeleportCharacters(List<Character> chars)
         {
             // Clear existing characters from units list
-            var existingCharacters = Characters;
+            var existingCharacters = Characters.ToList(); // Create a copy to avoid collection modification error
             foreach (var character in existingCharacters)
             {
                 RemoveUnit(character);
@@ -207,7 +204,7 @@ namespace MonogameRPG.Map
 
 
 
-        public List<Vector2> GetMonsterSpawnPoints()
+        public List<Point> GetMonsterSpawnPoints()
         {
             return monsterSpawnPoints;
         }

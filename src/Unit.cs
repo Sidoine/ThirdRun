@@ -17,7 +17,7 @@ namespace MonogameRPG
         
         // Map properties for movement and pathfinding
         public MonogameRPG.Map.Map? Map { get; set; }
-        protected MonogameRPG.Map.WorldMap? WorldMap { get; set; }
+        protected MonogameRPG.Map.WorldMap WorldMap { get; set; }
         
         // Ability system
         public List<Ability> Abilities { get; private set; }
