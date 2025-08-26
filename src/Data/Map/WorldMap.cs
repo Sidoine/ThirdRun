@@ -10,15 +10,26 @@ namespace MonogameRPG.Map
 {
     public class WorldMap(Random random)
     {
-        private readonly Dictionary<Point, Map> maps = new Dictionary<Point, Map>();
+        private readonly Dictionary<Point, Map> outsideMaps = [];
+        private readonly Dictionary<Point, Map> townMaps = [];
+        private readonly Dictionary<Point, Map> dungeonMaps = [];
+
+        private Dictionary<Point, Map> Maps
+        {
+            get
+            {
+                if (isInDungeonMode) return dungeonMaps;
+                if (isInTownMode) return townMaps;
+                return outsideMaps;
+            } 
+        }
+
         private Point currentMapPosition = Point.Zero;
         private Point lastHostileMapPosition = Point.Zero;
         private List<Character> characters = [];
-        private Map? townMap = null; // Dedicated town map
         private bool isInTownMode = false; // Track if we're currently in town mode
         
         // Dungeon system
-        private List<Map>? dungeonMaps = null; // Current dungeon maps
         private int currentDungeonMapIndex = 0;
         private bool isInDungeonMode = false; // Track if we're currently in dungeon mode
         private Dungeon? currentDungeon = null;
@@ -26,9 +37,7 @@ namespace MonogameRPG.Map
         private readonly Random random = random;
 
         public Map CurrentMap => 
-            isInDungeonMode && dungeonMaps != null && currentDungeonMapIndex < dungeonMaps.Count ? dungeonMaps[currentDungeonMapIndex] :
-            isInTownMode && townMap != null ? townMap : 
-            (maps.TryGetValue(currentMapPosition, out Map? value) ? value : throw new Exception("Current map not found at position: " + currentMapPosition));
+            Maps.TryGetValue(currentMapPosition, out Map? value) ? value : throw new Exception("Current map not found at position: " + currentMapPosition);
         public Point CurrentMapPosition => currentMapPosition;
         public bool IsInTown => isInTownMode;
         public bool IsInDungeon => isInDungeonMode;
@@ -40,15 +49,15 @@ namespace MonogameRPG.Map
             var initialMap = new Map(Point.Zero, random);
             initialMap.GenerateRandomMap();
             initialMap.SpawnMonsters(this);
-            maps[Point.Zero] = initialMap;
+            outsideMaps[Point.Zero] = initialMap;
             currentMapPosition = Point.Zero;
 
             // Create dedicated town map at a special position
-            townMap = new Map(new Point(-999, -999), random); // Special position for town
+            var townMap = new Map(Point.Zero, random); // Special position for town
             townMap.GenerateRandomMap();
             townMap.IsTownZone = true;
             townMap.SpawnNPCs(this);
-            maps[townMap.WorldPosition] = townMap;
+            townMaps[townMap.WorldPosition] = townMap;
         }
 
         public void SetCharacters(List<Character> chars)
@@ -105,7 +114,7 @@ namespace MonogameRPG.Map
             foreach (var dir in directions)
             {
                 var adjacentPos = GetAdjacentPosition(currentMapPosition, dir);
-                if (!maps.ContainsKey(adjacentPos))
+                if (!Maps.ContainsKey(adjacentPos))
                 {
                     available.Add(dir);
                 }
@@ -135,14 +144,14 @@ namespace MonogameRPG.Map
         {
             var newCardPos = GetAdjacentPosition(currentMapPosition, direction);
 
-            if (!maps.ContainsKey(newCardPos))
+            if (!Maps.ContainsKey(newCardPos))
             {
                 var newCard = new Map(newCardPos, random);
                 newCard.GenerateRandomMap();
                 newCard.SpawnMonsters(this);
-                maps[newCardPos] = newCard;
+                Maps[newCardPos] = newCard;
             }
-            return maps[newCardPos];
+            return Maps[newCardPos];
         }
 
         public Map GetAdjacentCardWithMonsters()
@@ -160,7 +169,7 @@ namespace MonogameRPG.Map
         public Map? GetMapAtPosition(Vector2 worldPosition)
         {
             // Convert world position to card coordinates
-            foreach (var kvp in maps)
+            foreach (var kvp in Maps)
             {
                 var card = kvp.Value;
                 var cardWorldPos = card.WorldPosition;
@@ -200,7 +209,7 @@ namespace MonogameRPG.Map
             foreach (var dir in directions)
             {
                 var adjacentPos = GetAdjacentPosition(currentMapPosition, dir);
-                if (maps.TryGetValue(adjacentPos, out Map? map))
+                if (Maps.TryGetValue(adjacentPos, out Map? map))
                 {
                     yield return map;
                 }
@@ -211,7 +220,7 @@ namespace MonogameRPG.Map
         {
             var cardsToRemove = new List<Point>();
 
-            foreach (var kvp in maps)
+            foreach (var kvp in Maps)
             {
                 var mapPosition = kvp.Key;
                 var card = kvp.Value;
@@ -231,7 +240,7 @@ namespace MonogameRPG.Map
 
             foreach (var cardPos in cardsToRemove)
             {
-                maps.Remove(cardPos);
+                Maps.Remove(cardPos);
             }
         }
 
@@ -251,8 +260,7 @@ namespace MonogameRPG.Map
 
         public IEnumerable<Map> GetAllMaps()
         {
-            if (isInTownMode && townMap != null) return [townMap];
-            return maps.Values;
+            return Maps.Values;
         }
 
         /// <summary>
@@ -282,7 +290,7 @@ namespace MonogameRPG.Map
             int relativeY = absoluteY - mapY * Map.GridHeight;
             
             // Try to get the map
-            maps.TryGetValue(new Point(mapX, mapY), out Map? map);
+            Maps.TryGetValue(new Point(mapX, mapY), out Map? map);
             
             return (map, relativeX, relativeY);
         }
@@ -392,7 +400,7 @@ namespace MonogameRPG.Map
                 isInTownMode = false;
                 
                 // Teleport characters back to the hostile map
-                if (maps.ContainsKey(lastHostileMapPosition))
+                if (Maps.ContainsKey(lastHostileMapPosition))
                 {
                     currentMapPosition = lastHostileMapPosition;
                     CurrentMap.TeleportCharacters(characters);
@@ -405,12 +413,9 @@ namespace MonogameRPG.Map
                 
                 // Switch to town mode
                 isInTownMode = true;
-                
-                // Teleport characters to the town map
-                if (townMap != null)
-                {
-                    townMap.TeleportCharacters(characters);
-                }
+
+                currentMapPosition = Point.Zero;
+                CurrentMap.TeleportCharacters(characters);
             }
         }
 
@@ -434,12 +439,12 @@ namespace MonogameRPG.Map
             currentDungeonMapIndex = 0;
             
             // Generate dungeon maps
-            dungeonMaps = GenerateDungeonMaps(dungeon);
+            GenerateDungeonMaps(dungeon);
             
             // Teleport characters to first dungeon map
             if (dungeonMaps.Count > 0)
             {
-                dungeonMaps[0].TeleportCharacters(characters);
+                dungeonMaps[Point.Zero].TeleportCharacters(characters);
             }
         }
 
@@ -450,11 +455,10 @@ namespace MonogameRPG.Map
             // Switch back to hostile zone
             isInDungeonMode = false;
             currentDungeon = null;
-            dungeonMaps = null;
             currentDungeonMapIndex = 0;
             
             // Teleport characters back to the hostile map
-            if (maps.ContainsKey(lastHostileMapPosition))
+            if (Maps.ContainsKey(lastHostileMapPosition))
             {
                 currentMapPosition = lastHostileMapPosition;
                 CurrentMap.TeleportCharacters(characters);
@@ -481,9 +485,6 @@ namespace MonogameRPG.Map
                 ExitDungeon(); // Auto-exit when dungeon is complete
                 return true;
             }
-            
-            // Teleport to next map
-            dungeonMaps[currentDungeonMapIndex].TeleportCharacters(characters);
             return true;
         }
 
@@ -495,24 +496,22 @@ namespace MonogameRPG.Map
             return Math.Max(1, totalLevel / characters.Count);
         }
 
-        private List<Map> GenerateDungeonMaps(Dungeon dungeon)
+        private void GenerateDungeonMaps(Dungeon dungeon)
         {
-            var dungeonMaps = new List<Map>();
+            dungeonMaps.Clear();
             
             for (int i = 0; i < dungeon.Maps.Count; i++)
             {
                 var mapDef = dungeon.Maps[i];
-                var map = new Map(new Point(-1000 - i, -1000), random); // Special positions for dungeon maps
+                var map = new Map(new Point(i, 0), random); // Special positions for dungeon maps
                 var totalMonsterCount = mapDef.MonsterSpawns.Sum(spawn => spawn.Count);
                 map.GenerateRandomMap(totalMonsterCount);
                 
                 // Spawn monsters based on map definition
                 SpawnDungeonMonsters(map, mapDef);
                 
-                dungeonMaps.Add(map);
+                dungeonMaps.Add(map.WorldPosition, map);
             }
-            
-            return dungeonMaps;
         }
 
         private void SpawnDungeonMonsters(Map map, DungeonMapDefinition mapDef)
@@ -538,7 +537,8 @@ namespace MonogameRPG.Map
                 var (monsterType, isBoss) = allSpawns[i];
                 
                 var monster = new Monster(monsterType, map, this, random);
-                monster.Position = spawnPoint;
+                monster.Position = new Vector2(spawnPoint.X * Map.TileWidth + Map.TileWidth / 2,
+                                                spawnPoint.Y * Map.TileHeight + Map.TileHeight / 2) + map.Position;
                 map.AddUnit(monster);
             }
         }

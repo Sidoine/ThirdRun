@@ -18,12 +18,7 @@ namespace ThirdRun.UI.Panels
         {
             AddChild(new Button(uiManager, new Rectangle(bounds.Right - ButtonSize, bounds.Top, ButtonSize, ButtonSize), () => uiManager.CurrentState.IsInventoryVisible = !uiManager.CurrentState.IsInventoryVisible, "I"));
             AddChild(new Button(uiManager, new Rectangle(bounds.Right - (ButtonSize * 2 + ButtonMargin), bounds.Top, ButtonSize, ButtonSize), () => uiManager.CurrentState.IsInTown = !uiManager.CurrentState.IsInTown, "P"));
-            AddChild(new Button(uiManager, new Rectangle(bounds.Right - (ButtonSize * 3 + ButtonMargin * 2), bounds.Top, ButtonSize, ButtonSize), () => EnterDungeon(uiManager), "D"));
-        }
-
-        private void EnterDungeon(UiManager uiManager)
-        {
-            uiManager.GameState.WorldMap.EnterDungeon();
+            AddChild(new Button(uiManager, new Rectangle(bounds.Right - (ButtonSize * 3 + ButtonMargin * 2), bounds.Top, ButtonSize, ButtonSize), () => uiManager.GameState.WorldMap.EnterDungeon(), "D"));
         }
     }
 }
