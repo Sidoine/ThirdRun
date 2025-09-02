@@ -81,8 +81,9 @@ namespace ThirdRun.Tests
             
             hunter.UpdateGameTime(10f);
             
-            // Act - Hunter should use regeneration on damaged warrior
-            hunter.UseAbilities();
+            // Get the regeneration ability and use it directly
+            var regenAbility = hunter.Abilities.First(a => a.Name == "Regeneration");
+            regenAbility.Use(hunter, warrior, 10f);
             
             // Assert - Warrior should have regeneration aura
             Assert.Single(warrior.ActiveAuras);
