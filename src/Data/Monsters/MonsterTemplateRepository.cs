@@ -51,6 +51,24 @@ namespace MonogameRPG.Monsters
             new("Dragon Jeune", "Jeune dragon encore petit mais redoutable", "Monsters/dragon", 100, 25, 5),
         };
 
+        private static readonly MonsterTemplate[] BossTemplates = 
+        {
+            // Early game bosses (Levels 1-3)
+            new("Chef Gobelin", "Chef des gobelins, plus fort et intelligent", "Monsters/goblin_chief", 45, 12, 3),
+            
+            // Mid-early game bosses (Levels 4-6)
+            new("Druide Corrompu", "Druide transformé par la magie noire", "Monsters/corrupted_druid", 70, 18, 5),
+            
+            // Mid game bosses (Levels 7-9)
+            new("Seigneur Liche", "Liche ancienne aux pouvoirs redoutables", "Monsters/lich_lord", 120, 28, 8),
+            
+            // Late mid game bosses (Levels 10-13)
+            new("Dragon Rouge", "Dragon adulte cracheur de feu", "Monsters/red_dragon", 200, 45, 12),
+            
+            // End game bosses (Levels 14-16)
+            new("Seigneur du Chaos", "Maître des forces chaotiques", "Monsters/chaos_lord", 300, 60, 15)
+        };
+
         private static readonly MonsterTemplate[] CreatureTemplates = 
         {
             new("Araignée Géante", "Arachnide venimeuse de grande taille", "Monsters/spider", 28, 8, 2),
@@ -68,7 +86,8 @@ namespace MonogameRPG.Monsters
                 .Concat(UndeadTemplates)
                 .Concat(BeastTemplates)
                 .Concat(MagicalTemplates)
-                .Concat(CreatureTemplates);
+                .Concat(CreatureTemplates)
+                .Concat(BossTemplates);
         }
 
         /// <summary>
@@ -106,6 +125,7 @@ namespace MonogameRPG.Monsters
         public static IReadOnlyCollection<MonsterTemplate> GetBeastTemplates() => BeastTemplates;
         public static IReadOnlyCollection<MonsterTemplate> GetMagicalTemplates() => MagicalTemplates;
         public static IReadOnlyCollection<MonsterTemplate> GetCreatureTemplates() => CreatureTemplates;
+        public static IReadOnlyCollection<MonsterTemplate> GetBossTemplates() => BossTemplates;
 
         /// <summary>
         /// Get all available monster image paths for content loading
@@ -245,6 +265,15 @@ namespace MonogameRPG.Monsters
             }
             
             return entries;
+        }
+
+        /// <summary>
+        /// Get a MonsterType by its name
+        /// </summary>
+        public static MonsterType? GetMonsterTypeByName(string name)
+        {
+            var template = GetAllTemplates().FirstOrDefault(t => t.Name == name);
+            return template?.ToMonsterType();
         }
     }
 }

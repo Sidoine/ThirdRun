@@ -42,5 +42,6 @@ public class UiManager
         public bool IsCharacterDetailsVisible { get; set; } = false;
         public Character? SelectedCharacter { get; set; } = null;
         public bool IsInTown { get; set; } = false;
+        public bool IsInDungeon { get; set; } = false;
     }
 }

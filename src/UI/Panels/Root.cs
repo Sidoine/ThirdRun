@@ -22,7 +22,7 @@ public class Root : Container
         
         // Buttons panel remains in the bottom right
         AddChild(new ButtonsPanel(uiManager, 
-            new Rectangle(bounds.Right - 100, bounds.Bottom - 60, 100, 60)));
+            new Rectangle(bounds.Right - 200, bounds.Bottom - 60, 200, 60)));
         
         // Character details panel (initially hidden)
         _characterDetailsPanel = new CharacterDetailsPanel(uiManager, bounds);
