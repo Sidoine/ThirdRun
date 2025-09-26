@@ -6,92 +6,64 @@ namespace ThirdRun.Items
 {
     public static class RandomItemGenerator
     {
-        private static readonly string[] WeaponNames = {
-            "Épée", "Hache", "Arc", "Dague", "Marteau", "Lance", "Faux", "Masse"
-        };
-
-        private static readonly string[] ArmorNames = {
-            "Casque", "Plastron", "Gants", "Bottes", "Bouclier", "Cotte de mailles", "Robe", "Cape"
-        };
-
-        private static readonly string[] WeaponPrefixes = {
-            "Rouillé", "Solide", "Magique", "Enchanté", "Légendaire", "Ancien", "Béni", "Maudit"
-        };
-
-        private static readonly string[] ArmorPrefixes = {
-            "Usé", "Renforcé", "Magique", "Enchanté", "Légendaire", "Ancien", "Béni", "Maudit"
-        };
-
-        private static readonly string[] PotionTypes = {
-            "Potion de Soin", "Potion de Magie", "Potion de Force", "Potion d'Agilité", 
-            "Potion de Résistance", "Élixir de Vie", "Philtre de Guérison", "Breuvage Mystique"
-        };
-
-        public static Item GenerateRandomItem(int monsterLevel)
+        public static Item GenerateRandomItem(int monsterLevel, Random random)
         {
-            int itemLevel = CalculateItemLevel(monsterLevel);
-            int itemType = Helpers.RandomNumber(0, 3); // 0: weapon, 1: armor, 2: potion
+            return GenerateRandomItem(monsterLevel, random, ItemRarity.Common);
+        }
+
+        public static Item GenerateRandomItem(int monsterLevel, Random random, ItemRarity rarity)
+        {
+            int itemLevel = CalculateItemLevel(monsterLevel, random, rarity);
+            int itemType = random.Next(0, 3); // 0: weapon, 1: armor, 2: potion
 
             return itemType switch
             {
-                0 => GenerateRandomWeapon(itemLevel),
-                1 => GenerateRandomArmor(itemLevel),
-                2 => GenerateRandomPotion(itemLevel),
-                _ => GenerateRandomWeapon(itemLevel)
+                0 => GenerateRandomWeapon(itemLevel, random),
+                1 => GenerateRandomArmor(itemLevel, random),
+                2 => GenerateRandomPotion(itemLevel, random),
+                _ => GenerateRandomWeapon(itemLevel, random)
             };
         }
 
-        private static int CalculateItemLevel(int monsterLevel)
+        private static int CalculateItemLevel(int monsterLevel, Random random, ItemRarity rarity)
         {
-            // Item level is monster level +/- 1, minimum 1
-            int variation = Helpers.RandomNumber(-1, 2); // -1, 0, or 1
-            return Math.Max(1, monsterLevel + variation);
+            // Base item level is monster level +/- 1, minimum 1
+            int variation = random.Next(-1, 2); // -1, 0, or 1
+            int baseLevel = Math.Max(1, monsterLevel + variation);
+            
+            // Apply rarity boost to item level
+            int rarityBoost = rarity switch
+            {
+                ItemRarity.Common => 0,
+                ItemRarity.Rare => random.Next(1, 3),    // +1 to +2 levels
+                ItemRarity.Epic => random.Next(2, 5),    // +2 to +4 levels
+                _ => 0
+            };
+            
+            return baseLevel + rarityBoost;
         }
 
-        private static Weapon GenerateRandomWeapon(int itemLevel)
+        private static Weapon GenerateRandomWeapon(int itemLevel, Random random)
         {
-            string prefix = WeaponPrefixes[Helpers.RandomNumber(0, WeaponPrefixes.Length)];
-            string weaponType = WeaponNames[Helpers.RandomNumber(0, WeaponNames.Length)];
-            string name = $"{prefix} {weaponType}";
-
-            // Stats scale with item level
-            int baseValue = itemLevel * Helpers.RandomNumber(15, 25);
-            int bonusStats = itemLevel + Helpers.RandomNumber(0, 3);
-            int damage = itemLevel * 2 + Helpers.RandomNumber(1, 6);
-
-            string description = $"Une {weaponType.ToLower()} {prefix.ToLower()} de niveau {itemLevel}";
-
-            return new Weapon(name, description, baseValue, bonusStats, damage, itemLevel);
+            var template = ItemTemplateRepository.GetRandomWeaponTemplate(random);
+            string prefix = ItemTemplateRepository.GetRandomWeaponPrefix(random);
+            
+            return (Weapon)template.CreateItem(itemLevel, random, prefix);
         }
 
-        private static Armor GenerateRandomArmor(int itemLevel)
+        private static Armor GenerateRandomArmor(int itemLevel, Random random)
         {
-            string prefix = ArmorPrefixes[Helpers.RandomNumber(0, ArmorPrefixes.Length)];
-            string armorType = ArmorNames[Helpers.RandomNumber(0, ArmorNames.Length)];
-            string name = $"{prefix} {armorType}";
-
-            // Stats scale with item level
-            int baseValue = itemLevel * Helpers.RandomNumber(12, 20);
-            int bonusStats = itemLevel + Helpers.RandomNumber(0, 2);
-            int defense = itemLevel * 2 + Helpers.RandomNumber(1, 5);
-
-            string description = $"Un {armorType.ToLower()} {prefix.ToLower()} de niveau {itemLevel}";
-
-            return new Armor(name, description, baseValue, bonusStats, defense, itemLevel);
+            var template = ItemTemplateRepository.GetRandomArmorTemplate(random);
+            string prefix = ItemTemplateRepository.GetRandomArmorPrefix(random);
+            
+            return (Armor)template.CreateItem(itemLevel, random, prefix);
         }
 
-        private static Potion GenerateRandomPotion(int itemLevel)
+        private static Potion GenerateRandomPotion(int itemLevel, Random random)
         {
-            string potionType = PotionTypes[Helpers.RandomNumber(0, PotionTypes.Length)];
-            string name = $"{potionType} (Niv. {itemLevel})";
-
-            // Stats scale with item level
-            int baseValue = itemLevel * Helpers.RandomNumber(8, 15);
-            int healAmount = itemLevel * 3 + Helpers.RandomNumber(5, 15);
-
-            string description = $"Une potion magique de niveau {itemLevel} qui restaure la santé";
-
-            return new Potion(name, description, baseValue, healAmount, itemLevel);
+            var template = ItemTemplateRepository.GetRandomPotionTemplate(random);
+            
+            return (Potion)template.CreateItem(itemLevel, random);
         }
     }
 }

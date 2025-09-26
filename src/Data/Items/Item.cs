@@ -8,6 +8,7 @@ namespace ThirdRun.Items
     public string Description { get; set; }
     public int Value { get; set; }
     public int ItemLevel { get; set; }
+    public string? ImagePath { get; set; }
 
     public Item(string name, string description, int value, int itemLevel = 1)
     {
@@ -15,6 +16,7 @@ namespace ThirdRun.Items
         Description = description;
         Value = value;
         ItemLevel = itemLevel;
+        ImagePath = null;
     }
 }
 

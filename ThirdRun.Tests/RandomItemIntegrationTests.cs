@@ -16,10 +16,11 @@ public class RandomItemIntegrationTests
         var level5Items = new List<Item>();
         
         // Act - Generate several items for each level
+        var random = new Random(12345);
         for (int i = 0; i < 10; i++)
         {
-            level1Items.Add(RandomItemGenerator.GenerateRandomItem(1));
-            level5Items.Add(RandomItemGenerator.GenerateRandomItem(5));
+            level1Items.Add(RandomItemGenerator.GenerateRandomItem(1, random));
+            level5Items.Add(RandomItemGenerator.GenerateRandomItem(5, random));
         }
         
         // Assert - Level 5 items should generally be more valuable

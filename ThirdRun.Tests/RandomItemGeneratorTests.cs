@@ -10,9 +10,10 @@ public class RandomItemGeneratorTests
     {
         // Arrange
         int monsterLevel = 1;
+        var random = new Random(12345);
         
         // Act
-        var item = RandomItemGenerator.GenerateRandomItem(monsterLevel);
+        var item = RandomItemGenerator.GenerateRandomItem(monsterLevel, random);
         
         // Assert
         Assert.NotNull(item);
@@ -30,7 +31,8 @@ public class RandomItemGeneratorTests
     public void GenerateRandomItem_ItemLevelShouldBeBasedOnMonsterLevel(int monsterLevel)
     {
         // Arrange & Act
-        var item = RandomItemGenerator.GenerateRandomItem(monsterLevel);
+        var random = new Random(12345);
+        var item = RandomItemGenerator.GenerateRandomItem(monsterLevel, random);
         
         // Assert
         // Item level should be monster level +/- 1, minimum 1
@@ -45,11 +47,12 @@ public class RandomItemGeneratorTests
         // Arrange
         var generatedTypes = new HashSet<Type>();
         int monsterLevel = 5;
+        var random = new Random(12345);
         
         // Act - Generate multiple items to check for variety
         for (int i = 0; i < 50; i++)
         {
-            var item = RandomItemGenerator.GenerateRandomItem(monsterLevel);
+            var item = RandomItemGenerator.GenerateRandomItem(monsterLevel, random);
             generatedTypes.Add(item.GetType());
         }
         
@@ -62,9 +65,10 @@ public class RandomItemGeneratorTests
     {
         // Arrange & Act - Generate many items to find weapons
         var weapons = new List<Weapon>();
+        var random = new Random(12345);
         for (int i = 0; i < 50; i++)
         {
-            var item = RandomItemGenerator.GenerateRandomItem(3);
+            var item = RandomItemGenerator.GenerateRandomItem(3, random);
             if (item is Weapon weapon)
             {
                 weapons.Add(weapon);
@@ -89,9 +93,10 @@ public class RandomItemGeneratorTests
     {
         // Arrange & Act - Generate many items to find armor
         var armors = new List<Armor>();
+        var random = new Random(12345);
         for (int i = 0; i < 50; i++)
         {
-            var item = RandomItemGenerator.GenerateRandomItem(3);
+            var item = RandomItemGenerator.GenerateRandomItem(3, random);
             if (item is Armor armor)
             {
                 armors.Add(armor);
@@ -114,9 +119,10 @@ public class RandomItemGeneratorTests
     {
         // Arrange & Act - Generate many items to find potions
         var potions = new List<Potion>();
+        var random = new Random(12345);
         for (int i = 0; i < 50; i++)
         {
-            var item = RandomItemGenerator.GenerateRandomItem(3);
+            var item = RandomItemGenerator.GenerateRandomItem(3, random);
             if (item is Potion potion)
             {
                 potions.Add(potion);
@@ -143,12 +149,13 @@ public class RandomItemGeneratorTests
         // Arrange
         var lowLevelItems = new List<Item>();
         var highLevelItems = new List<Item>();
+        var random = new Random(12345);
         
         // Act - Generate items of different levels
         for (int i = 0; i < 20; i++)
         {
-            lowLevelItems.Add(RandomItemGenerator.GenerateRandomItem(1));
-            highLevelItems.Add(RandomItemGenerator.GenerateRandomItem(10));
+            lowLevelItems.Add(RandomItemGenerator.GenerateRandomItem(1, random));
+            highLevelItems.Add(RandomItemGenerator.GenerateRandomItem(10, random));
         }
         
         // Assert - Higher level items should generally have better stats

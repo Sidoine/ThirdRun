@@ -17,6 +17,7 @@ namespace ThirdRun.UI.Panels
             base(uiManager, bounds)
         {
             AddChild(new Button(uiManager, new Rectangle(bounds.Right - ButtonSize, bounds.Top, ButtonSize, ButtonSize), () => uiManager.CurrentState.IsInventoryVisible = !uiManager.CurrentState.IsInventoryVisible, "I"));
+            AddChild(new Button(uiManager, new Rectangle(bounds.Right - (ButtonSize * 2 + ButtonMargin), bounds.Top, ButtonSize, ButtonSize), () => uiManager.CurrentState.IsInTown = !uiManager.CurrentState.IsInTown, "P"));
         }
     }
 }

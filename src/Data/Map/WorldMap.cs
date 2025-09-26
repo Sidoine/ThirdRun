@@ -3,26 +3,40 @@ using System.Linq;
 using MonogameRPG.Monsters;
 using System;
 using Microsoft.Xna.Framework;
+using ThirdRun.Data.NPCs;
 
 namespace MonogameRPG.Map
 {
-    public class WorldMap()
+    public class WorldMap(Random random)
     {
         private readonly Dictionary<Point, Map> maps = new Dictionary<Point, Map>();
         private Point currentMapPosition = Point.Zero;
+        private Point lastHostileMapPosition = Point.Zero;
         private List<Character> characters = [];
+        private Map? townMap = null; // Dedicated town map
+        private bool isInTownMode = false; // Track if we're currently in town mode
+        private readonly Random random = random;
 
-        public Map CurrentMap => maps.TryGetValue(currentMapPosition, out Map? value) ? value : throw new Exception("Current map not found at position: " + currentMapPosition);
+        public Map CurrentMap => isInTownMode && townMap != null ? townMap : 
+            (maps.TryGetValue(currentMapPosition, out Map? value) ? value : throw new Exception("Current map not found at position: " + currentMapPosition));
         public Point CurrentMapPosition => currentMapPosition;
+        public bool IsInTown => isInTownMode;
 
         public void Initialize()
         {
             // Create the initial card at (0,0)
-            var initialMap = new Map(Point.Zero);
+            var initialMap = new Map(Point.Zero, random);
             initialMap.GenerateRandomMap();
-            initialMap.SpawnMonsters();
+            initialMap.SpawnMonsters(this);
             maps[Point.Zero] = initialMap;
             currentMapPosition = Point.Zero;
+
+            // Create dedicated town map at a special position
+            townMap = new Map(new Point(-999, -999), random); // Special position for town
+            townMap.GenerateRandomMap();
+            townMap.IsTownZone = true;
+            townMap.SpawnNPCs(this);
+            maps[townMap.WorldPosition] = townMap;
         }
 
         public void SetCharacters(List<Character> chars)
@@ -33,6 +47,11 @@ namespace MonogameRPG.Map
             {
                 CurrentMap.SetCharacters(chars);
             }
+        }
+        
+        public List<Character> GetAllCharacters()
+        {
+            return characters.ToList(); // Return a copy to prevent external modification
         }
 
         public void Update()
@@ -47,16 +66,14 @@ namespace MonogameRPG.Map
             if (availableDirections.Count > 0)
             {
                 // Generate a new card in a random available direction
-                var rand = new Random();
-                direction = availableDirections[rand.Next(availableDirections.Count)];
+                direction = availableDirections[random.Next(availableDirections.Count)];
             }
             else
             {
                 // If there are no available directions, generate one anyway by choosing a random direction
                 // This ensures the game always continues
-                var rand = new Random();
                 var directions = new Direction[] { Direction.North, Direction.South, Direction.East, Direction.West };
-                direction = directions[rand.Next(directions.Length)];
+                direction = directions[random.Next(directions.Length)];
             }
             return GenerateAdjacentMap(direction);
         }
@@ -102,9 +119,9 @@ namespace MonogameRPG.Map
 
             if (!maps.ContainsKey(newCardPos))
             {
-                var newCard = new Map(newCardPos);
+                var newCard = new Map(newCardPos, random);
                 newCard.GenerateRandomMap();
-                newCard.SpawnMonsters();
+                newCard.SpawnMonsters(this);
                 maps[newCardPos] = newCard;
             }
             return maps[newCardPos];
@@ -212,11 +229,44 @@ namespace MonogameRPG.Map
 
         public IEnumerable<Map> GetAllMaps()
         {
+            if (isInTownMode && townMap != null) return [townMap];
             return maps.Values;
         }
 
+        /// <summary>
+        /// Converts absolute tile coordinates to relative coordinates within a specific map.
+        /// </summary>
+        /// <param name="absoluteX">Absolute X tile coordinate</param>
+        /// <param name="absoluteY">Absolute Y tile coordinate</param>
+        /// <returns>Tuple containing the Map (or null if not found) and relative coordinates</returns>
+        public (Map? map, int relativeX, int relativeY) GetRelativeTileCoordinate(int absoluteX, int absoluteY)
+        {
+            // Calculate which map this absolute coordinate belongs to
+            int mapX = absoluteX / Map.GridWidth;
+            int mapY = absoluteY / Map.GridHeight;
+            
+            // Handle negative coordinates correctly
+            if (absoluteX < 0 && absoluteX % Map.GridWidth != 0)
+            {
+                mapX--;
+            }
+            if (absoluteY < 0 && absoluteY % Map.GridHeight != 0)
+            {
+                mapY--;
+            }
+            
+            // Calculate relative coordinates within the map
+            int relativeX = absoluteX - mapX * Map.GridWidth;
+            int relativeY = absoluteY - mapY * Map.GridHeight;
+            
+            // Try to get the map
+            maps.TryGetValue(new Point(mapX, mapY), out Map? map);
+            
+            return (map, relativeX, relativeY);
+        }
+
         // Retourne la liste des cases accessibles (Herbe) autour d'une case
-        public List<(Point point, int cost)> GetNeighbors(Point cell)
+        public List<(Point point, int cost)> GetNeighbors(Point cell, Point? targetCell = null)
         {
             var neighbors = new List<(Point point, int cost)>();
             int[,] directions = new int[,] { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 } };
@@ -224,24 +274,39 @@ namespace MonogameRPG.Map
             {
                 int nx = cell.X + directions[i, 0];
                 int ny = cell.Y + directions[i, 1];
-                int mapX = nx / Map.GridWidth;
-                if (nx < 0)
+                
+                // Use the new method to get map and relative coordinates
+                var (map, rx, ry) = GetRelativeTileCoordinate(nx, ny);
+                
+                if (map != null)
                 {
-                    mapX--;
-                }
-                int mapY = ny / Map.GridHeight;
-                if (ny < 0)
-                {
-                    mapY--;
-                }
-                if (maps.TryGetValue(new Point(mapX, mapY), out Map? map))
-                {
-                    var rx = nx - mapX * Map.GridWidth;
-                    var ry = ny - mapY * Map.GridHeight;
+                    // Verify that relative coordinates are within bounds
+                    if (rx < 0 || rx >= Map.GridWidth || ry < 0 || ry >= Map.GridHeight)
+                    {
+                        // This should not happen with correct coordinate conversion
+                        throw new InvalidOperationException(
+                            $"GetRelativeTileCoordinate returned out-of-bounds coordinates: " +
+                            $"absolute=({nx},{ny}), relative=({rx},{ry}), bounds=({Map.GridWidth},{Map.GridHeight})");
+                    }
+                    
+                    Point neighborPoint = new Point(nx, ny);
+                    
                     if (map.Tiles[rx, ry].IsWalkable)
-                        neighbors.Add((new Point(nx, ny), 1));
+                    {
+                        // Check for unit collision
+                        var tile = map.Tiles[rx, ry];
+                        bool isOccupied = tile.IsOccupied;
+                        bool isTarget = targetCell.HasValue && neighborPoint == targetCell.Value;
+                        
+                        if (!isOccupied || isTarget)
+                        {
+                            // Allow movement to unoccupied tiles or to the target tile (for combat)
+                            neighbors.Add((neighborPoint, 1));
+                        }
+                        // If occupied and not target, don't add as neighbor (blocked)
+                    }
                     else if (map != CurrentMap)
-                        neighbors.Add((new Point(nx, ny), 10));
+                        neighbors.Add((neighborPoint, 10));
                 }
             }
             return neighbors;
@@ -265,7 +330,7 @@ namespace MonogameRPG.Map
                 if (current == endCell)
                     return ReconstructPath(cameFrom, current);
                 openSet.Remove(openSet.Min);
-                foreach (var (neighbor, cost) in GetNeighbors(current))
+                foreach (var (neighbor, cost) in GetNeighbors(current, endCell))
                 {
                     float tentativeG = gScore[current] + cost;
                     if (!gScore.ContainsKey(neighbor) || tentativeG < gScore[neighbor])
@@ -295,6 +360,41 @@ namespace MonogameRPG.Map
                 path.Insert(0, new Vector2(current.X * Map.TileWidth + Map.TileWidth / 2, current.Y * Map.TileHeight + Map.TileHeight / 2));
             }
             return path;
+        }
+
+        public void ToggleTownMode()
+        {
+            if (isInTownMode)
+            {
+                // Switch back to hostile zone
+                isInTownMode = false;
+                
+                // Teleport characters back to the hostile map
+                if (maps.ContainsKey(lastHostileMapPosition))
+                {
+                    currentMapPosition = lastHostileMapPosition;
+                    CurrentMap.TeleportCharacters(characters);
+                }
+            }
+            else
+            {
+                // Remember current hostile position before going to town
+                lastHostileMapPosition = currentMapPosition;
+                
+                // Switch to town mode
+                isInTownMode = true;
+                
+                // Teleport characters to the town map
+                if (townMap != null)
+                {
+                    townMap.TeleportCharacters(characters);
+                }
+            }
+        }
+
+        public List<NPC> GetNPCsOnCurrentMap()
+        {
+            return CurrentMap.NPCs.ToList();
         }
     }
 }
